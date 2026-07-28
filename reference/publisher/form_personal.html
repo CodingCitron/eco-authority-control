@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개인명 폼 - KORMARC 전거관리 시스템</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <a href="#main-content" class="visually-hidden-focusable skip-link">본문 바로가기</a>
+    
+    <header class="navbar navbar-dark sticky-top bg-primary flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 p-3 fs-6 fw-bold d-flex align-items-center gap-2" href="index.html"><img src="img/logo.png" aalt="KORMARC" height="40"></a>
+        <div class="navbar-nav w-100 d-flex flex-row align-items-center justify-content-end px-3">
+            <div class="nav-item text-nowrap"><span class="nav-link text-white px-3"><i class="bi bi-person me-2" aria-hidden="true"></i>관리자(홍길동)</span></div>
+            <div class="nav-item text-nowrap"><a class="btn btn-sm btn-outline-light" href="#">로그아웃</a></div>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-white sidebar collapse shadow-sm" aria-label="주요 메뉴">
+                <div class="position-sticky pt-3 sidebar-sticky">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 검색 및 목록</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link " href="index.html"><i class="bi bi-search me-2" aria-hidden="true"></i>통합 전거 검색</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 레코드 관리</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="form_personal.html"><i class="bi bi-person me-2" aria-hidden="true"></i>개인명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_corp.html"><i class="bi bi-building me-2" aria-hidden="true"></i>단체명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_geo.html"><i class="bi bi-geo-alt me-2" aria-hidden="true"></i>지리명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_subject.html"><i class="bi bi-book me-2" aria-hidden="true"></i>주제명 등록/수정</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 반입관리</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link" href="tools.html"><i class="bi bi-upload me-2" aria-hidden="true"></i>전거 반입관리</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>구축현황 보기</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link" href="build_status.html"><i class="bi bi-bar-chart-line me-2" aria-hidden="true"></i>구축현황</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main id="main-content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4 pb-5 min-vh-100">
+                
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold">개인명 전거관리 - 입력/수정</h1>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary">서지 목록보기</button>
+                        <button class="btn btn-sm btn-secondary">화면 초기화</button>
+                        <label for="fontSizeSelect" class="visually-hidden">글자크기</label>
+                        <select class="form-select form-select-sm d-inline-block w-auto" id="fontSizeSelect" onchange="changeRecordFontSize(this.value)">
+                            <option value="">글자크기</option>
+                            <option value="14">14px</option>
+                            <option value="16">16px</option>
+                            <option value="18">18px</option>
+                            <option value="20">20px</option>
+                            <option value="22">22px</option>
+                            <option value="24">24px</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-dark">한자 -> 한글</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- 입력 폼 영역 -->
+                    <div class="col-lg-7">
+                        <div class="card marc-form shadow-sm mb-4">
+                            <div class="card-body">
+                                <form class="row g-2 form-sm">
+                                    <div class="col-md-6">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-4"><label class="form-label fw-bold mb-0 text-nowrap" for="fldIndicator">전거표시기호</label></div>
+                                            <div class="col"><select class="form-select" id="fldIndicator"><option>100 : 개인명</option></select></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-4"><label class="form-label fw-bold mb-0 text-nowrap" for="fldRegion">전거지역구분</label></div>
+                                            <div class="col"><select class="form-select" id="fldRegion"><option>1 : 한국</option></select></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-2"><label class="form-label fw-bold mb-0 text-nowrap" for="fldHeading">채택표목</label></div>
+                                            <div class="col">
+                                                <div class="input-group flex-nowrap">
+                                                    <input type="text" class="form-control" id="fldHeading" value="김소월">
+                                                    <span class="input-group-text" aria-hidden="true">한자명</span>
+                                                    <label class="visually-hidden" for="p-hanja">한자명</label>
+                                                    <input type="text" class="form-control" id="p-hanja" value="金素月">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-2"><label class="form-label fw-bold mb-0 text-nowrap" for="p-birthDate">생몰년</label></div>
+                                            <div class="col">
+                                                <div class="input-group flex-nowrap">
+                                                    <span class="input-group-text" aria-hidden="true">출생일</span>
+                                                    <label class="visually-hidden" for="p-birthDate">출생일</label>
+                                                    <input type="text" class="form-control" id="p-birthDate" value="1902">
+                                                    <span class="input-group-text" aria-hidden="true">사망일</span>
+                                                    <label class="visually-hidden" for="p-deathDate">사망일</label>
+                                                    <input type="text" class="form-control" id="p-deathDate" value="1934">
+                                                    <div class="input-group-text text-nowrap"><input class="form-check-input mt-0" type="checkbox" id="birthdatePrivate"> <label for="birthdatePrivate">비공개</label></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="box-group border rounded p-3">
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label fw-bold mb-0" for="p-ref400">참조표목(400)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-ref400" value="김정식(400 $a)"></div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0" for="p-ref400hanja">한자명</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-ref400hanja" value="金廷湜(400 $g)"></div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-2"><label class="form-label mb-0" for="p-ref400roman">원어명</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-ref400roman" value="KIM, Sowol(400 $a)"></div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="box-group border rounded p-3">
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-placeType370">관련장소(370)</label></div>
+                                                <div class="col-md-2">
+                                                    <label class="visually-hidden" for="p-placeType370">관련장소(370) 유형</label>
+                                                    <select class="form-select form-select-sm" id="p-placeType370">
+                                                        <option>출생지</option>
+                                                        <option>사망지</option>
+                                                        <option>활동지</option>
+                                                        <option>거주지</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col">
+                                                    <label class="visually-hidden" for="p-place370">관련장소(370) 입력</label>
+                                                    <input type="text" class="form-control" id="p-place370" value="평안북도 구성(370$a)">
+                                                </div>
+                                                <div class="col-auto d-flex align-items-center gap-1">
+                                                    <span class="text-nowrap small text-muted">관련일자</span>
+                                                    <label class="visually-hidden" for="p-place370DateFrom">관련장소 관련일자 시작</label>
+                                                    <input type="text" class="form-control form-control-sm" id="p-place370DateFrom" style="width:90px" value="370 $s">
+                                                    <span>~</span>
+                                                    <label class="visually-hidden" for="p-place370DateTo">관련장소 관련일자 종료</label>
+                                                    <input type="text" class="form-control form-control-sm" id="p-place370DateTo" style="width:90px" value="370 $t">
+                                                </div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-addrType371">주소(371)</label></div>
+                                                <div class="col-md-2">
+                                                    <label class="visually-hidden" for="p-addrType371">주소(371) 유형</label>
+                                                    <select class="form-select form-select-sm" id="p-addrType371">
+                                                        <option value="a">주소($a)</option>
+                                                        <option value="b">도시($b)</option>
+                                                        <option value="d">국가($d)</option>
+                                                        <option value="e">우편번호($e)</option>
+                                                        <option value="m">이메일($m)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col">
+                                                    <label class="visually-hidden" for="p-addr371">주소(371) 입력</label>
+                                                    <input type="text" class="form-control" id="p-addr371" value="">
+                                                </div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="box-group border rounded p-3">
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-field372">분야(372)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-field372" value="한국 시[韓國 時]($a)"></div>
+                                                <div class="col-auto d-flex align-items-center gap-1">
+                                                    <span class="text-nowrap small text-muted">관련일자</span>
+                                                    <label class="visually-hidden" for="p-field372DateFrom">분야 관련일자 시작</label>
+                                                    <input type="text" class="form-control form-control-sm" id="p-field372DateFrom" style="width:90px" value="372 $s">
+                                                    <span>~</span>
+                                                    <label class="visually-hidden" for="p-field372DateTo">분야 관련일자 종료</label>
+                                                    <input type="text" class="form-control form-control-sm" id="p-field372DateTo" style="width:90px" value="372 $t">
+                                                </div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-org373">단체(373)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-org373" value="동아일보 정주지국(설립자)($a)"></div>
+                                                <div class="col-auto d-flex align-items-center gap-1">
+                                                    <span class="text-nowrap small text-muted">관련일자</span>
+                                                    <label class="visually-hidden" for="p-org373DateFrom">단체 관련일자 시작</label>
+                                                    <input type="text" class="form-control form-control-sm" id="p-org373DateFrom" style="width:90px" value="373 $s">
+                                                    <span>~</span>
+                                                    <label class="visually-hidden" for="p-org373DateTo">단체 관련일자 종료</label>
+                                                    <input type="text" class="form-control form-control-sm" id="p-org373DateTo" style="width:90px" value="373 $t">
+                                                </div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-job374">직업(374)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-job374" value="작가(사람)[作家]($a)"></div>
+                                                <div class="col-auto d-flex align-items-center gap-1">
+                                                    <span class="text-nowrap small text-muted">관련일자</span>
+                                                    <label class="visually-hidden" for="p-job374DateFrom">직업 관련일자 시작</label>
+                                                    <input type="text" class="form-control form-control-sm" id="p-job374DateFrom" style="width:90px" value="374 $s">
+                                                    <span>~</span>
+                                                    <label class="visually-hidden" for="p-job374DateTo">직업 관련일자 종료</label>
+                                                    <input type="text" class="form-control form-control-sm" id="p-job374DateTo" style="width:90px" value="374 $t">
+                                                </div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="gender_unknown">성별(375)</label></div>
+                                                <div class="col-md-auto d-flex align-items-center gap-3">
+                                                    <div class="form-check mb-0"><input class="form-check-input" type="radio" name="gender" id="gender_unknown"><label class="form-check-label" for="gender_unknown">모름</label></div>
+                                                    <div class="form-check mb-0"><input class="form-check-input" type="radio" name="gender" id="gender_male" checked><label class="form-check-label" for="gender_male">남성</label></div>
+                                                    <div class="form-check mb-0"><input class="form-check-input" type="radio" name="gender" id="gender_female"><label class="form-check-label" for="gender_female">여성</label></div>
+                                                </div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-lang377">관련언어(377)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-lang377" value="한국어($i)"></div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-historyVis">이력사항 공개구분(368)</label></div>
+                                                <div class="col-md-3">
+                                                    <select class="form-select form-select-sm" id="p-historyVis">
+                                                        <option value="e">외부(공개)</option>
+                                                        <option value="i" selected>내부(비공개)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <span class="badge text-bg-primary fw-light">전거관리시스템 전용 · 홈페이지/반출 시 제거</span>
+                                                </div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-edu667">학력(667)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-edu667" placeholder="$a"></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-bio678">전기(678)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-bio678" value="시인; 1920년 등단($a;$a로 반복)"></div>
+                                            </div>
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="p-source670">정보원(670)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="p-source670" value="진달래꽃.(Human & Books).2011"></div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="box-group border rounded p-3">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <span class="fw-bold">저작권 포괄동의 관리</span>
+                                                <span class="badge text-bg-primary fw-light">전거관리시스템 전용 · 홈페이지/반출 시 제거</span>
+                                            </div>
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-3">
+                                                    <div class="form-check mb-0">
+                                                        <input class="form-check-input" type="checkbox" id="copyrightConsent">
+                                                        <label class="form-check-label" for="copyrightConsent">포괄동의여부</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2"><label class="form-label mb-0 fw-bold" for="copyrightConsentDate">동의일시</label></div>
+                                                <div class="col-md-4"><input type="datetime-local" class="form-control" id="copyrightConsentDate"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-3"><label class="form-label mb-0 fw-bold" for="p-createdBy">최초입력자</label></div>
+                                            <div class="col-md-3"><input type="text" class="form-control" id="p-createdBy" value="김영희" readonly></div>
+                                            <div class="col-md-3"><label class="form-label mb-0 fw-bold" for="p-createdAt">최초입력일</label></div>
+                                            <div class="col-md-3"><input type="text" class="form-control" id="p-createdAt" value="2026/06/25" readonly></div>
+                                        </div>
+                                        <div class="row g-2 align-items-center mt-1">
+                                            <div class="col-md-3"><label class="form-label mb-0 fw-bold" for="p-updatedBy">마지막수정자</label></div>
+                                            <div class="col-md-3"><input type="text" class="form-control bg-secondary-subtle" id="p-updatedBy" value="" disabled></div>
+                                            <div class="col-md-3"><label class="form-label mb-0 fw-bold" for="p-updatedAt">마지막수정일</label></div>
+                                            <div class="col-md-3"><input type="text" class="form-control bg-secondary-subtle" id="p-updatedAt" value="" disabled></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-5">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+                                <span>MARC 레코드 뷰</span>
+                                <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#modal008">고정길이편집</button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="form-control marc-textarea marc-record-view h-100 border-0 rounded-0 font-monospace bg-light" style="min-height: 200px;">
+                                    <div class="marc-line marc-line-control"><span class="marc-tag">001</span> KAC201206266</div>
+                                    <div class="marc-line marc-line-control"><span class="marc-tag">005</span> 20200918145415</div>
+                                    <div class="marc-line marc-line-control"><span class="marc-tag">008</span> 120224 b aznnnaabn                  a aaa        <span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-control"><span class="marc-tag">046</span>  <span class="marc-sf">$f</span>1902<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">100</span> 1<span class="marc-sf">$a</span>김소월,<span class="marc-sf">$g</span>金素月,<span class="marc-sf">$d</span>1902-1934<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">370</span>  <span class="marc-sf">$c</span>한국(국명)[韓國] <span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">370</span>  <span class="marc-sf">$a</span>평안북도 구성<span class="marc-sf">$b</span>평안북도 곽산<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">372</span>  <span class="marc-sf">$a</span>한국 시[韓國時] <span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">372</span>  <span class="marc-sf">$a</span>문학(예술)[문학] <span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">373</span>  <span class="marc-sf">$a</span>동아일보 정주지국(설립자) <span class="marc-sf">$s</span>1926<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">374</span>  <span class="marc-sf">$a</span>작가(사람)[作家] <span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">375</span>  <span class="marc-sf">$a</span>남성<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">377</span>  <span class="marc-sf">$i</span>한국어<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">400</span>  <span class="marc-sf">$a</span>소월, <span class="marc-sf">$g</span>素月, <span class="marc-sf">$d</span>1902-1934<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">400</span>  <span class="marc-sf">$a</span>김정식, <span class="marc-sf">$g</span>金廷湜, <span class="marc-sf">$d</span>1902-1934<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">400</span>  <span class="marc-sf">$a</span>KIM,Sowol, <span class="marc-sf">$d</span>1902-1934<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">670</span>  <span class="marc-sf">$a</span>진달래꽃,(Human&amp;Books),2011<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">670</span>  <span class="marc-sf">$a</span>김소월 시집,(스타북스),2018<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">678</span>  <span class="marc-sf">$a</span>시인;<span class="marc-sf">$a</span>1920년 등단<span class="marc-eof">%</span></div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white d-flex justify-content-between">
+                                <div>
+                                    <button class="btn btn-outline-secondary">이전</button>
+                                    <button class="btn btn-outline-secondary">다음</button>
+                                    <button type="button" class="btn btn-light-info ms-2" data-bs-toggle="modal" data-bs-target="#modalMarcSync">서지레코드 일관성 작업</button>
+                                </div>
+                                <div>
+                                    <button class="btn btn-light-warning">중복조사</button>
+                                    <button class="btn btn-primary">저장</button>
+                                    <button class="btn btn-secondary">취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal 서지레코드 일관성 작업 -->
+                <div class="modal fade" id="modalMarcSync" role="dialog" tabindex="-1" aria-labelledby="modalMarcSyncLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                    <div class="modal-header bg-info text-white"><h2 class="modal-title h5 fw-bold" id="modalMarcSyncLabel">서지레코드 일관성 작업</h2><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                    <div class="modal-body">
+                        <ul class="nav nav-tabs" id="marcSyncTab" role="tablist">
+                            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#marcSyncTarget" type="button">반영대상 서지</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#marcSyncLog" type="button">서지변경 로그</button></li>
+                        </ul>
+                        <div class="tab-content border border-top-0 p-3">
+                            <div class="tab-pane fade show active" id="marcSyncTarget">
+                                <div class="alert alert-info py-2 mb-3 small">채택표목(100) 변경사항이 아직 반영되지 않은 서지레코드 목록입니다. 전거 담당자가 직접 조회하여 반영합니다.</div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text fw-bold" aria-hidden="true">서지 검색</span>
+                                    <label class="visually-hidden" for="p-marcSyncSearch">서지 검색</label>
+                                    <input type="text" class="form-control" id="p-marcSyncSearch" placeholder="제어번호 또는 서명 입력">
+                                    <button class="btn btn-primary" type="button">찾기</button>
+                                </div>
+                                <table class="table table-bordered table-sm text-center align-middle">
+                                    <caption class="visually-hidden">서지레코드 일관성 반영 대상 목록</caption>
+                                    <thead class="table-light"><tr><th scope="col">선택</th><th scope="col">서지제어번호</th><th scope="col">서명</th><th scope="col">필드</th><th scope="col">변경 전</th><th scope="col">변경 후</th><th scope="col">상태</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><label class="visually-hidden" for="p-marcSync1">진달래꽃 선택</label><input type="checkbox" id="p-marcSync1" checked></td><td>KOR2011004521</td><td class="text-start">진달래꽃</td><td>100 $a</td><td>소월</td><td class="text-primary fw-bold">김소월, 1902-1934</td><td><span class="badge text-bg-warning">대기</span></td></tr>
+                                        <tr><td><label class="visually-hidden" for="p-marcSync2">김소월 시집 선택</label><input type="checkbox" id="p-marcSync2" checked></td><td>KOR2018009873</td><td class="text-start">김소월 시집</td><td>100 $a</td><td>소월</td><td class="text-primary fw-bold">김소월, 1902-1934</td><td><span class="badge text-bg-warning">대기</span></td></tr>
+                                    </tbody>
+                                </table>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="marcSyncSelectAll" checked>
+                                        <label class="form-check-label" for="marcSyncSelectAll">전체 선택</label>
+                                    </div>
+                                    <button class="btn btn-success btn-sm">선택 서지 일괄 반영</button>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="marcSyncLog">
+                                <table class="table table-bordered table-sm text-center align-middle">
+                                    <caption class="visually-hidden">서지레코드 일관성 반영 이력</caption>
+                                    <thead class="table-light"><tr><th scope="col">반영일시</th><th scope="col">처리자</th><th scope="col">서지제어번호</th><th scope="col">서명</th><th scope="col">필드</th><th scope="col">변경 전</th><th scope="col">변경 후</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>2026-07-21 10:15</td><td>홍길동</td><td>KOR2009001122</td><td class="text-start">한국 현대시 연구</td><td>100 $a</td><td>金素月</td><td>김소월, 1902-1934</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button></div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Modal 008 -->
+                <div class="modal fade" id="modal008" role="dialog" tabindex="-1" aria-labelledby="modal008Label" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                    <div class="modal-header bg-dark text-white"><h2 class="modal-title h5 fw-bold" id="modal008Label">고정길이편집 (008)</h2><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                    <div class="modal-body p-4">
+                        <div class="box-group border rounded mb-4">
+                            <div class="bg-light px-3 py-2 fw-bold border-bottom">리더</div>
+                            <div class="row g-3 p-3">
+                                <div class="col-md-4"><label class="form-label" for="f008_status">상 태</label><input type="text" class="form-control" id="f008_status" value="n"></div>
+                                <div class="col-md-4"><label class="form-label" for="f008_type">형 태</label><input type="text" class="form-control" id="f008_type" value="z"></div>
+                                <div class="col-md-4"><label class="form-label" for="f008_level">입력수준</label><input type="text" class="form-control" id="f008_level" value="a"></div>
+                            </div>
+                        </div>
+                        <div class="box-group border rounded">
+                            <div class="px-3 py-2 fw-bold border-bottom">부호화정보필드(008)</div>
+                            <div class="row g-3 p-3">
+                                <div class="col"><label class="form-label" for="f008_date">입력날짜</label><input type="text" class="form-control" id="f008_date" value="120224"></div>
+                                <div class="col"><label class="form-label" for="f008_geo">지리구분</label><input type="text" class="form-control" id="f008_geo" value=""></div>
+                                <div class="col"><label class="form-label" for="f008_roman">로마자번자표</label><input type="text" class="form-control" id="f008_roman" value="a"></div>
+                                <div class="col"><label class="form-label" for="f008_rectype">레코드 종류</label><input type="text" class="form-control" id="f008_rectype" value="z"></div>
+                                <div class="col"><label class="form-label" for="f008_catform">목록기술형식</label><input type="text" class="form-control" id="f008_catform" value="n"></div>
+                                <div class="col"><label class="form-label" for="f008_subjthdg">주제명표목표</label><input type="text" class="form-control" id="f008_subjthdg" value="n"></div>
+                                <div class="col"><label class="form-label" for="f008_sertype">총서유형</label><input type="text" class="form-control" id="f008_sertype" value="n"></div>
+                            </div>
+                            <div class="row g-3 p-3 pt-0">
+                                <div class="col"><label class="form-label" for="f008_sernum">총서번호유무</label><input type="text" class="form-control" id="f008_sernum" value="a"></div>
+                                <div class="col"><label class="form-label" for="f008_use">표목사용(주표목)</label><input type="text" class="form-control" id="f008_use" value="a"></div>
+                                <div class="col"><label class="form-label" for="f008_subjadd">주제부출표목</label><input type="text" class="form-control" id="f008_subjadd" value="b"></div>
+                                <div class="col"><label class="form-label" for="f008_seradd">총서부출표목</label><input type="text" class="form-control" id="f008_seradd" value="n"></div>
+                                <div class="col"><label class="form-label" for="f008_subdiv">주제세목유형</label><input type="text" class="form-control" id="f008_subdiv" value=""></div>
+                                <div class="col"><label class="form-label" for="f008_refeval">참조평가</label><input type="text" class="form-control" id="f008_refeval" value="a"></div>
+                                <div class="col"><label class="form-label" for="f008_recupd">레코드갱신</label><input type="text" class="form-control" id="f008_recupd" value="a"></div>
+                            </div>
+                            <div class="row g-3 p-3 pt-0">
+                                <div class="col"><label class="form-label" for="f008_nametype">동명이인</label><input type="text" class="form-control" id="f008_nametype" value=""></div>
+                                <div class="col"><label class="form-label" for="f008_hdguse">채택표목수준</label><input type="text" class="form-control" id="f008_hdguse" value=""></div>
+                                <div class="col"><label class="form-label" for="f008_modrec">수정레코드</label><input type="text" class="form-control" id="f008_modrec" value=""></div>
+                                <div class="col"><label class="form-label" for="f008_catorg">목록작성기관</label><input type="text" class="form-control" id="f008_catorg" value=""></div>
+                                <div class="col"></div>
+                                <div class="col"></div>
+                                <div class="col"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">확인</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button></div>
+                    </div>
+                </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+        function changeRecordFontSize(size) {
+            if (!size) return;
+            document.querySelector('.marc-textarea').style.fontSize = size + 'px';
+        }
+    </script>
+</body>
+</html>

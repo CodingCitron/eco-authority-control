@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주제명 폼 - KORMARC 전거관리 시스템</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <a href="#main-content" class="visually-hidden-focusable skip-link">본문 바로가기</a>
+    
+    <header class="navbar navbar-dark sticky-top bg-primary flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 p-3 fs-6 fw-bold d-flex align-items-center gap-2" href="index.html"><img src="img/logo.png" aalt="KORMARC" height="40"></a>
+        <div class="navbar-nav w-100 d-flex flex-row align-items-center justify-content-end px-3">
+            <div class="nav-item text-nowrap"><span class="nav-link text-white px-3"><i class="bi bi-person me-2" aria-hidden="true"></i>관리자(홍길동)</span></div>
+            <div class="nav-item text-nowrap"><a class="btn btn-sm btn-outline-light" href="#">로그아웃</a></div>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-white sidebar collapse shadow-sm" aria-label="주요 메뉴">
+                <div class="position-sticky pt-3 sidebar-sticky">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 검색 및 목록</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link " href="index.html"><i class="bi bi-search me-2" aria-hidden="true"></i>통합 전거 검색</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 레코드 관리</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link " href="form_personal.html"><i class="bi bi-person me-2" aria-hidden="true"></i>개인명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_corp.html"><i class="bi bi-building me-2" aria-hidden="true"></i>단체명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_geo.html"><i class="bi bi-geo-alt me-2" aria-hidden="true"></i>지리명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="form_subject.html" aria-current="page"><i class="bi bi-book me-2" aria-hidden="true"></i>주제명 등록/수정</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 반입관리</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link" href="tools.html"><i class="bi bi-upload me-2" aria-hidden="true"></i>전거 반입관리</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>구축현황 보기</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link" href="build_status.html"><i class="bi bi-bar-chart-line me-2" aria-hidden="true"></i>구축현황</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main id="main-content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4 pb-5 min-vh-100">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                    <h1 class="h2 fw-bold">주제명 전거관리 - 입력/수정</h1>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary">서지 목록보기</button>
+                        <button class="btn btn-sm btn-secondary">화면 초기화</button>
+                        <label for="fontSizeSelect" class="visually-hidden">글자크기</label>
+                        <select class="form-select form-select-sm d-inline-block w-auto" id="fontSizeSelect" onchange="changeRecordFontSize(this.value)">
+                            <option value="">글자크기</option>
+                            <option value="14">14px</option>
+                            <option value="16">16px</option>
+                            <option value="18">18px</option>
+                            <option value="20">20px</option>
+                            <option value="22">22px</option>
+                            <option value="24">24px</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-dark">한자 -> 한글</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-7">
+                        <div class="card marc-form shadow-sm mb-4">
+                            <div class="card-body">
+                                <form class="row g-2 form-sm">
+                                    <div class="col-md-6">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-4"><label class="form-label fw-bold mb-0 text-nowrap" for="fldIndicator">전거표시기호</label></div>
+                                            <div class="col"><select class="form-select" id="fldIndicator"><option>150 : 주제명</option></select></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-4"><label class="form-label fw-bold mb-0 text-nowrap" for="fldRegion">전거지역구분</label></div>
+                                            <div class="col"><select class="form-select" id="fldRegion"><option>1 : 한국</option></select></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-2"><label class="form-label fw-bold mb-0 text-nowrap" for="s-heading150">채택표목</label></div>
+                                            <div class="col"><input type="text" class="form-control" id="s-heading150" value="부작위[不作爲]"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="box-group border rounded p-3">
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-auto">
+                                                    <div class="form-check form-check-inline mb-0">
+                                                        <input class="form-check-input" type="radio" name="ref450type" id="ref450none" checked>
+                                                        <label class="form-check-label" for="ref450none">적용안함</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline mb-0">
+                                                        <input class="form-check-input" type="radio" name="ref450type" id="ref450code">
+                                                        <label class="form-check-label" for="ref450code">관계부호</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <label class="visually-hidden" for="s-ref450lang">언어명</label>
+                                                    <input type="text" class="form-control" id="s-ref450lang" value="영어">
+                                                </div>
+                                            </div>
+                                            <div class="row g-2 align-items-center">
+                                                <div class="col-md-2"><label class="form-label fw-bold mb-0 text-nowrap" for="s-ref450">참조표목(450)</label></div>
+                                                <div class="col"><input type="text" class="form-control" id="s-ref450" value="nonfeasance"></div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="box-group border rounded p-3">
+                                            <div class="row g-2 align-items-center mb-2">
+                                                <div class="col-md-2"><span class="form-label fw-bold mb-0 text-nowrap">참조표목(550)</span></div>
+                                                <div class="col"><button type="button" class="btn btn-secondary w-100" data-bs-toggle="modal" data-bs-target="#modal5XX">참조표목조회(5XX) 추가</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="box-group border rounded p-3">
+
+                                        <div class="row g-2 align-items-start mb-2">
+                                            <div class="col-md-2"><label class="form-label fw-bold mb-0 text-nowrap" for="s-source670">정보원(670)</label></div>
+                                            <div class="col">
+                                                <div class="input-group">
+                                                    <textarea class="form-control" id="s-source670" rows="2">법률용어사전</textarea>
+                                                    <span class="input-group-text"><i class="bi bi-chevron-expand" aria-hidden="true"></i></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                        </div>
+                                            <div class="row g-2 align-items-start">
+                                                <div class="col-md-2"><label class="form-label fw-bold mb-0 text-nowrap" for="s-note680">일반주기(680)</label></div>
+                                                <div class="col">
+                                                    <div class="input-group">
+                                                        <textarea class="form-control" id="s-note680" rows="2">이 표목은 법률상 의무가 있는 자가 행위를 하지 않음으로써 성립하는 법적 책임.</textarea>
+                                                        <span class="input-group-text"><i class="bi bi-chevron-expand" aria-hidden="true"></i></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-auto"><button type="button" class="btn btn-sm btn-outline-primary">추가</button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-md-3"><label class="form-label mb-0 fw-bold" for="s-createdBy">최초입력자</label></div>
+                                            <div class="col-md-3"><input type="text" class="form-control" id="s-createdBy" value="김영희" readonly></div>
+                                            <div class="col-md-3"><label class="form-label mb-0 fw-bold" for="s-createdAt">최초입력일</label></div>
+                                            <div class="col-md-3"><input type="text" class="form-control" id="s-createdAt" value="2026/06/25" readonly></div>
+                                        </div>
+                                        <div class="row g-2 align-items-center mt-1">
+                                            <div class="col-md-3"><label class="form-label mb-0 fw-bold" for="s-updatedBy">마지막수정자</label></div>
+                                            <div class="col-md-3"><input type="text" class="form-control bg-secondary-subtle" id="s-updatedBy" value="" disabled></div>
+                                            <div class="col-md-3"><label class="form-label mb-0 fw-bold" for="s-updatedAt">마지막수정일</label></div>
+                                            <div class="col-md-3"><input type="text" class="form-control bg-secondary-subtle" id="s-updatedAt" value="" disabled></div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+                                <span>MARC 레코드 뷰</span>
+                                <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#modal008">고정길이편집</button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="form-control marc-textarea marc-record-view h-100 border-0 rounded-0 font-monospace bg-light" style="min-height: 400px;">
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">150</span>  <span class="marc-sf">$a</span>부작위[不作爲]<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">450</span>  <span class="marc-sf">$w</span>r<span class="marc-sf">$i</span>영어<span class="marc-sf">$a</span>nonfeasance<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">450</span>  <span class="marc-sf">$w</span>r<span class="marc-sf">$i</span>독일어<span class="marc-sf">$a</span>Untatigkeit<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">450</span>  <span class="marc-sf">$w</span>r<span class="marc-sf">$i</span>불어<span class="marc-sf">$a</span>negligence<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">550</span>  <span class="marc-sf">$w</span>h<span class="marc-sf">$a</span>단순부작위[單純不作爲]<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">670</span>  <span class="marc-sf">$a</span>법률용어사전<span class="marc-eof">%</span></div>
+                                    <div class="marc-line marc-line-data"><span class="marc-tag">680</span>  <span class="marc-sf">$a</span>이 표목은 법률상 의무가 있는 자가 행위를 하지 않음으로써 성립하는 법적 책임.<span class="marc-eof">%</span></div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white d-flex justify-content-between">
+                                <div>
+                                    <button class="btn btn-outline-secondary">이전</button>
+                                    <button class="btn btn-outline-secondary">다음</button>
+                                    <button type="button" class="btn btn-light-info ms-2" data-bs-toggle="modal" data-bs-target="#modalMarcSync">서지레코드 일관성 작업</button>
+                                </div>
+                                <div>
+                                    <button class="btn btn-light-warning">중복조사</button>
+                                    <button class="btn btn-primary">저장</button>
+                                    <button class="btn btn-secondary">취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal 서지레코드 일관성 작업 -->
+                <div class="modal fade" id="modalMarcSync" role="dialog" tabindex="-1" aria-hidden="true" aria-labelledby="modalMarcSyncLabel">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                    <div class="modal-header bg-info text-white"><h2 class="modal-title h5 fw-bold" id="modalMarcSyncLabel">서지레코드 일관성 작업</h2><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                    <div class="modal-body">
+                        <ul class="nav nav-tabs" id="marcSyncTab" role="tablist">
+                            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#marcSyncTarget" type="button">반영대상 서지</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#marcSyncLog" type="button">서지변경 로그</button></li>
+                        </ul>
+                        <div class="tab-content border border-top-0 p-3">
+                            <div class="tab-pane fade show active" id="marcSyncTarget">
+                                <div class="alert alert-info py-2 mb-3 small">채택표목(150) 변경사항이 아직 반영되지 않은 서지레코드 목록입니다. 전거 담당자가 직접 조회하여 반영합니다.</div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text fw-bold" aria-hidden="true">서지 검색</span>
+                                    <label class="visually-hidden" for="s-marcSyncSearch">서지 검색</label>
+                                    <input type="text" class="form-control" id="s-marcSyncSearch" placeholder="제어번호 또는 서명 입력">
+                                    <button class="btn btn-primary" type="button">찾기</button>
+                                </div>
+                                <table class="table table-bordered table-sm text-center align-middle">
+                                    <caption class="visually-hidden">서지레코드 일관성 반영 대상 목록</caption>
+                                    <thead class="table-light"><tr><th scope="col">선택</th><th scope="col">서지제어번호</th><th scope="col">서명</th><th scope="col">필드</th><th scope="col">변경 전</th><th scope="col">변경 후</th><th scope="col">상태</th></tr></thead>
+                                    <tbody>
+                                        <tr><td><label class="visually-hidden" for="s-marcSync1">행정법상 부작위 위법확인 연구 선택</label><input type="checkbox" id="s-marcSync1" checked></td><td>KOR2014006630</td><td class="text-start">행정법상 부작위 위법확인 연구</td><td>150 $a</td><td>부작위(법률)</td><td class="text-primary fw-bold">부작위[不作爲]</td><td><span class="badge text-bg-warning">대기</span></td></tr>
+                                        <tr><td><label class="visually-hidden" for="s-marcSync2">공법상 부작위 판례 분석 선택</label><input type="checkbox" id="s-marcSync2" checked></td><td>KOR2019002211</td><td class="text-start">공법상 부작위 판례 분석</td><td>150 $a</td><td>부작위(법률)</td><td class="text-primary fw-bold">부작위[不作爲]</td><td><span class="badge text-bg-warning">대기</span></td></tr>
+                                    </tbody>
+                                </table>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="marcSyncSelectAll" checked>
+                                        <label class="form-check-label" for="marcSyncSelectAll">전체 선택</label>
+                                    </div>
+                                    <button class="btn btn-success btn-sm">선택 서지 일괄 반영</button>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="marcSyncLog">
+                                <table class="table table-bordered table-sm text-center align-middle">
+                                    <caption class="visually-hidden">서지레코드 일관성 반영 이력</caption>
+                                    <thead class="table-light"><tr><th scope="col">반영일시</th><th scope="col">처리자</th><th scope="col">서지제어번호</th><th scope="col">서명</th><th scope="col">필드</th><th scope="col">변경 전</th><th scope="col">변경 후</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>2026-07-21 14:20</td><td>홍길동</td><td>KOR2007000456</td><td class="text-start">행정소송법 개론</td><td>150 $a</td><td>부작위(법률)</td><td>부작위[不作爲]</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button></div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Modal 5XX -->
+                <div class="modal fade" id="modal5XX" role="dialog" tabindex="-1" aria-hidden="true" aria-labelledby="modal5XXLabel">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                    <div class="modal-header bg-secondary text-white">
+                        <h2 class="modal-title h5 fw-bold" id="modal5XXLabel">참조표목조회(5XX) 추가</h2>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                        <div class="col-lg-5">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text fw-bold" aria-hidden="true">검색어</span>
+                                <label class="visually-hidden" for="s-5xxSearch">검색어</label>
+                                <input type="text" class="form-control" id="s-5xxSearch" value="부작위">
+                                <button class="btn btn-primary" type="button">찾기</button>
+                            </div>
+                            <table class="table table-bordered table-sm text-center align-middle">
+                                <caption class="visually-hidden">전거 검색 결과 목록</caption>
+                                <thead class="table-light"><tr><th scope="col">No</th><th scope="col">선택</th><th scope="col">전거유형</th><th scope="col">전거제어번호</th><th scope="col">채택표목</th></tr></thead>
+                                <tbody>
+                                    <tr><td>1</td><td><label class="visually-hidden" for="s-refSelect1">작위[作爲] 선택</label><input type="radio" id="s-refSelect1" name="refSelect"></td><td>주제명</td><td>KAS201100002</td><td class="text-start">작위[作爲]</td></tr>
+                                    <tr><td>2</td><td><label class="visually-hidden" for="s-refSelect2">고의[故意] 선택</label><input type="radio" id="s-refSelect2" name="refSelect"></td><td>주제명</td><td>KAS201400005</td><td class="text-start">고의[故意]</td></tr>
+                                    <tr><td>3</td><td><label class="visually-hidden" for="s-refSelect3">법적 책임[法的責任] 선택</label><input type="radio" id="s-refSelect3" name="refSelect"></td><td>주제명</td><td>KAS201300002</td><td class="text-start">법적 책임[法的責任]</td></tr>
+                                    <tr><td>4</td><td><label class="visually-hidden" for="s-refSelect4">단순부작위[單純不作爲] 선택</label><input type="radio" id="s-refSelect4" name="refSelect" checked></td><td>주제명</td><td>KAS201206266</td><td class="text-start text-primary fw-bold">단순부작위[單純不作爲]</td></tr>
+                                    <tr><td>5</td><td></td><td></td><td></td><td></td></tr>
+                                    <tr><td>6</td><td></td><td></td><td></td><td></td></tr>
+                                </tbody>
+                            </table>
+                            <div class="d-flex justify-content-center align-items-center gap-2">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" aria-label="첫 페이지"><i class="bi bi-chevron-double-left" aria-hidden="true"></i></button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" aria-label="이전 페이지"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                                <span class="border rounded px-3 py-1">1/1</span>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" aria-label="다음 페이지"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" aria-label="마지막 페이지"><i class="bi bi-chevron-double-right" aria-hidden="true"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+                                <label class="visually-hidden" for="s-5xxFontSize">글자크기</label>
+                                <span class="fw-bold" aria-hidden="true">글자크기</span>
+                                <select class="form-select form-select-sm w-auto" id="s-5xxFontSize"><option>22 px</option></select>
+                                <button class="btn btn-sm btn-outline-dark">한자 -&gt; 한글</button>
+                            </div>
+                            <div class="form-control marc-textarea font-monospace bg-light mb-2" style="min-height:220px;">
+                                <div class="marc-line marc-line-control"><span class="marc-tag">001</span> KAS201206266</div>
+                                <div class="marc-line marc-line-control"><span class="marc-tag">005</span> 20200918145415</div>
+                                <div class="marc-line marc-line-control"><span class="marc-tag">008</span> 120224 n aznnnaabn                  a aaa        <span class="marc-eof">%</span></div>
+                                <div class="marc-line marc-line-data"><span class="marc-tag">150</span>  <span class="marc-sf">$a</span>단순부작위[單純不作爲]<span class="marc-eof">%</span></div>
+                                <div class="marc-line marc-line-data"><span class="marc-tag">360</span>  <span class="marc-sf">$i</span>더 넓은 개념은<span class="marc-sf">$a</span>부작위[不作爲]<span class="marc-eof">%</span></div>
+                                <div class="marc-line marc-line-data"><span class="marc-tag">377</span>  <span class="marc-sf">$i</span>한국어 <span class="marc-eof">%</span></div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center bg-light p-2 border mb-2">
+                                <div class="d-flex gap-2">
+                                    <div class="form-check form-check-inline mb-0"><input class="form-check-input" type="radio" name="btnradio" id="btnradio0" checked><label class="form-check-label" for="btnradio0">적용안함</label></div>
+                                    <div class="form-check form-check-inline mb-0"><input class="form-check-input" type="radio" name="btnradio" id="btnradio1"><label class="form-check-label" for="btnradio1">이전 (a)</label></div>
+                                    <div class="form-check form-check-inline mb-0"><input class="form-check-input" type="radio" name="btnradio" id="btnradio2"><label class="form-check-label" for="btnradio2">이후(b)</label></div>
+                                    <div class="form-check form-check-inline mb-0"><input class="form-check-input" type="radio" name="btnradio" id="btnradio3"><label class="form-check-label" for="btnradio3">상위 (g)</label></div>
+                                    <div class="form-check form-check-inline mb-0"><input class="form-check-input" type="radio" name="btnradio" id="btnradio4"><label class="form-check-label" for="btnradio4">하위(h)</label></div>
+                                </div>
+                                <button class="btn btn-success btn-sm">5XX로 복사</button>
+                            </div>
+                            <table class="table table-bordered table-sm text-center align-middle mb-2">
+                                <caption class="visually-hidden">5XX 필드 목록</caption>
+                                <thead class="table-light"><tr><th scope="col">no</th><th scope="col">선택</th><th scope="col">Tag</th><th scope="col">SB</th><th scope="col">내용</th></tr></thead>
+                                <tbody>
+                                    <tr><td>1</td><td><label class="visually-hidden" for="s-5xxRow1">550 단순부작위 선택</label><input type="checkbox" id="s-5xxRow1"></td><td class="fw-bold text-primary">550</td><td></td><td class="text-start"><span class="marc-sf">$w</span>b<span class="marc-sf">$a</span>단순부작위[單純不作爲]<span class="marc-sf">$0</span>KAS201206266</td></tr>
+                                    <tr><td>2</td><td><label class="visually-hidden" for="s-5xxRow2">550 작위 선택</label><input type="checkbox" id="s-5xxRow2"></td><td class="fw-bold text-primary">550</td><td></td><td class="text-start"><span class="marc-sf">$w</span>a<span class="marc-sf">$a</span>작위[作爲]<span class="marc-sf">$0</span>KAS201100002</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="text-end">
+                                <button class="btn btn-sm btn-outline-danger">삭제</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button class="btn btn-secondary">화면 초기화</button>
+                        <div>
+                            <button class="btn btn-primary">확인</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script>
+        function changeRecordFontSize(size) {
+            if (!size) return;
+            document.querySelector('.marc-textarea, .card-body textarea[readonly]').style.fontSize = size + 'px';
+        }
+    </script>
+</body>
+</html>

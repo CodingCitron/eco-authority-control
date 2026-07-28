@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전거 반입관리 - KORMARC 전거관리 시스템</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <a href="#main-content" class="visually-hidden-focusable skip-link">본문 바로가기</a>
+    
+    <header class="navbar navbar-dark sticky-top bg-primary flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 p-3 fs-6 fw-bold d-flex align-items-center gap-2" href="index.html"><img src="img/logo.png" aalt="KORMARC" height="40"></a>
+        <div class="navbar-nav w-100 d-flex flex-row align-items-center justify-content-end px-3">
+            <div class="nav-item text-nowrap"><span class="nav-link text-white px-3"><i class="bi bi-person me-2" aria-hidden="true"></i>관리자(홍길동)</span></div>
+            <div class="nav-item text-nowrap"><a class="btn btn-sm btn-outline-light" href="#">로그아웃</a></div>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-white sidebar collapse shadow-sm" aria-label="주요 메뉴">
+                <div class="position-sticky pt-3 sidebar-sticky">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 검색 및 목록</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link " href="index.html"><i class="bi bi-search me-2" aria-hidden="true"></i>통합 전거 검색</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 레코드 관리</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link " href="form_personal.html"><i class="bi bi-person me-2" aria-hidden="true"></i>개인명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_corp.html"><i class="bi bi-building me-2" aria-hidden="true"></i>단체명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_geo.html"><i class="bi bi-geo-alt me-2" aria-hidden="true"></i>지리명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_subject.html"><i class="bi bi-book me-2" aria-hidden="true"></i>주제명 등록/수정</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 반입관리</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link active" href="tools.html" aria-current="page"><i class="bi bi-upload me-2" aria-hidden="true"></i>전거 반입관리</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>구축현황 보기</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link" href="build_status.html"><i class="bi bi-bar-chart-line me-2" aria-hidden="true"></i>구축현황</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main id="main-content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4 pb-5 min-vh-100">
+                
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2 fw-bold">전거 반입관리</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer me-1" aria-hidden="true"></i>출력</button>
+        </div>
+    </div>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div class="d-flex gap-2 flex-wrap">
+                <input type="file" class="form-control w-auto" aria-label="반입 파일 선택">
+                <button class="btn btn-outline-dark btn-sm">파일읽기</button>
+                <button class="btn btn-outline-dark btn-sm">복본조사/검증</button>
+                <button class="btn btn-outline-dark btn-sm">자동선정</button>
+                <button class="btn btn-primary btn-sm">반입처리</button>
+            </div>
+        </div>
+        <div class="bg-light rounded box-group border p-3 mb-3">
+            <span class="me-4"><strong>전체:</strong> 1건</span> <span class="me-4 text-success"><strong>정상:</strong> 0건</span> <span class="text-danger"><strong>비정상:</strong> 1건</span>
+        </div>
+        <table class="table table-bordered text-center table-sm align-middle">
+            <caption class="visually-hidden">전거반입 목록</caption>
+            <thead class="table-light"><tr><th class="no-sort" scope="col">선택</th><th scope="col">전거유형</th><th scope="col">채택표목</th><th scope="col">생몰년</th><th scope="col">복본개수</th><th scope="col">문제점</th><th class="no-sort" scope="col">관리</th></tr></thead>
+            <tbody><tr onclick="goImportDetail(event)" style="cursor:pointer;">
+                <td><input type="checkbox" checked aria-label="김소월 선택"></td>
+                <td>개인명</td>
+                <td class="text-start fw-bold">김소월</td>
+                <td>1902-1934</td>
+                <td>0</td>
+                <td class="text-danger fw-bold">제1지시기호 오류</td>
+                <td><a href="form_import_edit.html" class="btn btn-sm btn-light-warning py-0">수정</a></td>
+            </tr></tbody>
+        </table>
+    </div>
+</div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/grid-sort.js"></script>
+    <script>
+        function goImportDetail(e) {
+            if (e.target.closest('input, a, button')) return;
+            location.href = 'form_import_edit.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구축현황 - KORMARC 전거관리 시스템</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <a href="#main-content" class="visually-hidden-focusable skip-link">본문 바로가기</a>
+
+    <header class="navbar navbar-dark sticky-top bg-primary flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 p-3 fs-6 fw-bold d-flex align-items-center gap-2" href="index.html"><img src="img/logo.png" aalt="KORMARC" height="40"></a>
+        <div class="navbar-nav w-100 d-flex flex-row align-items-center justify-content-end px-3">
+            <div class="nav-item text-nowrap"><span class="nav-link text-white px-3"><i class="bi bi-person me-2" aria-hidden="true"></i>관리자(홍길동)</span></div>
+            <div class="nav-item text-nowrap"><a class="btn btn-sm btn-outline-light" href="#">로그아웃</a></div>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" aria-label="주요 메뉴" class="col-md-3 col-lg-2 d-md-block bg-white sidebar collapse shadow-sm">
+                <div class="position-sticky pt-3 sidebar-sticky">
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 검색 및 목록</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link " href="index.html"><i class="bi bi-search me-2" aria-hidden="true"></i>통합 전거 검색</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 레코드 관리</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link " href="form_personal.html"><i class="bi bi-person me-2" aria-hidden="true"></i>개인명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_corp.html"><i class="bi bi-building me-2" aria-hidden="true"></i>단체명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_geo.html"><i class="bi bi-geo-alt me-2" aria-hidden="true"></i>지리명 등록/수정</a></li>
+                        <li class="nav-item"><a class="nav-link " href="form_subject.html"><i class="bi bi-book me-2" aria-hidden="true"></i>주제명 등록/수정</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>전거 반입관리</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link" href="tools.html"><i class="bi bi-upload me-2" aria-hidden="true"></i>전거 반입관리</a></li>
+                    </ul>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>구축현황 보기</span>
+                    </h6>
+                    <ul class="nav flex-column mb-3">
+                        <li class="nav-item"><a class="nav-link active" href="build_status.html" aria-current="page"><i class="bi bi-bar-chart-line me-2" aria-hidden="true"></i>구축현황</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main id="main-content" class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4 pb-5 min-vh-100">
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2 fw-bold">구축현황</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-printer me-1" aria-hidden="true"></i>출력</button>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <form class="row g-2 align-items-center">
+            <div class="col-auto"><label class="form-label mb-0 fw-bold text-nowrap" for="bs-authType">전거유형</label></div>
+            <div class="col-auto">
+                <select id="bs-authType" class="form-select form-select-sm">
+                    <option>전체</option>
+                    <option>개인명</option>
+                    <option>단체명</option>
+                    <option>지리명</option>
+                    <option>주제명</option>
+                </select>
+            </div>
+            <div class="col-auto d-flex align-items-center gap-1">
+                <label class="form-label mb-0 fw-bold ms-3 text-nowrap" for="bs-regDateFrom">등록일자</label>
+                <input type="date" id="bs-regDateFrom" class="form-control form-control-sm" aria-label="등록일자 시작">
+                <span aria-hidden="true">~</span>
+                <input type="date" class="form-control form-control-sm" aria-label="등록일자 종료">
+            </div>
+            <div class="col-auto d-flex align-items-center gap-1">
+                <label class="form-label mb-0 fw-bold ms-3 text-nowrap" for="bs-modDateFrom">수정일자(삭제일자)</label>
+                <input type="date" id="bs-modDateFrom" class="form-control form-control-sm" aria-label="수정일자 시작">
+                <span aria-hidden="true">~</span>
+                <input type="date" class="form-control form-control-sm" aria-label="수정일자 종료">
+            </div>
+            <div class="col-auto d-flex align-items-center gap-1">
+                <label class="form-label mb-0 fw-bold ms-3 text-nowrap" for="bs-editor">수정자</label>
+                <input type="text" id="bs-editor" class="form-control form-control-sm" placeholder="수정자 입력">
+            </div>
+            <div class="col-auto ms-auto">
+                <button type="button" class="btn btn-primary btn-sm">조회</button>
+                <button type="button" class="btn btn-secondary btn-sm">초기화</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body">
+        <table class="table table-bordered text-center align-middle">
+            <caption class="visually-hidden">구축현황표</caption>
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">전거유형</th>
+                    <th scope="col">구축 건수</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>개인명</td><td>25,000 건</td></tr>
+                <tr><td>단체명</td><td>32,000 건</td></tr>
+                <tr><td>지리명</td><td>1,200 건</td></tr>
+                <tr><td>주제명</td><td>1,500 건</td></tr>
+                <tr class="table-light">
+                    <td class="fw-bold">전체</td>
+                    <td class="fw-bold">59,700 건</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/grid-sort.js"></script>
+</body>
+</html>
