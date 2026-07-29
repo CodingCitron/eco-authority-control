@@ -1,7 +1,7 @@
 import SideNavigation from "@/components/layouts/side-navigation";
 import SearchResult from "@/components/home/search-result";
 
-export default function HomePage() {
+export default function SearchPage() {
   return (
     <div className="container-fluid">
       <div className="row">
