@@ -1,0 +1,18 @@
+/* React tab transition */
+.authority-tab-enter {
+  opacity: 0;
+}
+
+.authority-tab-enter-active {
+  opacity: 1;
+  transition: opacity 150ms ease-in;
+}
+
+.authority-tab-exit {
+  opacity: 1;
+}
+
+.authority-tab-exit-active {
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}

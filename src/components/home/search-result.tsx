@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router";
+import { CSSTransition, SwitchTransition } from "react-transition-group";
 import clsx from "clsx";
 
 import Table, { type TableColumn } from "@/components/table";
@@ -347,6 +348,7 @@ const tabList = [
 
 export default function SearchResult() {
   const [currentTab, setCurrentTab] = useState(tabList[0]);
+  const tabPanelRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -359,9 +361,8 @@ export default function SearchResult() {
                   active: currentTab.id === tab.id,
                 })}
                 id={`tab-${tab.id}`}
-                data-bs-toggle="tab"
-                data-bs-target={`#${tab.id}`}
                 aria-controls={tab.id}
+                aria-selected={currentTab.id === tab.id}
                 onClick={() => setCurrentTab(tab)}
               >
                 {tab.label}
@@ -374,20 +375,25 @@ export default function SearchResult() {
         className="tab-content border-start border-end border-bottom p-3 bg-white"
         id="myTabContent"
       >
-        {tabList.map((tab) => (
-          <div
-            key={tab.id}
-            className={clsx("tab-pane fade", {
-              "active show": currentTab.id === tab.id,
-            })}
-            id={tab.id}
-            role="tabpanel"
-            tabIndex={0}
-            aria-labelledby={tab.id}
+        <SwitchTransition mode="out-in">
+          <CSSTransition
+            key={currentTab.id}
+            nodeRef={tabPanelRef}
+            timeout={150}
+            classNames="authority-tab"
           >
-            <div className="table-responsive">{tab.content}</div>
-          </div>
-        ))}
+            <div
+              ref={tabPanelRef}
+              className="tab-pane active"
+              id={currentTab.id}
+              role="tabpanel"
+              tabIndex={0}
+              aria-labelledby={`tab-${currentTab.id}`}
+            >
+              <div className="table-responsive">{currentTab.content}</div>
+            </div>
+          </CSSTransition>
+        </SwitchTransition>
       </div>
     </>
   );
