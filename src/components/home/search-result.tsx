@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
-import { CSSTransition, SwitchTransition } from "react-transition-group";
-import clsx from "clsx";
+import { Nav, Tab } from "react-bootstrap";
 
 import Table, { type TableColumn } from "@/components/table";
 import type {
@@ -327,74 +326,80 @@ const tabList = [
   {
     id: "personal",
     label: "개인명",
-    content: <AuthoritySearchTable caption="개인명 전거 목록" columns={personalColumns} params={{ type: "personal" }} />,
+    content: (
+      <AuthoritySearchTable
+        caption="개인명 전거 목록"
+        columns={personalColumns}
+        params={{ type: "personal" }}
+      />
+    ),
   },
   {
     id: "corp",
     label: "단체명",
-    content: <AuthoritySearchTable caption="단체명 전거 목록" columns={organizationColumns} params={{ type: "organization" }} />,
+    content: (
+      <AuthoritySearchTable
+        caption="단체명 전거 목록"
+        columns={organizationColumns}
+        params={{ type: "organization" }}
+      />
+    ),
   },
   {
     id: "geo",
     label: "지리명",
-    content: <AuthoritySearchTable caption="지리명 전거 목록" columns={geographyColumns} params={{ type: "geography" }} />,
+    content: (
+      <AuthoritySearchTable
+        caption="지리명 전거 목록"
+        columns={geographyColumns}
+        params={{ type: "geography" }}
+      />
+    ),
   },
   {
     id: "subject",
     label: "주제명",
-    content: <AuthoritySearchTable caption="주제명 전거 목록" columns={subjectColumns} params={{ type: "subject" }} />,
+    content: (
+      <AuthoritySearchTable
+        caption="주제명 전거 목록"
+        columns={subjectColumns}
+        params={{ type: "subject" }}
+      />
+    ),
   },
 ];
 
 export default function SearchResult() {
   const [currentTab, setCurrentTab] = useState(tabList[0]);
-  const tabPanelRef = useRef<HTMLDivElement>(null);
 
   return (
-    <>
-      <ul className="nav nav-tabs" id="myTab" role="tablist">
-        {tabList.map((tab) => {
-          return (
-            <li key={tab.id} className="nav-item" role="presentation">
-              <button
-                className={clsx("nav-link", {
-                  active: currentTab.id === tab.id,
-                })}
-                id={`tab-${tab.id}`}
-                aria-controls={tab.id}
-                aria-selected={currentTab.id === tab.id}
-                onClick={() => setCurrentTab(tab)}
-              >
-                {tab.label}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-      <div
-        className="tab-content border-start border-end border-bottom p-3 bg-white"
+    <Tab.Container
+      activeKey={currentTab.id}
+      onSelect={(eventKey) => {
+        const tab = tabList.find(({ id }) => id === eventKey);
+        if (tab) setCurrentTab(tab);
+      }}
+      transition={true}
+      mountOnEnter
+      unmountOnExit
+    >
+      <Nav variant="tabs" id="myTab" role="tablist">
+        {tabList.map((tab) => (
+          <Nav.Item key={tab.id}>
+            <Nav.Link eventKey={tab.id}>{tab.label}</Nav.Link>
+          </Nav.Item>
+        ))}
+      </Nav>
+      <Tab.Content
+        className="border-start border-end border-bottom p-3 bg-white"
         id="myTabContent"
       >
-        <SwitchTransition mode="out-in">
-          <CSSTransition
-            key={currentTab.id}
-            nodeRef={tabPanelRef}
-            timeout={150}
-            classNames="authority-tab"
-          >
-            <div
-              ref={tabPanelRef}
-              className="tab-pane active"
-              id={currentTab.id}
-              role="tabpanel"
-              tabIndex={0}
-              aria-labelledby={`tab-${currentTab.id}`}
-            >
-              <div className="table-responsive">{currentTab.content}</div>
-            </div>
-          </CSSTransition>
-        </SwitchTransition>
-      </div>
-    </>
+        {tabList.map((tab) => (
+          <Tab.Pane key={tab.id} eventKey={tab.id} tabIndex={0}>
+            <div className="table-responsive">{tab.content}</div>
+          </Tab.Pane>
+        ))}
+      </Tab.Content>
+    </Tab.Container>
   );
 }
