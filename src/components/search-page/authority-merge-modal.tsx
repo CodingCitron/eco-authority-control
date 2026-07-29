@@ -87,11 +87,12 @@ export default function AuthorityMergeModal({
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[1]);
   const [targetFontSize, setTargetFontSize] = useState(fontSizeList[1]);
 
-  const { data = [], isLoading } = useAuthoritySearchByControlNumbersQuery(
-    currentTab.authorityType,
-    selectedControlNumbers,
-    show,
-  );
+  const { data = [], isError, isLoading } =
+    useAuthoritySearchByControlNumbersQuery(
+      currentTab.authorityType,
+      selectedControlNumbers,
+      show,
+    );
 
   const records = useMemo(
     () =>
@@ -122,6 +123,7 @@ export default function AuthorityMergeModal({
     (record) => record.controlNumber !== masterControlNumber,
   );
 
+  const isRecordFetchComplete = !isLoading && !isError;
   const canMerge = records.length === 2 && master && target;
 
   return (
@@ -139,9 +141,21 @@ export default function AuthorityMergeModal({
           삭제(flag) 처리됩니다.
         </p>
 
-        {isLoading ? (
+        {isLoading && (
           <p className="mb-0">선택한 전거자료를 불러오는 중입니다.</p>
-        ) : records.length !== 2 ? null : (
+        )}
+        {!isLoading && isError && (
+          <p className="alert alert-danger mb-0" role="alert">
+            선택한 전거자료를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+          </p>
+        )}
+        {isRecordFetchComplete && records.length !== 2 && (
+          <p className="alert alert-warning mb-0" role="alert">
+            선택한 전거자료 2건 중 {records.length}건만 조회되었습니다. 목록을
+            확인한 후 다시 시도해주세요.
+          </p>
+        )}
+        {isRecordFetchComplete && records.length === 2 && (
           <>
             <div className="table-responsive mb-4">
               <Table
