@@ -43,15 +43,15 @@ function RecordPreview({
   const marcLines = [
     {
       tag: "001",
-      field: record.controlNumber,
+      line: record.controlNumber,
     },
     {
       tag: "150",
-      field: record.heading,
+      line: record.heading,
     },
     {
       tag: "670",
-      field: record.source,
+      line: record.source,
     },
   ];
 
@@ -68,7 +68,7 @@ function RecordPreview({
       {marcLines.map((item) => (
         <div className="marc-line marc-line-control">
           <span className="marc-tag">{item.tag}</span>
-          {item.field}
+          {item.line}
         </div>
       ))}
     </div>
@@ -170,35 +170,45 @@ export default function AuthorityMergeModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {records.map((record, index) => (
-                    <tr key={record.controlNumber}>
-                      <td>{index + 1}</td>
-                      <td>
-                        <Form.Check
-                          type="radio"
-                          name="merge-master"
-                          aria-label={`${record.heading}을 통합 주자료로 선택`}
-                          checked={masterControlNumber === record.controlNumber}
-                          onChange={() =>
-                            setMasterControlNumber(record.controlNumber)
-                          }
-                        />
-                      </td>
-                      <td>{record.type}</td>
-                      <td>{record.controlNumber}</td>
-                      <td className="text-start">{record.heading}</td>
-                      <td className="text-start">{record.source}</td>
-                    </tr>
-                  ))}
+                  {records.map((record, index) => {
+                    const isChecked =
+                      masterControlNumber === record.controlNumber;
+
+                    return (
+                      <tr key={record.controlNumber}>
+                        <td>{index + 1}</td>
+                        <td>
+                          <Form.Check
+                            type="radio"
+                            name="merge-master"
+                            aria-label={`${record.heading}을 통합 주자료로 선택`}
+                            checked={isChecked}
+                            onChange={() =>
+                              setMasterControlNumber(record.controlNumber)
+                            }
+                          />
+                        </td>
+                        <td>{record.type}</td>
+                        <td>{record.controlNumber}</td>
+                        <td
+                          className={clsx("text-start", {
+                            "fw-bold text-primary": isChecked,
+                          })}
+                        >
+                          {record.heading}
+                        </td>
+                        <td className="text-start">{record.source}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </Table>
             </div>
-            <div className="d-flex justify-content-end mb-2"></div>
             <div className="row g-3">
               <section className="col-md-6">
                 <div className="border p-3 bg-light rounded h-100">
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                    <span className="badge bg-primary mb-2">
+                    <span className="badge bg-primary">
                       통합주자료({master ? master.controlNumber : ""})
                     </span>
                     <div className="d-flex gap-2">
@@ -208,7 +218,7 @@ export default function AuthorityMergeModal({
                         onChange={(event) =>
                           setMasterFontSize(event.target.value)
                         }
-                        className="w-auto"
+                        className="form-select-sm w-auto"
                       >
                         {fontSizeList.map((size) => (
                           <option key={size} value={parseInt(size)}>
@@ -235,7 +245,7 @@ export default function AuthorityMergeModal({
               <section className="col-md-6">
                 <div className="border p-3 bg-light rounded h-100">
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                    <span className="badge bg-secondary mb-2">
+                    <span className="badge bg-secondary">
                       통합대상자료({target ? target.controlNumber : ""})
                     </span>
                     <div className="d-flex gap-2">
@@ -245,7 +255,7 @@ export default function AuthorityMergeModal({
                         onChange={(event) =>
                           setTargetFontSize(event.target.value)
                         }
-                        className="w-auto"
+                        className="form-select-sm w-auto"
                       >
                         {fontSizeList.map((size) => (
                           <option key={size} value={parseInt(size)}>
@@ -275,20 +285,22 @@ export default function AuthorityMergeModal({
       </Modal.Body>
       <Modal.Footer className="justify-content-center">
         <Button
+          className="px-4 fw-bold"
           variant="outline-primary"
           disabled={!canMerge}
           onClick={() => canMerge && onPreview?.(master, target)}
         >
-          MARC 통합 미리보기
+          MARC 통합
         </Button>
         <Button
+          className="px-4 fw-bold"
           variant="primary"
           disabled={!canMerge}
           onClick={() => canMerge && onMerge?.(master, target)}
         >
           통합
         </Button>
-        <Button variant="secondary" onClick={onHide}>
+        <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
           닫기
         </Button>
       </Modal.Footer>
