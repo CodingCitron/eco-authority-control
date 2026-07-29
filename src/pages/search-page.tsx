@@ -1,8 +1,15 @@
-import SideNavigation from "@/components/layouts/side-navigation";
+import { useState } from "react";
+
 import { SearchPageProvider } from "@/components/search-page/search-page-provider";
+import SideNavigation from "@/components/layouts/side-navigation";
 import SearchResult from "@/components/search-page/search-result";
+import AuthorityMergeModal, {
+  AuthorityMergeButton,
+} from "@/components/search-page/authority-merge-modal";
 
 export default function SearchPage() {
+  const [mergeModalIsOpen, setMergeModalIsOpen] = useState(false);
+
   return (
     <SearchPageProvider>
       <div className="container-fluid">
@@ -142,16 +149,9 @@ export default function SearchPage() {
                       </strong>
                       건
                     </span>
-                    <button
-                      type="button"
-                      className="btn btn-outline-dark btn-sm"
-                    >
-                      <i
-                        className="bi bi-intersect me-1"
-                        aria-hidden="true"
-                      ></i>
-                      전거통합
-                    </button>
+                    <AuthorityMergeButton
+                      onOpen={() => setMergeModalIsOpen(true)}
+                    />
                     <button
                       type="button"
                       className="btn btn-outline-dark btn-sm"
@@ -205,6 +205,10 @@ export default function SearchPage() {
           </main>
         </div>
       </div>
+      <AuthorityMergeModal
+        show={mergeModalIsOpen}
+        onHide={() => setMergeModalIsOpen(false)}
+      />
     </SearchPageProvider>
   );
 }

@@ -1,12 +1,10 @@
 import {
-  createContext,
-  useContext,
+  useCallback,
   useState,
-  type Dispatch,
   type ReactNode,
-  type SetStateAction,
 } from "react";
 import { Link } from "react-router";
+import { createContext, useContextSelector } from "use-context-selector";
 
 import type { TableColumn } from "@/components/table";
 import type {
@@ -16,6 +14,8 @@ import type {
   SubjectRow,
 } from "@/components/search-page/search-result.types";
 import AuthoritySearchTable from "@/components/search-page/authority-search-table";
+import type { AuthoritySearchType } from "@/api/authority-search";
+import AuthoritySelectionCheckbox from "@/components/search-page/authority-selection-checkbox";
 
 const personalColumns: TableColumn<AuthorityRow>[] = [
   {
@@ -26,12 +26,11 @@ const personalColumns: TableColumn<AuthorityRow>[] = [
   {
     header: "선택",
     cell: (row) => (
-      <>
-        <label htmlFor={`check${row.id}`} className="visually-hidden">
-          {row.heading} 선택
-        </label>
-        <input type="checkbox" id={`check${row.id}`} />
-      </>
+      <AuthoritySelectionCheckbox
+        controlNumber={row.controlNumber}
+        heading={row.heading}
+        inputId={`check-${row.controlNumber}`}
+      />
     ),
   },
   { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
@@ -96,12 +95,11 @@ const organizationColumns: TableColumn<OrganizationRow>[] = [
   {
     header: "선택",
     cell: (row) => (
-      <>
-        <label htmlFor={`check-corp-${row.id}`} className="visually-hidden">
-          {row.heading} 선택
-        </label>
-        <input type="checkbox" id={`check-corp-${row.id}`} />
-      </>
+      <AuthoritySelectionCheckbox
+        controlNumber={row.controlNumber}
+        heading={row.heading}
+        inputId={`check-corp-${row.controlNumber}`}
+      />
     ),
   },
   { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
@@ -167,12 +165,11 @@ const geographyColumns: TableColumn<GeographyRow>[] = [
   {
     header: "선택",
     cell: (row) => (
-      <>
-        <label htmlFor={`check-geo-${row.id}`} className="visually-hidden">
-          {row.heading} 선택
-        </label>
-        <input type="checkbox" id={`check-geo-${row.id}`} />
-      </>
+      <AuthoritySelectionCheckbox
+        controlNumber={row.controlNumber}
+        heading={row.heading}
+        inputId={`check-geo-${row.controlNumber}`}
+      />
     ),
   },
   { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
@@ -227,12 +224,11 @@ const subjectColumns: TableColumn<SubjectRow>[] = [
   {
     header: "선택",
     cell: (row) => (
-      <>
-        <label htmlFor={`check-subj-${row.id}`} className="visually-hidden">
-          {row.heading} 선택
-        </label>
-        <input type="checkbox" id={`check-subj-${row.id}`} />
-      </>
+      <AuthoritySelectionCheckbox
+        controlNumber={row.controlNumber}
+        heading={row.heading}
+        inputId={`check-subj-${row.controlNumber}`}
+      />
     ),
   },
   { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
@@ -294,9 +290,17 @@ const subjectColumns: TableColumn<SubjectRow>[] = [
   },
 ];
 
-export const tabList = [
+interface SearchTab {
+  id: string;
+  authorityType: AuthoritySearchType;
+  label: string;
+  content: ReactNode;
+}
+
+export const tabList: SearchTab[] = [
   {
     id: "personal",
+    authorityType: "personal",
     label: "개인명",
     content: (
       <AuthoritySearchTable
@@ -308,6 +312,7 @@ export const tabList = [
   },
   {
     id: "corp",
+    authorityType: "organization",
     label: "단체명",
     content: (
       <AuthoritySearchTable
@@ -319,6 +324,7 @@ export const tabList = [
   },
   {
     id: "geo",
+    authorityType: "geography",
     label: "지리명",
     content: (
       <AuthoritySearchTable
@@ -330,6 +336,7 @@ export const tabList = [
   },
   {
     id: "subject",
+    authorityType: "subject",
     label: "주제명",
     content: (
       <AuthoritySearchTable
@@ -341,35 +348,99 @@ export const tabList = [
   },
 ];
 
-type SearchTab = (typeof tabList)[number];
-
 interface SearchPageContextValue {
   currentTab: SearchTab;
-  setCurrentTab: Dispatch<SetStateAction<SearchTab>>;
+  setCurrentTab: (tab: SearchTab) => void;
+  selectedControlNumbers: readonly string[];
+  toggleSelectedControlNumber: (controlNumber: string) => void;
+  clearSelectedControlNumbers: () => void;
 }
 
 const SearchPageContext = createContext<SearchPageContextValue | null>(null);
 
 export function SearchPageProvider({ children }: { children: ReactNode }) {
   const [currentTab, setCurrentTab] = useState<SearchTab>(tabList[0]);
+  const [selectedControlNumbers, setSelectedControlNumbers] = useState<
+    string[]
+  >([]);
+
+  const toggleSelectedControlNumber = useCallback((controlNumber: string) => {
+    setSelectedControlNumbers((current) =>
+      current.includes(controlNumber)
+        ? current.filter((value) => value !== controlNumber)
+        : [...current, controlNumber],
+    );
+  }, []);
+
+  const clearSelectedControlNumbers = useCallback(() => {
+    setSelectedControlNumbers([]);
+  }, []);
+
+  const changeCurrentTab = useCallback((tab: SearchTab) => {
+    setCurrentTab(tab);
+    clearSelectedControlNumbers();
+  }, [clearSelectedControlNumbers]);
 
   return (
-    <SearchPageContext.Provider value={{ currentTab, setCurrentTab }}>
+    <SearchPageContext.Provider
+      value={{
+        currentTab,
+        setCurrentTab: changeCurrentTab,
+        selectedControlNumbers,
+        toggleSelectedControlNumber,
+        clearSelectedControlNumbers,
+      }}
+    >
       {children}
     </SearchPageContext.Provider>
   );
 }
 
 export function useSearchPage() {
-  const context = useContext(SearchPageContext);
+  const currentTab = useContextSelector(
+    SearchPageContext,
+    (context) => context?.currentTab,
+  );
 
-  if (!context) {
+  const setCurrentTab = useContextSelector(
+    SearchPageContext,
+    (context) => context?.setCurrentTab,
+  );
+
+  const selectedControlNumbers = useContextSelector(
+    SearchPageContext,
+    (context) => context?.selectedControlNumbers,
+  );
+
+  const toggleSelectedControlNumber = useContextSelector(
+    SearchPageContext,
+    (context) => context?.toggleSelectedControlNumber,
+  );
+
+  const clearSelectedControlNumbers = useContextSelector(
+    SearchPageContext,
+    (context) => context?.clearSelectedControlNumbers,
+  );
+
+  if (
+    !currentTab ||
+    !setCurrentTab ||
+    !selectedControlNumbers ||
+    !toggleSelectedControlNumber ||
+    !clearSelectedControlNumbers
+  ) {
     throw new Error(
-      "useSearchPage는 SearchPageProvider안에서 사용해야 합니다.",
+      "useSearchPage는 SearchPageProvider 내부에서 사용해야 합니다.",
     );
   }
 
-  return context;
+  return {
+    currentTab,
+    setCurrentTab,
+    selectedControlNumbers,
+    toggleSelectedControlNumber,
+    clearSelectedControlNumbers,
+  };
 }
 
 export { SearchPageContext };

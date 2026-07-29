@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
+
+import type { AuthoritySearchResult } from "@/api/authority-search";
+import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
+
+import { useSearchPage } from "@/components/search-page/search-page-provider";
 
 export interface MergeAuthorityRecord {
   controlNumber: string;
@@ -12,7 +17,6 @@ export interface MergeAuthorityRecord {
 interface AuthorityMergeModalProps {
   show: boolean;
   onHide: () => void;
-  records: readonly MergeAuthorityRecord[];
   onPreview?: (
     master: MergeAuthorityRecord,
     target: MergeAuthorityRecord,
@@ -22,6 +26,8 @@ interface AuthorityMergeModalProps {
     target: MergeAuthorityRecord,
   ) => void;
 }
+
+const fontSizeList = ["16", "18", "20", "22", "24"];
 
 function RecordPreview({ record }: { record: MergeAuthorityRecord }) {
   const preview =
@@ -44,25 +50,39 @@ function RecordPreview({ record }: { record: MergeAuthorityRecord }) {
   );
 }
 
-const theads = [
-  "No",
-  "통합 주자로",
-  "전거유형",
-  "전거제어번호",
-  "채택표목",
-  "정보원",
-];
-const fontSizeList = ["16", "18", "20", "22", "24"];
-
 export default function AuthorityMergeModal({
   show,
   onHide,
-  records,
   onPreview,
   onMerge,
 }: AuthorityMergeModalProps) {
+  const { currentTab, selectedControlNumbers } = useSearchPage();
   const [masterControlNumber, setMasterControlNumber] = useState<string>();
   const [fontSize, setFontSize] = useState(fontSizeList[1]);
+
+  const { data = [], isLoading } = useAuthoritySearchByControlNumbersQuery(
+    currentTab.authorityType,
+    selectedControlNumbers,
+    show,
+  );
+
+  const records = useMemo(
+    () =>
+      selectedControlNumbers
+        .map((controlNumber) =>
+          data.find((record) => record.controlNumber === controlNumber),
+        )
+        .filter(
+          (record): record is AuthoritySearchResult => record !== undefined,
+        )
+        .map((record) => ({
+          controlNumber: record.controlNumber,
+          type: record.type,
+          heading: record.heading,
+          source: record.source,
+        })),
+    [data, selectedControlNumbers],
+  );
 
   useEffect(() => {
     if (show) setMasterControlNumber(records[0]?.controlNumber);
@@ -83,62 +103,57 @@ export default function AuthorityMergeModal({
           전거통합 - 통합화면
         </Modal.Title>
       </Modal.Header>
-
       <Modal.Body>
         <p className="text-muted small">
           통합 주자료를 하나 선택하세요. 선택하지 않은 자료는 통합 대상이 되어
           주자료에 병합됩니다.
         </p>
 
-        {records.length !== 2 ? (
-          <p className="alert alert-warning mb-0">
-            전거통합은 정확히 2건을 선택한 경우에만 진행할 수 있습니다.
-          </p>
-        ) : (
+        {isLoading ? (
+          <p className="mb-0">선택한 전거자료를 불러오는 중입니다.</p>
+        ) : records.length !== 2 ? null : (
           <>
-            <div className="table-responsive mb-4">
-              <Table
-                bordered
-                size="sm"
-                className="text-center align-middle mb-0"
-              >
-                <caption className="visually-hidden">
-                  전거 통합 대상 목록
-                </caption>
-                <thead className="table-light">
-                  <tr>
-                    {theads.map((th) => (
-                      <th scope="col" key={th}>
-                        {th}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {records.map((record, index) => (
-                    <tr key={record.controlNumber}>
-                      <td>{index + 1}</td>
-                      <td>
-                        <Form.Check
-                          type="radio"
-                          name="merge-master"
-                          aria-label={`${record.heading}을 통합 주자료로 선택`}
-                          checked={masterControlNumber === record.controlNumber}
-                          onChange={() =>
-                            setMasterControlNumber(record.controlNumber)
-                          }
-                        />
-                      </td>
-                      <td>{record.type}</td>
-                      <td>{record.controlNumber}</td>
-                      <td className="text-start">{record.heading}</td>
-                      <td className="text-start">{record.source}</td>
-                    </tr>
+            <Table bordered size="sm" className="text-center align-middle mb-4">
+              <caption className="visually-hidden">전거 통합 대상 목록</caption>
+              <thead className="table-light">
+                <tr>
+                  {[
+                    "No",
+                    "통합 주자료",
+                    "전거유형",
+                    "전거제어번호",
+                    "채택표목",
+                    "정보원",
+                  ].map((header) => (
+                    <th scope="col" key={header}>
+                      {header}
+                    </th>
                   ))}
-                </tbody>
-              </Table>
-            </div>
-
+                </tr>
+              </thead>
+              <tbody>
+                {records.map((record, index) => (
+                  <tr key={record.controlNumber}>
+                    <td>{index + 1}</td>
+                    <td>
+                      <Form.Check
+                        type="radio"
+                        name="merge-master"
+                        aria-label={`${record.heading}을 통합 주자료로 선택`}
+                        checked={masterControlNumber === record.controlNumber}
+                        onChange={() =>
+                          setMasterControlNumber(record.controlNumber)
+                        }
+                      />
+                    </td>
+                    <td>{record.type}</td>
+                    <td>{record.controlNumber}</td>
+                    <td className="text-start">{record.heading}</td>
+                    <td className="text-start">{record.source}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
             <div className="d-flex justify-content-end mb-2">
               <Form.Select
                 aria-label="MARC 미리보기 글자 크기"
@@ -153,7 +168,6 @@ export default function AuthorityMergeModal({
                 ))}
               </Form.Select>
             </div>
-
             <div className="row g-3" style={{ fontSize: `${fontSize}px` }}>
               <div className="col-md-6">
                 <section className="border p-3 bg-light rounded h-100">
@@ -171,7 +185,6 @@ export default function AuthorityMergeModal({
           </>
         )}
       </Modal.Body>
-
       <Modal.Footer className="justify-content-center">
         <Button
           variant="outline-primary"
@@ -192,5 +205,31 @@ export default function AuthorityMergeModal({
         </Button>
       </Modal.Footer>
     </Modal>
+  );
+}
+
+export function AuthorityMergeButton({ onOpen }: { onOpen: () => void }) {
+  const { selectedControlNumbers } = useSearchPage();
+
+  const handleClick = () => {
+    if (selectedControlNumbers.length !== 2) {
+      alert(
+        "전거통합은 2건씩 비교하여 진행합니다. 통합할 전거자료를 정확히 2건 선택해주세요.",
+      );
+      return;
+    }
+
+    onOpen();
+  };
+
+  return (
+    <button
+      type="button"
+      className="btn btn-outline-dark btn-sm"
+      onClick={handleClick}
+    >
+      <i className="bi bi-intersect me-1" aria-hidden="true"></i>
+      전거통합
+    </button>
   );
 }

@@ -16,6 +16,7 @@ export interface AuthoritySearchParams {
   type?: AuthoritySearchType;
   nationality?: string;
   controlNumber?: string;
+  controlNumbers?: readonly string[];
   heading?: string;
 }
 
@@ -34,6 +35,8 @@ export async function fetchAuthoritySearchResults(
       (!params.nationality || row.nationality === params.nationality) &&
       (!params.controlNumber ||
         row.controlNumber.includes(params.controlNumber)) &&
+      (!params.controlNumbers ||
+        params.controlNumbers.includes(row.controlNumber)) &&
       (!params.heading || row.heading.includes(params.heading)),
   );
 }
