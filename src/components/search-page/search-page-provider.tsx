@@ -1,20 +1,21 @@
-import { useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { Link } from "react-router";
-import { Nav, Tab } from "react-bootstrap";
 
-import Table, { type TableColumn } from "@/components/table";
-import type {
-  AuthoritySearchParams,
-  AuthoritySearchResult,
-} from "@/api/authority-search";
-import { useAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
-
+import type { TableColumn } from "@/components/table";
 import type {
   AuthorityRow,
-  OrganizationRow,
   GeographyRow,
+  OrganizationRow,
   SubjectRow,
-} from "./search-result.types";
+} from "@/components/search-page/search-result.types";
+import AuthoritySearchTable from "@/components/search-page/authority-search-table";
 
 const personalColumns: TableColumn<AuthorityRow>[] = [
   {
@@ -293,36 +294,7 @@ const subjectColumns: TableColumn<SubjectRow>[] = [
   },
 ];
 
-interface AuthoritySearchTableProps<T extends AuthoritySearchResult> {
-  caption: string;
-  columns: TableColumn<T>[];
-  params: AuthoritySearchParams;
-}
-
-function AuthoritySearchTable<T extends AuthoritySearchResult>({
-  caption,
-  columns,
-  params,
-}: AuthoritySearchTableProps<T>) {
-  const { data = [] } = useAuthoritySearchQuery<T>(params);
-
-  return (
-    <Table
-      caption={caption}
-      columns={columns}
-      rows={data}
-      getRowKey={(row) => row.controlNumber}
-      getRowProps={(row) => ({
-        "data-ctrl": row.controlNumber,
-        "data-type": row.type,
-        "data-heading": row.heading,
-        "data-source": row.source,
-      })}
-    />
-  );
-}
-
-const tabList = [
+export const tabList = [
   {
     id: "personal",
     label: "개인명",
@@ -369,37 +341,35 @@ const tabList = [
   },
 ];
 
-export default function SearchResult() {
-  const [currentTab, setCurrentTab] = useState(tabList[0]);
+type SearchTab = (typeof tabList)[number];
+
+interface SearchPageContextValue {
+  currentTab: SearchTab;
+  setCurrentTab: Dispatch<SetStateAction<SearchTab>>;
+}
+
+const SearchPageContext = createContext<SearchPageContextValue | null>(null);
+
+export function SearchPageProvider({ children }: { children: ReactNode }) {
+  const [currentTab, setCurrentTab] = useState<SearchTab>(tabList[0]);
 
   return (
-    <Tab.Container
-      activeKey={currentTab.id}
-      onSelect={(eventKey) => {
-        const tab = tabList.find(({ id }) => id === eventKey);
-        if (tab) setCurrentTab(tab);
-      }}
-      transition={true}
-      mountOnEnter
-      unmountOnExit
-    >
-      <Nav variant="tabs" id="myTab" role="tablist">
-        {tabList.map((tab) => (
-          <Nav.Item key={tab.id}>
-            <Nav.Link eventKey={tab.id}>{tab.label}</Nav.Link>
-          </Nav.Item>
-        ))}
-      </Nav>
-      <Tab.Content
-        className="border-start border-end border-bottom p-3 bg-white"
-        id="myTabContent"
-      >
-        {tabList.map((tab) => (
-          <Tab.Pane key={tab.id} eventKey={tab.id} tabIndex={0}>
-            <div className="table-responsive">{tab.content}</div>
-          </Tab.Pane>
-        ))}
-      </Tab.Content>
-    </Tab.Container>
+    <SearchPageContext.Provider value={{ currentTab, setCurrentTab }}>
+      {children}
+    </SearchPageContext.Provider>
   );
 }
+
+export function useSearchPage() {
+  const context = useContext(SearchPageContext);
+
+  if (!context) {
+    throw new Error(
+      "useSearchPage는 SearchPageProvider안에서 사용해야 합니다.",
+    );
+  }
+
+  return context;
+}
+
+export { SearchPageContext };

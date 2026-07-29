@@ -3,7 +3,7 @@ import type {
   GeographyRow,
   OrganizationRow,
   SubjectRow,
-} from "@/components/home/search-result.types";
+} from "@/components/search-page/search-result.types";
 import type { AuthoritySearchResult } from "./authority-search";
 
 const personalRows: AuthorityRow[] = [
