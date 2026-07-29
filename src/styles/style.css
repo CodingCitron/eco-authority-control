@@ -1,0 +1,343 @@
+@charset "utf-8";
+@import url('krds_tokens.css');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+/* Bootstrap 파란 계열 → krds primary(버건디) 오버라이드 */
+:root {
+  --bs-primary: var(--krds-light-color-element-primary);
+  /* #911B2B */
+  --bs-primary-rgb: 145, 27, 43;
+  --bs-link-color: var(--krds-light-color-link-default);
+  --bs-link-hover-color: var(--krds-light-color-link-hover);
+  --bs-link-color-rgb: 145, 27, 43;
+
+  /* info(청록) → krds secondary */
+  --bs-info: var(--krds-light-color-element-secondary);
+  --bs-info-rgb: 6, 58, 116;
+}
+
+/* 버튼 primary */
+.btn-primary {
+  --bs-btn-bg: var(--krds-light-color-button-primary-fill);
+  --bs-btn-border-color: var(--krds-light-color-button-primary-fill);
+  --bs-btn-hover-bg: var(--krds-light-color-button-primary-fill-hover);
+  --bs-btn-hover-border-color: var(--krds-light-color-button-primary-fill-hover);
+  --bs-btn-active-bg: var(--krds-light-color-button-primary-fill-pressed);
+  --bs-btn-active-border-color: var(--krds-light-color-button-primary-fill-pressed);
+  --bs-btn-disabled-bg: var(--krds-light-color-button-disabled-fill);
+  --bs-btn-disabled-border-color: var(--krds-light-color-button-disabled-fill);
+}
+
+/* 버튼 outline-primary */
+.btn-outline-primary {
+  --bs-btn-color: var(--krds-light-color-text-primary);
+  --bs-btn-border-color: var(--krds-light-color-border-primary);
+  --bs-btn-hover-bg: var(--krds-light-color-action-primary-hover);
+  --bs-btn-hover-border-color: var(--krds-light-color-border-primary);
+  --bs-btn-active-bg: var(--krds-light-color-action-primary-pressed);
+  --bs-btn-hover-color: var(--krds-light-color-text-primary);
+  --bs-btn-active-color: var(--krds-light-color-text-primary);
+}
+
+/* 버튼 outline-info */
+.btn-outline-info {
+  --bs-btn-color: var(--krds-light-color-text-secondary);
+  --bs-btn-border-color: var(--krds-light-color-border-secondary);
+  --bs-btn-hover-bg: var(--krds-light-color-action-secondary-hover);
+  --bs-btn-hover-border-color: var(--krds-light-color-border-secondary);
+  --bs-btn-active-bg: var(--krds-light-color-action-secondary-pressed);
+  --bs-btn-hover-color: var(--krds-light-color-text-secondary);
+  --bs-btn-active-color: var(--krds-light-color-text-secondary);
+}
+
+/* 텍스트 primary */
+.text-primary {
+  color: var(--krds-light-color-text-primary) !important;
+}
+
+/* 헤더 배경 bg-primary */
+.bg-primary {
+  background-color: var(--krds-light-color-element-primary) !important;
+}
+
+/* 탭 활성 상태 */
+.nav-tabs .nav-link.active {
+  color: var(--krds-light-color-text-primary);
+  border-color: var(--krds-light-color-border-primary) var(--krds-light-color-border-primary) #fff;
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--krds-light-color-text-primary);
+}
+
+/* 체크박스 활성 */
+.form-check-input:checked {
+  background-color: var(--krds-light-color-element-primary);
+  border-color: var(--krds-light-color-border-primary);
+}
+
+.form-check-input:focus {
+  border-color: var(--krds-light-color-border-primary);
+  box-shadow: 0 0 0 0.25rem rgba(145, 27, 43, 0.25);
+}
+
+/* 인풋 포커스 테두리 */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--krds-light-color-input-border-active);
+  box-shadow: 0 0 0 0.25rem rgba(145, 27, 43, 0.25);
+}
+
+/* Light 버튼 (연한 배경 + 진한 텍스트) */
+.btn-light-success {
+  background-color: var(--krds-light-color-surface-success-subtler);
+  color: var(--krds-light-color-text-success);
+  border-color: var(--krds-light-color-border-success);
+}
+
+.btn-light-success:hover {
+  background-color: var(--krds-color-light-success-10);
+  color: var(--krds-light-color-text-success);
+  border-color: var(--krds-light-color-border-success);
+}
+
+.btn-light-warning {
+  background-color: var(--krds-light-color-surface-warning-subtler);
+  color: var(--krds-light-color-text-warning);
+  border-color: var(--krds-light-color-border-warning);
+}
+
+.btn-light-warning:hover {
+  background-color: var(--krds-color-light-warning-10);
+  color: var(--krds-light-color-text-warning);
+  border-color: var(--krds-light-color-border-warning);
+}
+
+.btn-light-danger {
+  background-color: var(--krds-light-color-surface-danger-subtler);
+  color: var(--krds-light-color-text-danger);
+  border-color: var(--krds-light-color-border-danger);
+}
+
+.btn-light-danger:hover {
+  background-color: var(--krds-color-light-danger-10);
+  color: var(--krds-light-color-text-danger);
+  border-color: var(--krds-light-color-border-danger);
+}
+
+.btn-light-info {
+  background-color: var(--krds-light-color-surface-secondary-subtler);
+  color: var(--krds-light-color-text-secondary);
+  border-color: var(--krds-light-color-border-secondary);
+}
+
+.btn-light-info:hover {
+  background-color: var(--krds-color-light-secondary-10);
+  color: var(--krds-light-color-text-secondary);
+  border-color: var(--krds-light-color-border-secondary);
+}
+
+body {
+  font-size: 1rem;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Bootstrap sm 컴포넌트 폰트 최솟값 16px으로 */
+.btn-sm,
+.btn-group-sm>.btn {
+  font-size: 1rem;
+}
+
+.form-control-sm,
+.form-select-sm {
+  font-size: 1rem;
+}
+
+.form-check-label,
+.form-check-input {
+  font-size: 1rem;
+}
+
+.table-sm td,
+.table-sm th {
+  font-size: 1rem;
+}
+
+.nav-tabs .nav-link {
+  font-size: 1rem;
+}
+
+.navbar-brand {
+  background-color: var(--krds-light-color-alpha-inverse25);
+  box-shadow: inset -1px 0 0 var(--krds-light-color-alpha-inverse25);
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 48px 0 0;
+}
+
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  height: calc(100vh - 48px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: var(--krds-light-color-text-subtle);
+  padding: 0.75rem 1.25rem;
+  border-radius: 0;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  color: var(--krds-light-color-text-primary);
+  background-color: var(--krds-light-color-action-primary-hover);
+}
+
+.sidebar .nav-link.active {
+  border-left: 4px solid var(--krds-light-color-border-primary);
+}
+
+.form-sm .form-label {
+  font-size: 1rem;
+  font-weight: 500 !important;
+  margin: 0.25rem;
+  color: var(--krds-light-color-text-subtle);
+}
+
+.input-group-text {
+  font-size: 1rem;
+  background-color: var(--krds-light-color-background-gray-subtler);
+}
+
+.marc-textarea {
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: none;
+  color: var(--krds-light-color-text-basic);
+}
+
+.marc-form {
+  background: var(--krds-color-light-primary-5);
+}
+
+.marc-form .box-group {
+  background: #fff;
+  margin-top: 5px;
+  border-color: var(--krds-color-light-primary-10) !important;
+}
+
+
+/* MARC 레코드 뷰 컬러 하이라이트 */
+.marc-record-view {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.marc-line {
+  display: flex;
+  margin-bottom: 0;
+  padding: 8px 15px;
+  border-bottom: 1px dotted #aaa;
+}
+
+.marc-line .marc-tag {
+  min-width: 10%;
+}
+
+.marc-tag {
+  color: #de3412;
+  font-weight: 700;
+}
+
+.marc-sf {
+  color: #2b57e0;
+  font-weight: 700;
+}
+
+.marc-eof {
+  color: #e6007e;
+  font-weight: 700;
+}
+
+/* 그리드 헤더 정렬 */
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.sortable-th:hover {
+  background-color: var(--krds-light-color-action-primary-hover);
+}
+
+.sortable-th .sort-indicator {
+  margin-left: 4px;
+  font-size: 0.75em;
+  color: var(--krds-light-color-text-subtle);
+}
+
+.sortable-th[data-sort-dir="asc"] .sort-indicator,
+.sortable-th[data-sort-dir="desc"] .sort-indicator {
+  color: var(--krds-light-color-text-primary);
+  font-weight: 700;
+}
+
+/* 삭제(flag) 처리된 행 */
+tr[data-deleted="true"] {
+  color: var(--krds-light-color-text-subtle);
+}
+
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 3px solid var(--krds-light-color-element-warning) !important;
+  outline-offset: 1px;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--krds-light-color-background-inverse);
+  color: var(--krds-light-color-text-bolder-inverse);
+  padding: 10px;
+  z-index: 9999;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* 모달 */
+.modal-body .marc-record-view{
+  max-height:60vh;
+}
