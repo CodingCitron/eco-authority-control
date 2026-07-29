@@ -23,8 +23,9 @@
     "noFallthroughCasesInSwitch": true,
 
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "styled-system/*": ["./styled-system/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "styled-system"]
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { SearchPageProvider } from "@/components/search-page/search-page-provider";
 import SideNavigation from "@/components/layouts/side-navigation";
+
 import SearchResult from "@/components/search-page/search-result";
 import AuthorityMergeModal, {
   AuthorityMergeButton,

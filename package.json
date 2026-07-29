@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prepare": "panda codegen",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
+    "@pandacss/dev": "^1.12.0",
     "@rolldown/plugin-babel": "^0.2.3",
     "@tanstack/eslint-plugin-query": "^5.101.4",
     "@types/babel__core": "^7.20.5",

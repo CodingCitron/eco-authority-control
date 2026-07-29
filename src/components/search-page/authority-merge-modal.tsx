@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
+import clsx from "clsx";
+import { css } from "styled-system/css";
 
 import type { AuthoritySearchResult } from "@/api/authority-search";
 import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
@@ -29,24 +31,47 @@ interface AuthorityMergeModalProps {
 
 const fontSizeList = ["16", "18", "20", "22", "24"];
 
-function RecordPreview({ record }: { record: MergeAuthorityRecord }) {
-  const preview =
-    record.marcPreview ??
-    [
-      `001  ${record.controlNumber}`,
-      `150  $a ${record.heading}`,
-      record.source ? `670  $a ${record.source}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+function RecordPreview({
+  record,
+  fontSize,
+}: {
+  record: MergeAuthorityRecord;
+  fontSize: string;
+}) {
+  console.log(record);
+  console.log(record.marcPreview);
+  const marcLines = [
+    {
+      tag: "001",
+      field: record.controlNumber,
+    },
+    {
+      tag: "150",
+      field: record.heading,
+    },
+    {
+      tag: "670",
+      field: record.source,
+    },
+  ];
 
   return (
-    <pre
-      className="marc-record-view font-monospace bg-white border rounded p-3 mb-0"
-      style={{ minHeight: "280px" }}
+    <div
+      className={clsx(
+        "marc-record-view font-monospace bg-white border rounded p-2",
+        css({
+          minHeight: "280px",
+        }),
+      )}
+      style={{ fontSize }}
     >
-      {preview}
-    </pre>
+      {marcLines.map((item) => (
+        <div className="marc-line marc-line-control">
+          <span className="marc-tag">{item.tag}</span>
+          {item.field}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -58,7 +83,9 @@ export default function AuthorityMergeModal({
 }: AuthorityMergeModalProps) {
   const { currentTab, selectedControlNumbers } = useSearchPage();
   const [masterControlNumber, setMasterControlNumber] = useState<string>();
-  const [fontSize, setFontSize] = useState(fontSizeList[1]);
+
+  const [masterFontSize, setMasterFontSize] = useState(fontSizeList[1]);
+  const [targetFontSize, setTargetFontSize] = useState(fontSizeList[1]);
 
   const { data = [], isLoading } = useAuthoritySearchByControlNumbersQuery(
     currentTab.authorityType,
@@ -94,6 +121,7 @@ export default function AuthorityMergeModal({
   const target = records.find(
     (record) => record.controlNumber !== masterControlNumber,
   );
+
   const canMerge = records.length === 2 && master && target;
 
   return (
@@ -104,83 +132,143 @@ export default function AuthorityMergeModal({
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p className="text-muted small">
-          통합 주자료를 하나 선택하세요. 선택하지 않은 자료는 통합 대상이 되어
-          주자료에 병합됩니다.
+        <p className="text-muted small mb-2">
+          두 레코드 중 <strong>통합 주자료</strong> 열의 선택 버튼(또는 행
+          클릭)으로 주자료로 지정할 레코드를 하나씩 눌러보며 선택하세요. <br />
+          선택하지 않은 나머지 한 건은 통합 대상자료가 되어 주자료에 병합된 후
+          삭제(flag) 처리됩니다.
         </p>
 
         {isLoading ? (
           <p className="mb-0">선택한 전거자료를 불러오는 중입니다.</p>
         ) : records.length !== 2 ? null : (
           <>
-            <Table bordered size="sm" className="text-center align-middle mb-4">
-              <caption className="visually-hidden">전거 통합 대상 목록</caption>
-              <thead className="table-light">
-                <tr>
-                  {[
-                    "No",
-                    "통합 주자료",
-                    "전거유형",
-                    "전거제어번호",
-                    "채택표목",
-                    "정보원",
-                  ].map((header) => (
-                    <th scope="col" key={header}>
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((record, index) => (
-                  <tr key={record.controlNumber}>
-                    <td>{index + 1}</td>
-                    <td>
-                      <Form.Check
-                        type="radio"
-                        name="merge-master"
-                        aria-label={`${record.heading}을 통합 주자료로 선택`}
-                        checked={masterControlNumber === record.controlNumber}
-                        onChange={() =>
-                          setMasterControlNumber(record.controlNumber)
-                        }
-                      />
-                    </td>
-                    <td>{record.type}</td>
-                    <td>{record.controlNumber}</td>
-                    <td className="text-start">{record.heading}</td>
-                    <td className="text-start">{record.source}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            <div className="d-flex justify-content-end mb-2">
-              <Form.Select
-                aria-label="MARC 미리보기 글자 크기"
-                value={fontSize}
-                onChange={(event) => setFontSize(event.target.value)}
-                style={{ width: "auto" }}
+            <div className="table-responsive mb-4">
+              <Table
+                bordered
+                size="sm"
+                className="text-center align-middle mb-4"
+                id="mergeSummaryTable"
               >
-                {fontSizeList.map((size) => (
-                  <option key={size} value={parseInt(size)}>
-                    {size} px
-                  </option>
-                ))}
-              </Form.Select>
+                <caption className="visually-hidden">
+                  전거 통합 대상 목록
+                </caption>
+                <thead className="table-light">
+                  <tr>
+                    {[
+                      "No",
+                      "통합 주자료",
+                      "전거유형",
+                      "전거제어번호",
+                      "채택표목",
+                      "정보원",
+                    ].map((header) => (
+                      <th scope="col" key={header}>
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {records.map((record, index) => (
+                    <tr key={record.controlNumber}>
+                      <td>{index + 1}</td>
+                      <td>
+                        <Form.Check
+                          type="radio"
+                          name="merge-master"
+                          aria-label={`${record.heading}을 통합 주자료로 선택`}
+                          checked={masterControlNumber === record.controlNumber}
+                          onChange={() =>
+                            setMasterControlNumber(record.controlNumber)
+                          }
+                        />
+                      </td>
+                      <td>{record.type}</td>
+                      <td>{record.controlNumber}</td>
+                      <td className="text-start">{record.heading}</td>
+                      <td className="text-start">{record.source}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </div>
-            <div className="row g-3" style={{ fontSize: `${fontSize}px` }}>
-              <div className="col-md-6">
-                <section className="border p-3 bg-light rounded h-100">
-                  <span className="badge bg-primary mb-2">통합 주자료</span>
-                  {master && <RecordPreview record={master} />}
-                </section>
-              </div>
-              <div className="col-md-6">
-                <section className="border p-3 rounded h-100">
-                  <span className="badge bg-secondary mb-2">통합 대상자료</span>
-                  {target && <RecordPreview record={target} />}
-                </section>
-              </div>
+            <div className="d-flex justify-content-end mb-2"></div>
+            <div className="row g-3">
+              <section className="col-md-6">
+                <div className="border p-3 bg-light rounded h-100">
+                  <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <span className="badge bg-primary mb-2">
+                      통합주자료({master ? master.controlNumber : ""})
+                    </span>
+                    <div className="d-flex gap-2">
+                      <Form.Select
+                        aria-label="주자료 글자크기"
+                        value={masterFontSize}
+                        onChange={(event) =>
+                          setMasterFontSize(event.target.value)
+                        }
+                        className="w-auto"
+                      >
+                        {fontSizeList.map((size) => (
+                          <option key={size} value={parseInt(size)}>
+                            {size} px
+                          </option>
+                        ))}
+                      </Form.Select>
+                      <button
+                        className="btn btn-sm btn-outline-dark"
+                        type="button"
+                      >
+                        한자 -&gt; 한글
+                      </button>
+                    </div>
+                  </div>
+                  {master && (
+                    <RecordPreview
+                      record={master}
+                      fontSize={`${masterFontSize}px`}
+                    />
+                  )}
+                </div>
+              </section>
+              <section className="col-md-6">
+                <div className="border p-3 bg-light rounded h-100">
+                  <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <span className="badge bg-secondary mb-2">
+                      통합대상자료({target ? target.controlNumber : ""})
+                    </span>
+                    <div className="d-flex gap-2">
+                      <Form.Select
+                        aria-label="주자료 글자크기"
+                        value={targetFontSize}
+                        onChange={(event) =>
+                          setTargetFontSize(event.target.value)
+                        }
+                        className="w-auto"
+                      >
+                        {fontSizeList.map((size) => (
+                          <option key={size} value={parseInt(size)}>
+                            {size} px
+                          </option>
+                        ))}
+                      </Form.Select>
+                      <button
+                        className="btn btn-sm btn-outline-dark"
+                        type="button"
+                      >
+                        한자 -&gt; 한글
+                      </button>
+                    </div>
+                  </div>
+                  {target && (
+                    <RecordPreview
+                      record={target}
+                      fontSize={`${targetFontSize}px`}
+                    />
+                  )}
+                </div>
+              </section>
             </div>
           </>
         )}

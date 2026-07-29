@@ -10,6 +10,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "@/styles/animation.css";
 import "@/styles/style.css";
+import "@/styles/panda.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
