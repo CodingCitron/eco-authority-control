@@ -1,6 +1,10 @@
+import { useSearchParams } from "react-router";
+
 import { authorityTypeLabels } from "@/api/authority-search";
 
 export default function AuthoritySearchForm() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   return (
     <div className="card-header bg-white py-3">
       <form className="row g-2 align-items-center">

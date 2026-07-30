@@ -1,3 +1,5 @@
+// 통합 전거 검색
+
 import { Link } from "react-router";
 
 import { SearchPageProvider } from "@/components/authority-search-page/authority-search-page-provider";
