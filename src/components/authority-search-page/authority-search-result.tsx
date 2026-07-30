@@ -1,6 +1,9 @@
 import { Nav, Tab } from "react-bootstrap";
 
-import { tabList, useSearchPage } from "./authority-search-page-provider";
+import {
+  tabList,
+  useSearchPage,
+} from "@/components/authority-search-page/authority-search-page-provider";
 
 export default function AuthoritySearchResult() {
   const { currentTab, setCurrentTab } = useSearchPage();
@@ -25,8 +28,13 @@ export default function AuthoritySearchResult() {
       </Nav>
       <Tab.Content className="border-start border-end border-bottom p-3 bg-white">
         {tabList.map((tab) => (
-          <Tab.Pane key={tab.id} eventKey={tab.id} tabIndex={0}>
-            <div className="table-responsive">{tab.content}</div>
+          <Tab.Pane
+            key={tab.id}
+            eventKey={tab.id}
+            tabIndex={0}
+            className="table-responsive"
+          >
+            {tab.content}
           </Tab.Pane>
         ))}
       </Tab.Content>

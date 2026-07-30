@@ -19,6 +19,8 @@ export default function AuthoritySearchTable<T extends AuthoritySearchResult>({
 }: AuthoritySearchTableProps<T>) {
   const { data = [] } = useAuthoritySearchQuery<T>(params);
 
+  console.log(data);
+
   return (
     <Table
       caption={caption}

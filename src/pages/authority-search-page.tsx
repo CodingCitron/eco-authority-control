@@ -1,7 +1,14 @@
+import { Link } from "react-router";
+
 import { SearchPageProvider } from "@/components/authority-search-page/authority-search-page-provider";
+import AuthoritySearchForm from "@/components/authority-search-page/authority-search-form";
+import AuthoritySelectionControl from "@/components/authority-search-page/authority-selection-control";
 import AuthoritySearchResult from "@/components/authority-search-page/authority-search-result";
 import { AuthorityMergeButton } from "@/components/authority-search-page/authority-merge-modal";
-import AuthoritySearchForm from "@/components/authority-search-page/authority-search-form";
+import { AuthoritySplitButton } from "@/components/authority-search-page/authority-split-modal";
+import { AuthorityHistoryButton } from "@/components/authority-search-page/authority-history-modal";
+import { AuthorityControlButton } from "@/components/authority-search-page/authority-control-modal";
+import { AuthorityDeleteButton } from "@/components/authority-search-page/authority-delete-modal";
 
 import PrintButton from "@/components/ui/print-button";
 import BulkExportButton from "@/components/ui/bulk-export-button";
@@ -26,48 +33,15 @@ export default function SearchPage() {
           <div className="card-body">
             <div className="mb-2 d-flex justify-content-between">
               <div>
-                <span className="text-muted">
-                  <label htmlFor="checkAll" className="visually-hidden">
-                    전체 선택
-                  </label>
-                  <input type="checkbox" id="checkAll" /> 전체{" "}
-                  <strong id="listTotalCount">0</strong>건 / 선택{" "}
-                  <strong className="text-primary" id="listCheckedCount">
-                    0
-                  </strong>
-                  건
-                </span>{" "}
-                <AuthorityMergeButton />{" "}
-                <button type="button" className="btn btn-outline-dark btn-sm">
-                  <i className="bi bi-layout-split me-1" aria-hidden="true"></i>
-                  전거분리
-                </button>{" "}
-                <button type="button" className="btn btn-outline-info btn-sm">
-                  <i
-                    className="bi bi-clock-history me-1"
-                    aria-hidden="true"
-                  ></i>
-                  변경이력보기
-                </button>{" "}
-                <button
-                  type="button"
-                  className="btn btn-outline-dark btn-sm"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalControl"
-                >
-                  <i className="bi bi-link-45deg me-1" aria-hidden="true"></i>
-                  전거통제
-                </button>{" "}
-                <button className="btn btn-light-danger btn-sm">
-                  <i className="bi bi-trash me-1" aria-hidden="true"></i>
-                  삭제
-                </button>
+                <AuthoritySelectionControl /> <AuthorityMergeButton />{" "}
+                <AuthoritySplitButton /> <AuthorityHistoryButton />{" "}
+                <AuthorityControlButton /> <AuthorityDeleteButton />
               </div>
               <div>
-                <button className="btn btn-light-success btn-sm">
+                <Link to="/" className="btn btn-light-success btn-sm">
                   <i className="bi bi-plus-circle me-1" aria-hidden="true"></i>
                   입력
-                </button>
+                </Link>
               </div>
             </div>
             <AuthoritySearchResult />

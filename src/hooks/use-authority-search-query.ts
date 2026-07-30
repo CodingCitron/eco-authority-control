@@ -1,9 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import {
   fetchAuthoritySearchResults,
   type AuthoritySearchResult,
   type AuthoritySearchParams,
 } from "@/api/authority-search";
+
+import { useSearchPage } from "@/components/authority-search-page/authority-search-page-provider";
 
 export const authoritySearchQueryKeys = {
   all: ["authority-search"] as const,
@@ -14,22 +17,36 @@ export const authoritySearchQueryKeys = {
 
 export function useAuthoritySearchQuery<T extends AuthoritySearchResult>(
   params: AuthoritySearchParams = {},
-  options: { enabled?: boolean } = {},
+  options?: Omit<UseQueryOptions<T[], Error>, "queryKey" | "queryFn">,
 ) {
   return useQuery<T[]>({
     queryKey: authoritySearchQueryKeys.list(params),
     queryFn: () => fetchAuthoritySearchResults(params) as Promise<T[]>,
-    enabled: options.enabled,
+    ...options,
   });
 }
 
-export function useAuthoritySearchByControlNumbersQuery(
-  type: NonNullable<AuthoritySearchParams["type"]>,
-  controlNumbers: readonly string[],
-  enabled: boolean,
-) {
+// 선택된 전거 가져오기
+export function useAuthoritySearchByControlNumbersQuery(enabled: boolean) {
+  const { currentTab, selectedControlNumbers } = useSearchPage();
+
   return useAuthoritySearchQuery(
-    { type, controlNumbers },
-    { enabled: enabled && controlNumbers.length > 0 },
+    { type: currentTab.authorityType },
+    {
+      enabled,
+      select: useCallback(
+        (data) => {
+          if (!enabled) return;
+          return selectedControlNumbers
+            .map((controlNumber) =>
+              data.find((record) => record.controlNumber === controlNumber),
+            )
+            .filter(
+              (record): record is AuthoritySearchResult => record !== undefined,
+            );
+        },
+        [enabled, selectedControlNumbers],
+      ),
+    },
   );
 }

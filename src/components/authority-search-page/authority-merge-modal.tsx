@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import clsx from "clsx";
 import { css } from "styled-system/css";
 
-import type { AuthoritySearchResult } from "@/api/authority-search";
 import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-provider";
@@ -79,7 +78,6 @@ export default function AuthorityMergeModal({
   onPreview,
   onMerge,
 }: AuthorityMergeModalProps) {
-  const { currentTab, selectedControlNumbers } = useSearchPage();
   const [masterControlNumber, setMasterControlNumber] = useState<string>();
 
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[1]);
@@ -89,43 +87,21 @@ export default function AuthorityMergeModal({
     data = [],
     isError,
     isLoading,
-  } = useAuthoritySearchByControlNumbersQuery(
-    currentTab.authorityType,
-    selectedControlNumbers,
-    show,
-  );
-
-  const records = useMemo(
-    () =>
-      selectedControlNumbers
-        .map((controlNumber) =>
-          data.find((record) => record.controlNumber === controlNumber),
-        )
-        .filter(
-          (record): record is AuthoritySearchResult => record !== undefined,
-        )
-        .map((record) => ({
-          controlNumber: record.controlNumber,
-          type: record.type,
-          heading: record.heading,
-          source: record.source,
-        })),
-    [data, selectedControlNumbers],
-  );
+  } = useAuthoritySearchByControlNumbersQuery(show);
 
   useEffect(() => {
-    if (show) setMasterControlNumber(records[0]?.controlNumber);
-  }, [records, show]);
+    if (show) setMasterControlNumber(data[0]?.controlNumber);
+  }, [data, show]);
 
-  const master = records.find(
+  const master = data.find(
     (record) => record.controlNumber === masterControlNumber,
   );
-  const target = records.find(
+  const target = data.find(
     (record) => record.controlNumber !== masterControlNumber,
   );
 
   const isRecordFetchComplete = !isLoading && !isError;
-  const canMerge = records.length === 2 && master && target;
+  const canMerge = data.length === 2 && master && target;
 
   return (
     <Modal show={show} onHide={onHide} size="xl" backdrop="static" centered>
@@ -152,14 +128,14 @@ export default function AuthorityMergeModal({
           </p>
         )}
 
-        {isRecordFetchComplete && records.length !== 2 && (
+        {isRecordFetchComplete && data.length !== 2 && (
           <p className="alert alert-warning mb-0" role="alert">
-            선택한 전거자료 2건 중 {records.length}건만 조회되었습니다. 목록을
+            선택한 전거자료 2건 중 {data.length}건만 조회되었습니다. 목록을
             확인한 후 다시 시도해주세요.
           </p>
         )}
 
-        {isRecordFetchComplete && records.length === 2 && (
+        {isRecordFetchComplete && data.length === 2 && (
           <>
             <div className="table-responsive mb-4">
               <Table
@@ -188,7 +164,7 @@ export default function AuthorityMergeModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {records.map((record, index) => {
+                  {data.map((record, index) => {
                     const isChecked =
                       masterControlNumber === record.controlNumber;
 
