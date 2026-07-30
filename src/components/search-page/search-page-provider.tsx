@@ -1,8 +1,4 @@
-import {
-  useCallback,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { createContext, useContextSelector } from "use-context-selector";
 
@@ -16,6 +12,8 @@ import type {
 import AuthoritySearchTable from "@/components/search-page/authority-search-table";
 import type { AuthoritySearchType } from "@/api/authority-search";
 import AuthoritySelectionCheckbox from "@/components/search-page/authority-selection-checkbox";
+import clsx from "clsx";
+import { css } from "styled-system/css";
 
 const personalColumns: TableColumn<AuthorityRow>[] = [
   {
@@ -35,7 +33,7 @@ const personalColumns: TableColumn<AuthorityRow>[] = [
   },
   { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
   {
-    header: "국적",
+    header: "전거지역",
     cell: (row) => row.nationality,
     sortValue: (row) => row.nationality,
   },
@@ -46,9 +44,9 @@ const personalColumns: TableColumn<AuthorityRow>[] = [
     sortValue: (row) => row.heading,
   },
   {
-    header: "저자명",
-    cell: (row) => row.author,
-    sortValue: (row) => row.author,
+    header: "한자명",
+    cell: (row) => row.hanjaName,
+    sortValue: (row) => row.hanjaName,
   },
   { header: "생몰년", cell: (row) => row.years, sortValue: (row) => row.years },
   { header: "분야", cell: (row) => row.field, sortValue: (row) => row.field },
@@ -75,17 +73,17 @@ const personalColumns: TableColumn<AuthorityRow>[] = [
   {
     header: "관리",
     cell: () => (
-      <div className="d-flex gap-1 justify-content-center">
+      <>
         <Link
           to="form_personal.html"
           className="btn btn-sm btn-light-warning py-0"
         >
           수정
-        </Link>
+        </Link>{" "}
         <button type="button" className="btn btn-sm btn-light-danger py-0">
           삭제
         </button>
-      </div>
+      </>
     ),
   },
 ];
@@ -148,14 +146,14 @@ const organizationColumns: TableColumn<OrganizationRow>[] = [
   {
     header: "관리",
     cell: () => (
-      <div className="d-flex gap-1 justify-content-center">
+      <>
         <Link to="form_corp.html" className="btn btn-sm btn-light-warning py-0">
           수정
-        </Link>
+        </Link>{" "}
         <button type="button" className="btn btn-sm btn-light-danger py-0">
           삭제
         </button>
-      </div>
+      </>
     ),
   },
 ];
@@ -207,14 +205,14 @@ const geographyColumns: TableColumn<GeographyRow>[] = [
   {
     header: "관리",
     cell: () => (
-      <div className="d-flex gap-1 justify-content-center">
+      <>
         <Link to="form_geo.html" className="btn btn-sm btn-light-warning py-0">
           수정
-        </Link>
+        </Link>{" "}
         <button type="button" className="btn btn-sm btn-light-danger py-0">
           삭제
         </button>
-      </div>
+      </>
     ),
   },
 ];
@@ -250,12 +248,9 @@ const subjectColumns: TableColumn<SubjectRow>[] = [
   },
   {
     header: "일반주기",
-    cell: (row) => (
-      <span className="text-truncate d-block" style={{ maxWidth: "200px" }}>
-        {row.note}
-      </span>
-    ),
+    cell: (row) => <div className="text-truncate">{row.note}</div>,
     sortValue: (row) => row.note,
+    className: css({ maxWidth: "200px" }),
   },
   {
     header: "제어번호",
@@ -275,17 +270,17 @@ const subjectColumns: TableColumn<SubjectRow>[] = [
   {
     header: "관리",
     cell: () => (
-      <div className="d-flex gap-1 justify-content-center">
+      <>
         <Link
           to="form_subject.html"
           className="btn btn-sm btn-light-warning py-0"
         >
           수정
-        </Link>
+        </Link>{" "}
         <button type="button" className="btn btn-sm btn-light-danger py-0">
           삭제
         </button>
-      </div>
+      </>
     ),
   },
 ];
@@ -376,10 +371,13 @@ export function SearchPageProvider({ children }: { children: ReactNode }) {
     setSelectedControlNumbers([]);
   }, []);
 
-  const changeCurrentTab = useCallback((tab: SearchTab) => {
-    setCurrentTab(tab);
-    clearSelectedControlNumbers();
-  }, [clearSelectedControlNumbers]);
+  const changeCurrentTab = useCallback(
+    (tab: SearchTab) => {
+      setCurrentTab(tab);
+      clearSelectedControlNumbers();
+    },
+    [clearSelectedControlNumbers],
+  );
 
   return (
     <SearchPageContext.Provider

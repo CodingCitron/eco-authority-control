@@ -25,12 +25,6 @@ export default function AuthoritySearchTable<T extends AuthoritySearchResult>({
       columns={columns}
       rows={data}
       getRowKey={(row) => row.controlNumber}
-      getRowProps={(row) => ({
-        "data-ctrl": row.controlNumber,
-        "data-type": row.type,
-        "data-heading": row.heading,
-        "data-source": row.source,
-      })}
     />
   );
 }

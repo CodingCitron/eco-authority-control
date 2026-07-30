@@ -137,35 +137,35 @@ export default function SearchPage() {
 
             <div className="card-body">
               <div className="mb-2 d-flex justify-content-between">
-                <div className="d-flex align-items-center gap-1">
-                  <span className="text-muted d-flex align-items-center gap-1">
+                <div>
+                  <span className="text-muted">
                     <label htmlFor="checkAll" className="visually-hidden">
                       전체 선택
                     </label>
-                    <input type="checkbox" id="checkAll" />
-                    전체 <strong id="listTotalCount">0</strong>건 / 선택{" "}
+                    <input type="checkbox" id="checkAll" /> 전체{" "}
+                    <strong id="listTotalCount">0</strong>건 / 선택{" "}
                     <strong className="text-primary" id="listCheckedCount">
                       0
                     </strong>
                     건
-                  </span>
+                  </span>{" "}
                   <AuthorityMergeButton
                     onOpen={() => setMergeModalIsOpen(true)}
-                  />
+                  />{" "}
                   <button type="button" className="btn btn-outline-dark btn-sm">
                     <i
                       className="bi bi-layout-split me-1"
                       aria-hidden="true"
                     ></i>
                     전거분리
-                  </button>
+                  </button>{" "}
                   <button type="button" className="btn btn-outline-info btn-sm">
                     <i
                       className="bi bi-clock-history me-1"
                       aria-hidden="true"
                     ></i>
                     변경이력보기
-                  </button>
+                  </button>{" "}
                   <button
                     type="button"
                     className="btn btn-outline-dark btn-sm"
@@ -174,7 +174,7 @@ export default function SearchPage() {
                   >
                     <i className="bi bi-link-45deg me-1" aria-hidden="true"></i>
                     전거통제
-                  </button>
+                  </button>{" "}
                   <button className="btn btn-light-danger btn-sm">
                     <i className="bi bi-trash me-1" aria-hidden="true"></i>
                     삭제

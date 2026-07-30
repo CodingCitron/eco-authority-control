@@ -3,7 +3,7 @@ export interface AuthorityRow {
   type: string;
   nationality: string;
   heading: string;
-  author: string;
+  hanjaName: string;
   years: string;
   field: string;
   source: string;

@@ -27,7 +27,6 @@ export default function Header() {
           </div>
           <div className="nav-item text-nowrap">
             <a className="btn btn-sm btn-outline-light" href="#">
-              <i className="bi bi-box-arrow-right me-1" aria-hidden="true"></i>
               로그아웃
             </a>
           </div>

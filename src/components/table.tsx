@@ -69,7 +69,7 @@ export default function Table<T>({
                         ? "▲"
                         : direction === "desc"
                           ? "▼"
-                          : "↕"}
+                          : "⇅"}
                     </span>
                   </>
                 ) : (
