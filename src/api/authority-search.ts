@@ -1,14 +1,14 @@
 import type {
   AuthorityRow,
   GeographyRow,
-  OrganizationRow,
+  CorporationRow,
   SubjectRow,
-} from "@/components/search-page/search-result.types";
+} from "@/components/authority-search-page/authority-search-result.types";
 import { authoritySearchMockData } from "./authority-search.mock";
 
 export type AuthoritySearchType =
   | "personal"
-  | "organization"
+  | "corporation"
   | "geography"
   | "subject";
 
@@ -22,10 +22,18 @@ export interface AuthoritySearchParams {
 
 export type AuthoritySearchResult =
   | AuthorityRow
-  | OrganizationRow
+  | CorporationRow
   | GeographyRow
   | SubjectRow;
 
+export const authorityTypeLabels: Record<AuthoritySearchType, string> = {
+  personal: "개인명",
+  corporation: "단체명",
+  geography: "지리명",
+  subject: "주제명",
+};
+
+// 테스트 데이터
 export async function fetchAuthoritySearchResults(
   params: AuthoritySearchParams,
 ): Promise<AuthoritySearchResult[]> {
@@ -41,9 +49,4 @@ export async function fetchAuthoritySearchResults(
   );
 }
 
-const authorityTypeLabels: Record<AuthoritySearchType, string> = {
-  personal: "개인명",
-  organization: "단체명",
-  geography: "지리명",
-  subject: "주제명",
-};
+// 검색 조건에 따라 데이터 가져오기

@@ -6,7 +6,7 @@ import { css } from "styled-system/css";
 import type { AuthoritySearchResult } from "@/api/authority-search";
 import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
 
-import { useSearchPage } from "@/components/search-page/search-page-provider";
+import { useSearchPage } from "@/components/authority-search-page/authority-search-page-provider";
 
 export interface MergeAuthorityRecord {
   controlNumber: string;
@@ -38,8 +38,6 @@ function RecordPreview({
   record: MergeAuthorityRecord;
   fontSize: string;
 }) {
-  console.log(record);
-  console.log(record.marcPreview);
   const marcLines = [
     {
       tag: "001",
@@ -87,12 +85,15 @@ export default function AuthorityMergeModal({
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[1]);
   const [targetFontSize, setTargetFontSize] = useState(fontSizeList[1]);
 
-  const { data = [], isError, isLoading } =
-    useAuthoritySearchByControlNumbersQuery(
-      currentTab.authorityType,
-      selectedControlNumbers,
-      show,
-    );
+  const {
+    data = [],
+    isError,
+    isLoading,
+  } = useAuthoritySearchByControlNumbersQuery(
+    currentTab.authorityType,
+    selectedControlNumbers,
+    show,
+  );
 
   const records = useMemo(
     () =>
@@ -144,17 +145,20 @@ export default function AuthorityMergeModal({
         {isLoading && (
           <p className="mb-0">선택한 전거자료를 불러오는 중입니다.</p>
         )}
+
         {!isLoading && isError && (
           <p className="alert alert-danger mb-0" role="alert">
             선택한 전거자료를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
           </p>
         )}
+
         {isRecordFetchComplete && records.length !== 2 && (
           <p className="alert alert-warning mb-0" role="alert">
             선택한 전거자료 2건 중 {records.length}건만 조회되었습니다. 목록을
             확인한 후 다시 시도해주세요.
           </p>
         )}
+
         {isRecordFetchComplete && records.length === 2 && (
           <>
             <div className="table-responsive mb-4">
@@ -322,8 +326,10 @@ export default function AuthorityMergeModal({
   );
 }
 
-export function AuthorityMergeButton({ onOpen }: { onOpen: () => void }) {
+export function AuthorityMergeButton() {
   const { selectedControlNumbers } = useSearchPage();
+
+  const [mergeModalIsOpen, setMergeModalIsOpen] = useState(false);
 
   const handleClick = () => {
     if (selectedControlNumbers.length !== 2) {
@@ -333,17 +339,23 @@ export function AuthorityMergeButton({ onOpen }: { onOpen: () => void }) {
       return;
     }
 
-    onOpen();
+    setMergeModalIsOpen(true);
   };
 
   return (
-    <button
-      type="button"
-      className="btn btn-outline-dark btn-sm"
-      onClick={handleClick}
-    >
-      <i className="bi bi-intersect me-1" aria-hidden="true"></i>
-      전거통합
-    </button>
+    <>
+      <button
+        type="button"
+        className="btn btn-outline-dark btn-sm"
+        onClick={handleClick}
+      >
+        <i className="bi bi-intersect me-1" aria-hidden="true"></i>
+        전거통합
+      </button>
+      <AuthorityMergeModal
+        show={mergeModalIsOpen}
+        onHide={() => setMergeModalIsOpen(false)}
+      />
+    </>
   );
 }

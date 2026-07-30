@@ -12,7 +12,7 @@ export interface AuthorityRow {
   modifiedBy: string;
 }
 
-export interface OrganizationRow {
+export interface CorporationRow {
   id: string;
   type: string;
   nationality: string;

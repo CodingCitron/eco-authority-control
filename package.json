@@ -19,6 +19,7 @@
     "react": "^19.2.7",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.7",
+    "react-error-boundary": "^6.1.2",
     "react-modal": "^3.16.3",
     "react-router": "^8.3.0",
     "use-context-selector": "^2.0.0",

@@ -1,11 +1,13 @@
 import { createBrowserRouter } from "react-router";
 
-import RootLayout from "./components/layouts/root-layout";
+import RootLayout from "@/components/layouts/root-layout";
 
-import SearchPage from "./pages/search-page";
+import GlobalErrorPage from "@/pages/global-error-page";
+import SearchPage from "@/pages/authority-search-page";
 
 const router = createBrowserRouter([
   {
+    errorElement: <GlobalErrorPage />,
     element: <RootLayout />,
     children: [
       {

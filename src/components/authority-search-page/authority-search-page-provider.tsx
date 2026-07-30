@@ -1,19 +1,19 @@
 import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { createContext, useContextSelector } from "use-context-selector";
+import { css } from "styled-system/css";
 
-import type { TableColumn } from "@/components/table";
+import type { AuthoritySearchType } from "@/api/authority-search";
+
 import type {
   AuthorityRow,
   GeographyRow,
-  OrganizationRow,
+  CorporationRow,
   SubjectRow,
-} from "@/components/search-page/search-result.types";
-import AuthoritySearchTable from "@/components/search-page/authority-search-table";
-import type { AuthoritySearchType } from "@/api/authority-search";
-import AuthoritySelectionCheckbox from "@/components/search-page/authority-selection-checkbox";
-import clsx from "clsx";
-import { css } from "styled-system/css";
+} from "@/components/authority-search-page/authority-search-result.types";
+import AuthoritySearchTable from "@/components/authority-search-page/authority-search-table";
+import AuthoritySelectionCheckbox from "@/components/authority-search-page/authority-selection-checkbox";
+import type { TableColumn } from "@/components/ui/table";
 
 const personalColumns: TableColumn<AuthorityRow>[] = [
   {
@@ -88,7 +88,7 @@ const personalColumns: TableColumn<AuthorityRow>[] = [
   },
 ];
 
-const organizationColumns: TableColumn<OrganizationRow>[] = [
+const corporationColumns: TableColumn<CorporationRow>[] = [
   { header: "no", cell: (row) => row.id, sortValue: (row) => row.id },
   {
     header: "선택",
@@ -307,13 +307,13 @@ export const tabList: SearchTab[] = [
   },
   {
     id: "corp",
-    authorityType: "organization",
+    authorityType: "corporation",
     label: "단체명",
     content: (
       <AuthoritySearchTable
         caption="단체명 전거 목록"
-        columns={organizationColumns}
-        params={{ type: "organization" }}
+        columns={corporationColumns}
+        params={{ type: "corporation" }}
       />
     ),
   },

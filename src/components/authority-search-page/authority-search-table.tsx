@@ -4,7 +4,7 @@ import type {
 } from "@/api/authority-search";
 import { useAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
 
-import Table, { type TableColumn } from "@/components/table";
+import Table, { type TableColumn } from "@/components/ui/table";
 
 interface AuthoritySearchTableProps<T extends AuthoritySearchResult> {
   caption: string;
