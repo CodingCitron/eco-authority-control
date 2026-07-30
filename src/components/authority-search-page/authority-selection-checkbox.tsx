@@ -1,6 +1,6 @@
 import { useContextSelector } from "use-context-selector";
 
-import { SearchPageContext } from "@/components/authority-search-page/authority-search-page-provider";
+import { SearchPageContext } from "@/components/authority-search-page/authority-search-page-context";
 
 export default function AuthoritySelectionCheckbox({
   controlNumber,

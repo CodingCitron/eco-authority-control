@@ -1,7 +1,7 @@
 import type {
   AuthorityRow,
   GeographyRow,
-  OrganizationRow,
+  CorporationRow,
   SubjectRow,
 } from "@/components/authority-search-page/authority-search-result.types";
 import type { AuthoritySearchResult } from "./authority-search";
@@ -35,7 +35,7 @@ const personalRows: AuthorityRow[] = [
   },
 ];
 
-const organizationRows: OrganizationRow[] = [
+const corporationRows: CorporationRow[] = [
   {
     id: "1",
     type: "단체명",
@@ -91,7 +91,7 @@ const subjectRows: SubjectRow[] = [
 
 export const authoritySearchMockData: AuthoritySearchResult[] = [
   ...personalRows,
-  ...organizationRows,
+  ...corporationRows,
   ...geographyRows,
   ...subjectRows,
 ];

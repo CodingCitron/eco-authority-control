@@ -1,9 +1,7 @@
 import { Nav, Tab } from "react-bootstrap";
 
-import {
-  tabList,
-  useSearchPage,
-} from "@/components/authority-search-page/authority-search-page-provider";
+import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
+import { tabList } from "@/components/authority-search-page/authority-search-page-tabs";
 
 export default function AuthoritySearchResult() {
   const { currentTab, setCurrentTab } = useSearchPage();

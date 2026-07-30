@@ -5,7 +5,7 @@ import { css } from "styled-system/css";
 
 import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
 
-import { useSearchPage } from "@/components/authority-search-page/authority-search-page-provider";
+import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 
 export interface MergeAuthorityRecord {
   controlNumber: string;

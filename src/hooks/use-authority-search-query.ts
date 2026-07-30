@@ -6,7 +6,7 @@ import {
   type AuthoritySearchParams,
 } from "@/api/authority-search";
 
-import { useSearchPage } from "@/components/authority-search-page/authority-search-page-provider";
+import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 
 export const authoritySearchQueryKeys = {
   all: ["authority-search"] as const,
@@ -27,26 +27,29 @@ export function useAuthoritySearchQuery<T extends AuthoritySearchResult>(
 }
 
 // 선택된 전거 가져오기
-export function useAuthoritySearchByControlNumbersQuery(enabled: boolean) {
+export function useAuthoritySearchByControlNumbersQuery(isOpen: boolean) {
   const { currentTab, selectedControlNumbers } = useSearchPage();
 
-  return useAuthoritySearchQuery(
+  const query = useAuthoritySearchQuery<AuthoritySearchResult>(
     { type: currentTab.authorityType },
     {
-      enabled,
+      enabled: false,
       select: useCallback(
-        (data) => {
-          if (!enabled) return;
-          return selectedControlNumbers
+        (data) =>
+          selectedControlNumbers
             .map((controlNumber) =>
               data.find((record) => record.controlNumber === controlNumber),
             )
             .filter(
               (record): record is AuthoritySearchResult => record !== undefined,
-            );
-        },
-        [enabled, selectedControlNumbers],
+            ),
+        [selectedControlNumbers],
       ),
     },
   );
+
+  return {
+    ...query,
+    data: isOpen ? query.data : undefined,
+  };
 }
