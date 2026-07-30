@@ -1,5 +1,9 @@
 import { Link } from "react-router";
+import { css } from "styled-system/css";
+
 import logo from "@/assets/images/logo.png";
+
+const imgCss = css({ height: "40px" });
 
 export default function Header() {
   return (
@@ -12,7 +16,7 @@ export default function Header() {
           to="/"
           className="navbar-brand col-md-3 col-lg-2 me-0 p-3 fs-6 fw-bold d-flex align-items-center gap-2"
         >
-          <img src={logo} alt="KORMARC" height="40" />
+          <img src={logo} alt="KORMARC" className={imgCss} />
         </Link>
         <div className="navbar-nav w-100 d-flex flex-row align-items-center justify-content-end px-3">
           <div className="nav-item text-nowrap">
