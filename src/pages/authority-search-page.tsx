@@ -1,5 +1,6 @@
 // 통합 전거 검색
 
+import { useRef } from "react";
 import { Link } from "react-router";
 
 import { SearchPageProvider } from "@/components/authority-search-page/authority-search-page-provider";
@@ -14,7 +15,6 @@ import { AuthorityDeleteButton } from "@/components/authority-search-page/author
 
 import PrintButton from "@/components/ui/print-button";
 import BulkExportButton from "@/components/ui/bulk-export-button";
-import { useRef } from "react";
 
 export default function SearchPage() {
   const printRef = useRef<HTMLDivElement>(null);
@@ -41,6 +41,7 @@ export default function SearchPage() {
           <div className="card-body">
             <div className="mb-2 d-flex justify-content-between">
               <div>
+                {/* 뛰어쓰기가 존재해야 브라우저에서 버튼이 구분됨 */}
                 <AuthoritySelectionControl /> <AuthorityMergeButton />{" "}
                 <AuthoritySplitButton /> <AuthorityHistoryButton />{" "}
                 <AuthorityControlButton /> <AuthorityDeleteButton />
