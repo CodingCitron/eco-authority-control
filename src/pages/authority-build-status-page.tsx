@@ -92,7 +92,7 @@ export default function AuthorityBuildStatusPage() {
             <div className="col-auto ms-auto">
               <button type="button" className="btn btn-primary btn-sm">
                 조회
-              </button>
+              </button>{" "}
               <button type="button" className="btn btn-secondary btn-sm">
                 초기화
               </button>
