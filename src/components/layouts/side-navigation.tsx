@@ -42,13 +42,13 @@ const navLinkCategories: NavLinkCategory[] = [
         to: "/corporation/new",
         icon: <i className="bi bi-building me-2" aria-hidden="true"></i>,
         label: "단체명 등록/수정",
-        match: "/corp/new",
+        match: "/corporation/new",
       },
       {
         to: "/geography/new",
         icon: <i className="bi bi-geo-alt me-2" aria-hidden="true"></i>,
         label: "지리명 등록/수정",
-        match: "/geo/new",
+        match: "/geography/new",
       },
       {
         to: "/subject/new",
