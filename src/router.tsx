@@ -30,7 +30,7 @@ const router = createBrowserRouter([
       },
       {
         // 개인명 수정
-        path: "personal/edit/:controlNumber",
+        path: "personal/:controlNumber/edit",
         element: <AuthorityPersonalFormPage />,
       },
       {
@@ -40,7 +40,7 @@ const router = createBrowserRouter([
       },
       {
         // 단체명 수정
-        path: "corporation/edit/:controlNumber",
+        path: "corporation/:controlNumber/edit",
         element: <AuthorityCorporationFormPage />,
       },
       {
@@ -50,7 +50,7 @@ const router = createBrowserRouter([
       },
       {
         // 지리명 수정
-        path: "geography/edit/:controlNumber",
+        path: "geography/:controlNumber/edit",
         element: <AuthorityGeographyFormPage />,
       },
       {
@@ -60,7 +60,7 @@ const router = createBrowserRouter([
       },
       {
         // 주제명 수정
-        path: "subject/edit/:controlNumber",
+        path: "subject/:controlNumber/edit",
         element: <AuthoritySubjectFormPage />,
       },
       {
@@ -74,6 +74,11 @@ const router = createBrowserRouter([
         element: <AuthorityBuildStatusPage />,
       },
     ],
+  },
+  {
+    // 404 페이지
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 
