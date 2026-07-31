@@ -7,8 +7,11 @@ import GlobalErrorPage from "@/pages/global-error-page";
 import AuthoritySearchPage from "@/pages/authority-search-page";
 import AuthorityPersonalFormPage from "@/pages/authority-personal-form-page";
 import AuthorityCorporationFormPage from "@/pages/authority-corporation-form-page";
-import AuthorityToolsPage from "./pages/authority-tools-page";
-import AuthorityBuildStatusPage from "./pages/authority-build-status-page";
+import AuthorityGeographyFormPage from "@/pages/authority-geography-form-page";
+import AuthoritySubjectFormPage from "@/pages/authority-subject-form-page";
+import AuthorityToolsPage from "@/pages/authority-tools-page";
+import AuthorityBuildStatusPage from "@/pages/authority-build-status-page";
+import NotFoundPage from "@/pages/not-found-page";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +42,26 @@ const router = createBrowserRouter([
         // 단체명 수정
         path: "corporation/edit/:controlNumber",
         element: <AuthorityCorporationFormPage />,
+      },
+      {
+        // 지리명 등록
+        path: "geography/new",
+        element: <AuthorityGeographyFormPage />,
+      },
+      {
+        // 지리명 수정
+        path: "geography/edit/:controlNumber",
+        element: <AuthorityGeographyFormPage />,
+      },
+      {
+        // 주제명 등록
+        path: "subject/new",
+        element: <AuthoritySubjectFormPage />,
+      },
+      {
+        // 주제명 수정
+        path: "subject/edit/:controlNumber",
+        element: <AuthoritySubjectFormPage />,
       },
       {
         // 전거 반입 관리

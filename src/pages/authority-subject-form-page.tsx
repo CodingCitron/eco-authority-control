@@ -1,3 +1,3 @@
 export default function AuthoritySubjectFormPage() {
-  return;
+  return <></>;
 }

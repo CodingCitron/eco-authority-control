@@ -732,8 +732,8 @@ export default function AuthorityCorporationFormPage() {
             </div>
             <div className="card-footer bg-white d-flex justify-content-between">
               <div>
-                <button className="btn btn-outline-secondary">이전</button>
-                <button className="btn btn-outline-secondary">다음</button>
+                <button className="btn btn-outline-secondary">이전</button>{" "}
+                <button className="btn btn-outline-secondary">다음</button>{" "}
                 <button
                   type="button"
                   className="btn btn-light-info ms-2"
@@ -744,8 +744,8 @@ export default function AuthorityCorporationFormPage() {
                 </button>
               </div>
               <div>
-                <button className="btn btn-light-warning">중복조사</button>
-                <button className="btn btn-primary">저장</button>
+                <button className="btn btn-light-warning">중복조사</button>{" "}
+                <button className="btn btn-primary">저장</button>{" "}
                 <button className="btn btn-secondary">취소</button>
               </div>
             </div>
