@@ -14,16 +14,22 @@ import { AuthorityDeleteButton } from "@/components/authority-search-page/author
 
 import PrintButton from "@/components/ui/print-button";
 import BulkExportButton from "@/components/ui/bulk-export-button";
+import { useRef } from "react";
 
 export default function SearchPage() {
+  const printRef = useRef<HTMLDivElement>(null);
+
   return (
     <SearchPageProvider>
-      <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4 pb-5 min-vh-100">
+      <main
+        ref={printRef}
+        className="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4 pb-5 min-vh-100"
+      >
         <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
           <h1 className="h2 fw-bold">전거관리 기본화면</h1>
           <div className="btn-toolbar mb-2 mb-md-0">
             <div className="btn-group me-2">
-              <PrintButton />
+              <PrintButton contentRef={printRef} />
               <BulkExportButton />
             </div>
           </div>

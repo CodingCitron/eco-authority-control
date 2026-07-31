@@ -89,7 +89,6 @@ export default function SideNavigation() {
 
   return (
     <nav
-      id="sidebarMenu"
       className="col-md-3 col-lg-2 d-md-block bg-white sidebar collapse shadow-sm"
       aria-label="주요 메뉴"
     >
