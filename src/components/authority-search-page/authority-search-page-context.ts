@@ -11,9 +11,9 @@ export interface SearchTab {
 }
 
 export interface SearchPageContextValue {
-  currentTab: SearchTab;
+  currentTab: SearchTab; // 현재 선택된 탭
   setCurrentTab: (tab: SearchTab) => void;
-  selectedControlNumbers: readonly string[];
+  selectedControlNumbers: readonly string[]; // 선택된 레코드 제어번호
   toggleSelectedControlNumber: (controlNumber: string) => void;
   clearSelectedControlNumbers: () => void;
 }

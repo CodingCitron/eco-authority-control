@@ -9,3 +9,7 @@ if (!baseURL) {
 export const apiClient = create({
   baseURL,
 });
+
+apiClient.interceptors.request.use();
+
+apiClient.interceptors.response.use();

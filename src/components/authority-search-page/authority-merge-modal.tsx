@@ -1,76 +1,32 @@
 import { useEffect, useState } from "react";
-import { Button, Form, Modal, Table } from "react-bootstrap";
+import { Button, Form, Table } from "react-bootstrap";
 import clsx from "clsx";
-import { css } from "styled-system/css";
 
 import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
-
-export interface MergeAuthorityRecord {
-  controlNumber: string;
-  type: string;
-  heading: string;
-  source?: string;
-  marcPreview?: string;
-}
+import MarcFontSizeSelect, {
+  fontSizeList,
+} from "@/components/ui/marc-font-size-select";
+import BaseModal from "@/components/ui/base-modal";
+import type { AuthorityRecord } from "@/components/ui/record-preview";
+import RecordPreview from "@/components/ui/record-preview";
 
 interface AuthorityMergeModalProps {
   show: boolean;
   onHide: () => void;
-  onPreview?: (
-    master: MergeAuthorityRecord,
-    target: MergeAuthorityRecord,
-  ) => void;
-  onMerge?: (
-    master: MergeAuthorityRecord,
-    target: MergeAuthorityRecord,
-  ) => void;
+  onPreview?: (master: AuthorityRecord, target: AuthorityRecord) => void;
+  onMerge?: (master: AuthorityRecord, target: AuthorityRecord) => void;
 }
 
-const fontSizeList = ["16", "18", "20", "22", "24"];
-
-function RecordPreview({
-  record,
-  fontSize,
-}: {
-  record: MergeAuthorityRecord;
-  fontSize: string;
-}) {
-  const marcLines = [
-    {
-      tag: "001",
-      line: record.controlNumber,
-    },
-    {
-      tag: "150",
-      line: record.heading,
-    },
-    {
-      tag: "670",
-      line: record.source,
-    },
-  ];
-
-  return (
-    <div
-      className={clsx(
-        "marc-record-view font-monospace bg-white border rounded p-2",
-        css({
-          minHeight: "280px",
-        }),
-      )}
-      style={{ fontSize }}
-    >
-      {marcLines.map((item) => (
-        <div className="marc-line marc-line-control">
-          <span className="marc-tag">{item.tag}</span>
-          {item.line}
-        </div>
-      ))}
-    </div>
-  );
-}
+const MERGE_TABLE_HEADS = [
+  "No",
+  "통합 주자료",
+  "전거유형",
+  "전거제어번호",
+  "채택표목",
+  "정보원",
+];
 
 export default function AuthorityMergeModal({
   show,
@@ -80,8 +36,8 @@ export default function AuthorityMergeModal({
 }: AuthorityMergeModalProps) {
   const [masterControlNumber, setMasterControlNumber] = useState<string>();
 
-  const [masterFontSize, setMasterFontSize] = useState(fontSizeList[1]);
-  const [targetFontSize, setTargetFontSize] = useState(fontSizeList[1]);
+  const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
+  const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
 
   const {
     data = [],
@@ -104,13 +60,39 @@ export default function AuthorityMergeModal({
   const canMerge = data.length === 2 && master && target;
 
   return (
-    <Modal show={show} onHide={onHide} size="xl" backdrop="static" centered>
-      <Modal.Header closeButton className="bg-primary text-white">
-        <Modal.Title as="h2" className="h5 fw-bold">
-          전거통합 - 통합화면
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
+    <>
+      <BaseModal
+        title="전거통합 통합화면"
+        show={show}
+        onHide={onHide}
+        footer={
+          <>
+            <Button
+              className="px-4 fw-bold"
+              variant="outline-primary"
+              disabled={!canMerge}
+              onClick={() => canMerge && onPreview?.(master, target)}
+            >
+              MARC 통합
+            </Button>
+            <Button
+              className="px-4 fw-bold"
+              variant="primary"
+              disabled={!canMerge}
+              onClick={() => canMerge && onMerge?.(master, target)}
+            >
+              통합
+            </Button>
+            <Button
+              className="px-4 fw-bold"
+              variant="secondary"
+              onClick={onHide}
+            >
+              닫기
+            </Button>
+          </>
+        }
+      >
         <p className="text-muted small mb-2">
           두 레코드 중 <strong>통합 주자료</strong> 열의 선택 버튼(또는 행
           클릭)으로 주자료로 지정할 레코드를 하나씩 눌러보며 선택하세요. <br />
@@ -149,14 +131,7 @@ export default function AuthorityMergeModal({
                 </caption>
                 <thead className="table-light">
                   <tr>
-                    {[
-                      "No",
-                      "통합 주자료",
-                      "전거유형",
-                      "전거제어번호",
-                      "채택표목",
-                      "정보원",
-                    ].map((header) => (
+                    {MERGE_TABLE_HEADS.map((header) => (
                       <th scope="col" key={header}>
                         {header}
                       </th>
@@ -206,20 +181,12 @@ export default function AuthorityMergeModal({
                       통합주자료({master ? master.controlNumber : ""})
                     </span>
                     <div className="d-flex gap-2">
-                      <Form.Select
+                      <MarcFontSizeSelect
                         aria-label="주자료 글자크기"
                         value={masterFontSize}
-                        onChange={(event) =>
-                          setMasterFontSize(event.target.value)
-                        }
+                        onChange={setMasterFontSize}
                         className="form-select-sm w-auto"
-                      >
-                        {fontSizeList.map((size) => (
-                          <option key={size} value={parseInt(size)}>
-                            {size} px
-                          </option>
-                        ))}
-                      </Form.Select>
+                      />
                       <button
                         className="btn btn-sm btn-outline-dark"
                         type="button"
@@ -232,31 +199,24 @@ export default function AuthorityMergeModal({
                     <RecordPreview
                       record={master}
                       fontSize={`${masterFontSize}px`}
+                      className="bg-white"
                     />
                   )}
                 </div>
               </section>
               <section className="col-md-6">
-                <div className="border p-3 bg-light rounded h-100">
+                <div className="border p-3 bg-white rounded h-100">
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <span className="badge bg-secondary">
                       통합대상자료({target ? target.controlNumber : ""})
                     </span>
                     <div className="d-flex gap-2">
-                      <Form.Select
+                      <MarcFontSizeSelect
                         aria-label="주자료 글자크기"
                         value={targetFontSize}
-                        onChange={(event) =>
-                          setTargetFontSize(event.target.value)
-                        }
+                        onChange={setTargetFontSize}
                         className="form-select-sm w-auto"
-                      >
-                        {fontSizeList.map((size) => (
-                          <option key={size} value={parseInt(size)}>
-                            {size} px
-                          </option>
-                        ))}
-                      </Form.Select>
+                      />
                       <button
                         className="btn btn-sm btn-outline-dark"
                         type="button"
@@ -269,6 +229,7 @@ export default function AuthorityMergeModal({
                     <RecordPreview
                       record={target}
                       fontSize={`${targetFontSize}px`}
+                      className="bg-light"
                     />
                   )}
                 </div>
@@ -276,36 +237,15 @@ export default function AuthorityMergeModal({
             </div>
           </>
         )}
-      </Modal.Body>
-      <Modal.Footer className="justify-content-center">
-        <Button
-          className="px-4 fw-bold"
-          variant="outline-primary"
-          disabled={!canMerge}
-          onClick={() => canMerge && onPreview?.(master, target)}
-        >
-          MARC 통합
-        </Button>
-        <Button
-          className="px-4 fw-bold"
-          variant="primary"
-          disabled={!canMerge}
-          onClick={() => canMerge && onMerge?.(master, target)}
-        >
-          통합
-        </Button>
-        <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
-          닫기
-        </Button>
-      </Modal.Footer>
-    </Modal>
+      </BaseModal>
+    </>
   );
 }
 
 export function AuthorityMergeButton() {
   const { selectedControlNumbers } = useSearchPage();
 
-  const [mergeModalIsOpen, setMergeModalIsOpen] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const handleClick = () => {
     if (selectedControlNumbers.length !== 2) {
@@ -315,7 +255,7 @@ export function AuthorityMergeButton() {
       return;
     }
 
-    setMergeModalIsOpen(true);
+    setModalIsOpen(true);
   };
 
   return (
@@ -329,8 +269,8 @@ export function AuthorityMergeButton() {
         전거통합
       </button>
       <AuthorityMergeModal
-        show={mergeModalIsOpen}
-        onHide={() => setMergeModalIsOpen(false)}
+        show={modalIsOpen}
+        onHide={() => setModalIsOpen(false)}
       />
     </>
   );

@@ -33,15 +33,18 @@ export function useAuthoritySearchByControlNumbersQuery() {
   return useAuthoritySearchQuery<AuthoritySearchResult>(
     { type: currentTab.authorityType },
     {
-      enabled: false,
-      select: (data) =>
-        selectedControlNumbers
-          .map((controlNumber) =>
-            data.find((record) => record.controlNumber === controlNumber),
-          )
-          .filter(
-            (record): record is AuthoritySearchResult => record !== undefined,
-          ),
+      // enabled: false
+      select: useCallback(
+        (data) =>
+          selectedControlNumbers
+            .map((controlNumber) =>
+              data.find((record) => record.controlNumber === controlNumber),
+            )
+            .filter(
+              (record): record is AuthoritySearchResult => record !== undefined,
+            ),
+        [selectedControlNumbers],
+      ),
     },
   );
 }
