@@ -27,29 +27,21 @@ export function useAuthoritySearchQuery<T extends AuthoritySearchResult>(
 }
 
 // 선택된 전거 가져오기
-export function useAuthoritySearchByControlNumbersQuery(isOpen: boolean) {
+export function useAuthoritySearchByControlNumbersQuery() {
   const { currentTab, selectedControlNumbers } = useSearchPage();
 
-  const query = useAuthoritySearchQuery<AuthoritySearchResult>(
+  return useAuthoritySearchQuery<AuthoritySearchResult>(
     { type: currentTab.authorityType },
     {
       enabled: false,
-      select: useCallback(
-        (data) =>
-          selectedControlNumbers
-            .map((controlNumber) =>
-              data.find((record) => record.controlNumber === controlNumber),
-            )
-            .filter(
-              (record): record is AuthoritySearchResult => record !== undefined,
-            ),
-        [selectedControlNumbers],
-      ),
+      select: (data) =>
+        selectedControlNumbers
+          .map((controlNumber) =>
+            data.find((record) => record.controlNumber === controlNumber),
+          )
+          .filter(
+            (record): record is AuthoritySearchResult => record !== undefined,
+          ),
     },
   );
-
-  return {
-    ...query,
-    data: isOpen ? query.data : undefined,
-  };
 }

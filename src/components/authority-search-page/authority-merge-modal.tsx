@@ -87,7 +87,7 @@ export default function AuthorityMergeModal({
     data = [],
     isError,
     isLoading,
-  } = useAuthoritySearchByControlNumbersQuery(show);
+  } = useAuthoritySearchByControlNumbersQuery();
 
   useEffect(() => {
     if (show) setMasterControlNumber(data[0]?.controlNumber);
