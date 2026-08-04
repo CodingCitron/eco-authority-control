@@ -27,8 +27,9 @@ export function SearchPageProvider({ children }: { children: ReactNode }) {
       if (controlNumberSet.size === 0) return;
 
       setSelectedControlNumbers((current) => {
+        const selectedControlNumberSet = new Set(current);
         const isAllSelected = [...controlNumberSet].every((controlNumber) =>
-          current.includes(controlNumber),
+          selectedControlNumberSet.has(controlNumber),
         );
 
         if (isAllSelected) {
