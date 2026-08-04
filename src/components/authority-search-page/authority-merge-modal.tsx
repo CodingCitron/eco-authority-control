@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Form, Table } from "react-bootstrap";
+import { Button, Form, Modal, Table } from "react-bootstrap";
 import clsx from "clsx";
 
 import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
@@ -28,12 +28,61 @@ const MERGE_TABLE_HEADS = [
   "정보원",
 ];
 
+export function AuthorityMergeButton() {
+  const { selectedControlNumbers } = useSearchPage();
+
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const handleClick = () => {
+    if (selectedControlNumbers.length !== 2) {
+      alert(
+        "전거통합은 2건씩 비교하여 진행합니다. 통합할 전거자료를 정확히 2건 선택해주세요.",
+      );
+      return;
+    }
+
+    setModalIsOpen(true);
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        className="btn btn-outline-dark btn-sm"
+        onClick={handleClick}
+      >
+        <i className="bi bi-intersect me-1" aria-hidden="true"></i>
+        전거통합
+      </button>
+      <AuthorityMergeModal
+        show={modalIsOpen}
+        onHide={() => setModalIsOpen(false)}
+      />
+    </>
+  );
+}
+
 export default function AuthorityMergeModal({
   show,
   onHide,
   onPreview,
   onMerge,
 }: AuthorityMergeModalProps) {
+  return (
+    <>
+      <BaseModal title="전거통합 통합화면" show={show} onHide={onHide}>
+        <AuthorityMergeModalBody
+          show={show}
+          onHide={onHide}
+          onPreview={onPreview}
+          onMerge={onMerge}
+        />
+      </BaseModal>
+    </>
+  );
+}
+
+function AuthorityMergeModalBody({ show, onHide, onPreview, onMerge }) {
   const [masterControlNumber, setMasterControlNumber] = useState<string>();
 
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
@@ -61,38 +110,16 @@ export default function AuthorityMergeModal({
 
   return (
     <>
-      <BaseModal
-        title="전거통합 통합화면"
-        show={show}
-        onHide={onHide}
-        footer={
-          <>
-            <Button
-              className="px-4 fw-bold"
-              variant="outline-primary"
-              disabled={!canMerge}
-              onClick={() => canMerge && onPreview?.(master, target)}
-            >
-              MARC 통합
-            </Button>
-            <Button
-              className="px-4 fw-bold"
-              variant="primary"
-              disabled={!canMerge}
-              onClick={() => canMerge && onMerge?.(master, target)}
-            >
-              통합
-            </Button>
-            <Button
-              className="px-4 fw-bold"
-              variant="secondary"
-              onClick={onHide}
-            >
-              닫기
-            </Button>
-          </>
-        }
+      <Modal.Header
+        closeButton
+        closeVariant="white"
+        className="bg-primary text-white"
       >
+        <Modal.Title as="h2" className="h5 fw-bold">
+          전거통합 통합화면
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
         <p className="text-muted small mb-2">
           두 레코드 중 <strong>통합 주자료</strong> 열의 선택 버튼(또는 행
           클릭)으로 주자료로 지정할 레코드를 하나씩 눌러보며 선택하세요. <br />
@@ -237,41 +264,28 @@ export default function AuthorityMergeModal({
             </div>
           </>
         )}
-      </BaseModal>
-    </>
-  );
-}
-
-export function AuthorityMergeButton() {
-  const { selectedControlNumbers } = useSearchPage();
-
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-
-  const handleClick = () => {
-    if (selectedControlNumbers.length !== 2) {
-      alert(
-        "전거통합은 2건씩 비교하여 진행합니다. 통합할 전거자료를 정확히 2건 선택해주세요.",
-      );
-      return;
-    }
-
-    setModalIsOpen(true);
-  };
-
-  return (
-    <>
-      <button
-        type="button"
-        className="btn btn-outline-dark btn-sm"
-        onClick={handleClick}
-      >
-        <i className="bi bi-intersect me-1" aria-hidden="true"></i>
-        전거통합
-      </button>
-      <AuthorityMergeModal
-        show={modalIsOpen}
-        onHide={() => setModalIsOpen(false)}
-      />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button
+          className="px-4 fw-bold"
+          variant="outline-primary"
+          disabled={!canMerge}
+          onClick={() => canMerge && onPreview?.(master, target)}
+        >
+          MARC 통합
+        </Button>
+        <Button
+          className="px-4 fw-bold"
+          variant="primary"
+          disabled={!canMerge}
+          onClick={() => canMerge && onMerge?.(master, target)}
+        >
+          통합
+        </Button>
+        <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
+          닫기
+        </Button>
+      </Modal.Footer>
     </>
   );
 }
