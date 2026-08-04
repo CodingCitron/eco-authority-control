@@ -20,6 +20,29 @@ export function SearchPageProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const toggleAllControlNumbers = useCallback(
+    (controlNumbers: readonly string[]) => {
+      const controlNumberSet = new Set(controlNumbers);
+
+      if (controlNumberSet.size === 0) return;
+
+      setSelectedControlNumbers((current) => {
+        const isAllSelected = [...controlNumberSet].every((controlNumber) =>
+          current.includes(controlNumber),
+        );
+
+        if (isAllSelected) {
+          return current.filter(
+            (controlNumber) => !controlNumberSet.has(controlNumber),
+          );
+        }
+
+        return [...new Set([...current, ...controlNumberSet])];
+      });
+    },
+    [],
+  );
+
   const clearSelectedControlNumbers = useCallback(() => {
     setSelectedControlNumbers([]);
   }, []);
@@ -39,6 +62,7 @@ export function SearchPageProvider({ children }: { children: ReactNode }) {
         setCurrentTab: changeCurrentTab,
         selectedControlNumbers,
         toggleSelectedControlNumber,
+        toggleAllControlNumbers,
         clearSelectedControlNumbers,
       }}
     >

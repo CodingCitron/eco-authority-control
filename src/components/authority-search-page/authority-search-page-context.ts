@@ -15,6 +15,7 @@ export interface SearchPageContextValue {
   setCurrentTab: (tab: SearchTab) => void;
   selectedControlNumbers: readonly string[]; // 선택된 레코드 제어번호
   toggleSelectedControlNumber: (controlNumber: string) => void;
+  toggleAllControlNumbers: (controlNumbers: readonly string[]) => void;
   clearSelectedControlNumbers: () => void;
 }
 
@@ -43,6 +44,11 @@ export function useSearchPage() {
     (context) => context?.toggleSelectedControlNumber,
   );
 
+  const toggleAllControlNumbers = useContextSelector(
+    SearchPageContext,
+    (context) => context?.toggleAllControlNumbers,
+  );
+
   const clearSelectedControlNumbers = useContextSelector(
     SearchPageContext,
     (context) => context?.clearSelectedControlNumbers,
@@ -53,6 +59,7 @@ export function useSearchPage() {
     !setCurrentTab ||
     !selectedControlNumbers ||
     !toggleSelectedControlNumber ||
+    !toggleAllControlNumbers ||
     !clearSelectedControlNumbers
   ) {
     throw new Error(
@@ -65,6 +72,7 @@ export function useSearchPage() {
     setCurrentTab,
     selectedControlNumbers,
     toggleSelectedControlNumber,
+    toggleAllControlNumbers,
     clearSelectedControlNumbers,
   };
 }
