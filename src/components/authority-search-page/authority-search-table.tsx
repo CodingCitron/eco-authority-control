@@ -19,7 +19,7 @@ export default function AuthoritySearchTable<T extends AuthoritySearchResult>({
 }: AuthoritySearchTableProps<T>) {
   const { data = [] } = useAuthoritySearchQuery<T>(params);
 
-  console.log(data);
+  // 로딩이나, 에러에 대한 UI가 필요
 
   return (
     <Table

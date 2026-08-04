@@ -1,10 +1,26 @@
 import { useState } from "react";
 import { Button } from "react-bootstrap";
 
-import { useSearchPage } from "./authority-search-page-context";
+import { useAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
+
 import BaseModal from "../ui/base-modal";
+import { useSearchPage } from "./authority-search-page-context";
 
 export default function AuthorityHistoryModal({ show, onHide }) {
+  const { selectedControlNumbers } = useSearchPage();
+
+  // 1. 검색된 data를 다 가져온다.
+  const { data = [] } = useAuthoritySearchQuery();
+
+  // 2. controlNumber의 index는 현재 선택된 값이다.
+  const currentIndex = data.findIndex(
+    (item) => item.controlNumber === selectedControlNumbers[0],
+  );
+
+  // 3. 히스토리 호출 api 필요
+
+  // 4. 히스토리 오류 or 로딩 상태
+
   return (
     <BaseModal
       title="전거변경이력"
