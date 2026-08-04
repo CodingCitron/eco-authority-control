@@ -1,10 +1,10 @@
+import { apiClient } from "@/lib/axios";
 import type {
   AuthorityRow,
   GeographyRow,
   CorporationRow,
   SubjectRow,
 } from "@/components/authority-search-page/authority-search-result.types";
-import { authoritySearchMockData } from "./authority-search.mock";
 
 export type AuthoritySearchType =
   | "personal"
@@ -33,20 +33,15 @@ export const authorityTypeLabels: Record<AuthoritySearchType, string> = {
   subject: "주제명",
 };
 
-// 테스트 데이터
 export async function fetchAuthoritySearchResults(
   params: AuthoritySearchParams,
 ): Promise<AuthoritySearchResult[]> {
-  return authoritySearchMockData.filter(
-    (row) =>
-      (!params.type || row.type === authorityTypeLabels[params.type]) &&
-      (!params.nationality || row.nationality === params.nationality) &&
-      (!params.controlNumber ||
-        row.controlNumber.includes(params.controlNumber)) &&
-      (!params.controlNumbers ||
-        params.controlNumbers.includes(row.controlNumber)) &&
-      (!params.heading || row.heading.includes(params.heading)),
+  const { data } = await apiClient.get<AuthoritySearchResult[]>(
+    "/authority-search",
+    { params },
   );
+
+  return data;
 }
 
 // 검색 조건에 따라 데이터 가져오기

@@ -12,10 +12,23 @@ import "@/styles/animation.css";
 import "@/styles/style.css";
 import "@/styles/panda.css";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  </StrictMode>,
-);
+async function bootstrap() {
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW !== "false") {
+    const { worker } = await import("@/mocks/browser");
+
+    await worker.start({
+      serviceWorker: { url: "/mockServiceWorker.js" },
+      onUnhandledRequest: "error",
+    });
+  }
+
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </StrictMode>,
+  );
+}
+
+void bootstrap();

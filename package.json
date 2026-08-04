@@ -8,6 +8,8 @@
     "dev": "vite --port 5176",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "NODE_ENV=test vitest run",
+    "test:watch": "NODE_ENV=test vitest",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -32,14 +34,26 @@
     "@pandacss/dev": "^1.12.0",
     "@rolldown/plugin-babel": "^0.2.3",
     "@tanstack/eslint-plugin-query": "^5.101.4",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.3",
     "@types/babel__core": "^7.20.5",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "babel-plugin-react-compiler": "^1.0.0",
+    "jsdom": "^30.0.1",
+    "msw": "^2.15.0",
     "oxlint": "^1.71.0",
+    "oxlint-plugin-query": "^0.1.1",
     "typescript": "~6.0.2",
-    "vite": "^8.1.1"
+    "vite": "^8.1.1",
+    "vitest": "^4.1.10"
+  },
+  "msw": {
+    "workerDirectory": [
+      "src/mocks"
+    ]
   }
 }
