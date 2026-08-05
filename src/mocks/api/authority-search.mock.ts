@@ -1,10 +1,21 @@
+import { http } from "msw";
+
+import {
+  authorityTypeLabels,
+  type AuthoritySearchResult,
+} from "@/api/authority-search";
 import type {
   PersonalRow,
   GeographyRow,
   CorporationRow,
   SubjectRow,
 } from "@/components/authority-search-page/authority-search-result.types";
-import type { AuthoritySearchResult } from "../../api/authority-search";
+import { createApiResponse } from "@/mocks/utils";
+import type { AuthoritySearchType } from "@/types/authority.types";
+
+// ==========================================
+// 1. Mock 데이터 정의 (개인명 / 단체명 / 지리명 / 주제명)
+// ==========================================
 
 const personalRows: PersonalRow[] = [
   {
@@ -89,9 +100,99 @@ const subjectRows: SubjectRow[] = [
   },
 ];
 
+/** 전체 전거 레코드 Mock 데이터 */
 export const authoritySearchMockData: AuthoritySearchResult[] = [
   ...personalRows,
   ...corporationRows,
   ...geographyRows,
   ...subjectRows,
+];
+
+// ==========================================
+// 2. 쿼리 파라미터 타입 및 파싱 함수
+// ==========================================
+
+/**
+ * GET /api/authority-search 쿼리 파라미터 규격
+ */
+export interface AuthoritySearchQueryParams {
+  /** 전거 구분 타입 (personal | corporation | geography | subject) */
+  type?: AuthoritySearchType | null;
+  /** 국적 */
+  nationality?: string | null;
+  /** 제어번호 단일 검색어 */
+  controlNumber?: string | null;
+  /** 제어번호 다중 선택 검색 리스트 */
+  controlNumbers: string[];
+  /** 표목명 */
+  heading?: string | null;
+}
+
+/**
+ * Request 객체에서 쿼리 파라미터를 읽어 명확한 타입 객체로 변환합니다.
+ */
+function parseQueryParams(request: Request): AuthoritySearchQueryParams {
+  const url = new URL(request.url);
+  const params = url.searchParams;
+
+  return {
+    type: params.get("type") as AuthoritySearchType | null,
+    nationality: params.get("nationality"),
+    controlNumber: params.get("controlNumber"),
+    controlNumbers: [
+      ...params.getAll("controlNumbers"),
+      ...params.getAll("controlNumbers[]"),
+    ],
+    heading: params.get("heading"),
+  };
+}
+
+// ==========================================
+// 3. MSW Mock API 핸들러
+// ==========================================
+
+/**
+ * [GET] /api/authority-search
+ * 전거 레코드(개인명, 단체명, 지리명, 주제명) 통합 검색 Mock API
+ */
+export const authoritySearchHandlers = [
+  http.get("/api/authority-search", ({ request }) => {
+    // 1) 쿼리 파라미터 파싱
+    const query = parseQueryParams(request);
+
+    // 2) 검색 조건에 따른 데이터 필터링 (Early Return)
+    const results = authoritySearchMockData.filter((row) => {
+      // 전거 구분(타입) 필터링
+      if (query.type && row.type !== authorityTypeLabels[query.type]) {
+        return false;
+      }
+      // 국적 필터링
+      if (query.nationality && row.nationality !== query.nationality) {
+        return false;
+      }
+      // 제어번호 포함 여부 검색
+      if (
+        query.controlNumber &&
+        !row.controlNumber.includes(query.controlNumber)
+      ) {
+        return false;
+      }
+      // 표목명 포함 여부 검색
+      if (query.heading && !row.heading.includes(query.heading)) {
+        return false;
+      }
+      // 제어번호 목록 선택 필터링
+      if (
+        query.controlNumbers.length > 0 &&
+        !query.controlNumbers.includes(row.controlNumber)
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // 3) 공통 API 응답 구조 ({ result: { code: 'Y', ... }, contents: [...] })로 반환
+    return createApiResponse(results);
+  }),
 ];
