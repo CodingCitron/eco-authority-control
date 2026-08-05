@@ -5,8 +5,8 @@
 - `pnpm run lint`는 `oxlint-plugin-query` 설치 후 설정을 정상적으로 읽는다. 현재는 기존 코드의
   미사용 변수·JSX `key` 누락 등 경고만 9건이며 오류는 없다.
 - `pnpm run build`는 기존 TypeScript 오류 때문에 실패한다. 대표적으로 모달 컴포넌트의
-암시적 `any`, 사용하지 않는 변수, `record-preview.tsx`의 동적 키 인덱싱,
-`PrintButton`의 ref 타입 불일치가 있다.
+  암시적 `any`, 사용하지 않는 변수, `record-preview.tsx`의 동적 키 인덱싱,
+  `PrintButton`의 ref 타입 불일치가 있다.
 
 #### 검사 및 수동 테스트 방법
 
@@ -51,20 +51,20 @@ pnpm run test -- src/components/authority-search-page/authority-search-page-prov
 #### 자동 테스트 도구와 공식 사이트
 
 - [**Vitest**](https://vitest.dev/): Vite 설정을 재사용해 `*.test.ts`·`*.test.tsx` 파일을 실행하는
-테스트 러너다. 테스트 실행, assertion, mock·watch 모드를 제공한다.
+  테스트 러너다. 테스트 실행, assertion, mock·watch 모드를 제공한다.
 - [**jsdom**](https://github.com/jsdom/jsdom): Node.js에서 `window`, `document` 등 브라우저 DOM을
-흉내 낸다. 실제 브라우저를 띄우지 않고 React 컴포넌트를 테스트할 수 있게 한다.
+  흉내 낸다. 실제 브라우저를 띄우지 않고 React 컴포넌트를 테스트할 수 있게 한다.
 - [**React Testing Library**](https://testing-library.com/docs/react-testing-library/intro/): React
-컴포넌트를 렌더링하고, 사용자가 보는 텍스트·역할·label 기준으로 화면을 찾고 검증한다.
+  컴포넌트를 렌더링하고, 사용자가 보는 텍스트·역할·label 기준으로 화면을 찾고 검증한다.
 - [`**user-event**`](https://testing-library.com/docs/user-event/intro/): click, type, tab처럼 실제
-사용자 순서에 가까운 상호작용을 발생시킨다. 단순 DOM event 호출보다 UI 동작 테스트에 적합하다.
+  사용자 순서에 가까운 상호작용을 발생시킨다. 단순 DOM event 호출보다 UI 동작 테스트에 적합하다.
 - [`**jest-dom**`](https://github.com/testing-library/jest-dom): `toBeInTheDocument`, `toBeChecked` 같은
-DOM 전용 matcher를 Vitest assertion에 추가한다. `src/test/setup.ts`에서 등록한다.
+  DOM 전용 matcher를 Vitest assertion에 추가한다. `src/test/setup.ts`에서 등록한다.
 - [**MSW (Mock Service Worker)**](https://mswjs.io/docs/): 테스트 또는 개발 중 HTTP 요청을
-가로채 가짜 API 응답을 제공한다. 실제 Axios API 모듈은 유지한 채 mock 응답만 교체할 수 있다.
+  가로채 가짜 API 응답을 제공한다. 실제 Axios API 모듈은 유지한 채 mock 응답만 교체할 수 있다.
 - 작은 Axios 단위 테스트만 필요할 때는
-**[axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter)**도 가능하지만,
-화면과 API를 함께 검증하려면 MSW를 우선한다.
+  **[axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter)**도 가능하지만,
+  화면과 API를 함께 검증하려면 MSW를 우선한다.
 
 권장 구조:
 
@@ -89,19 +89,19 @@ VITE_USE_MSW=false pnpm dev
 - mock endpoint와 필터링 규칙은 `src/mocks/handlers.ts`에 추가한다.
 - mock 원본 데이터는 `src/api/authority-search.mock.ts`에 둔다.
 - 테스트는 `src/test/server.ts`에서 같은 handler를 Node 환경으로 시작하므로, handler를 한 번만 작성하면
-브라우저 개발과 Vitest 테스트에 함께 적용된다.
+  브라우저 개발과 Vitest 테스트에 함께 적용된다.
 - `src/mocks/mockServiceWorker.js`는 MSW가 생성한 브라우저 worker 파일이다. 수정하지 말고 MSW 업데이트 시
-`pnpm exec msw init src/mocks --save`로 다시 생성한다. Vite development middleware가 이 파일을
-`/mockServiceWorker.js`로만 제공하므로 production `dist/`에는 포함되지 않는다.
+  `pnpm exec msw init src/mocks --save`로 다시 생성한다. Vite development middleware가 이 파일을
+  `/mockServiceWorker.js`로만 제공하므로 production `dist/`에는 포함되지 않는다.
 
 테스트 예시는 `src/api/authority-search.test.ts`와
 `src/components/authority-search-page/authority-search-page-provider.test.tsx`에 있다.
 첫 테스트는 API 함수가 MSW handler의 응답을 실제로 사용하는지 검증한다. 두 번째 테스트는 현재 목록 전체 선택,
 중복 제어번호 제거, 다시 클릭했을 때 현재 목록만 해제하는 동작을 검증한다.
 
-### 복사용
+#### 복사
 
-#### 모달
+##### 모달
 
 ```tsx
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";

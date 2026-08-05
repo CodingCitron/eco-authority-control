@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Link, useLocation } from "react-router";
 
 import clsx from "clsx";
@@ -94,7 +95,7 @@ export default function SideNavigation() {
     >
       <div className="position-sticky pt-3 sidebar-sticky">
         {navLinkCategories.map((category) => (
-          <>
+          <Fragment key={category.id}>
             <h6
               key={category.id}
               className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase"
@@ -117,7 +118,7 @@ export default function SideNavigation() {
                 </li>
               ))}
             </ul>
-          </>
+          </Fragment>
         ))}
       </div>
     </nav>
