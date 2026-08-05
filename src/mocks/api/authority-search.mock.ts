@@ -162,8 +162,12 @@ export const authoritySearchHandlers = [
 
     // 2) 검색 조건에 따른 데이터 필터링 (Early Return)
     const results = authoritySearchMockData.filter((row) => {
-      // 전거 구분(타입) 필터링
-      if (query.type && row.type !== authorityTypeLabels[query.type]) {
+      // ① 전거 구분(타입) 필터링 ("all"이거나 없을 경우 전체 검색)
+      if (
+        query.type &&
+        (query.type as string) !== "all" &&
+        row.type !== authorityTypeLabels[query.type]
+      ) {
         return false;
       }
       // 국적 필터링

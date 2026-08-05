@@ -26,6 +26,9 @@ importers:
       exceljs:
         specifier: ^4.4.0
         version: 4.4.0
+      marc-eco:
+        specifier: git+https://repo.eco.co.kr/libteam/marc-converter.git#main
+        version: git+https://repo.eco.co.kr/libteam/marc-converter.git#5b5f38cecef7a95fccbd91b8964b997e637490d1
       react:
         specifier: ^19.2.7
         version: 19.2.8
@@ -2060,6 +2063,10 @@ packages:
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
+
+  marc-eco@git+https://repo.eco.co.kr/libteam/marc-converter.git#5b5f38cecef7a95fccbd91b8964b997e637490d1:
+    resolution: {commit: 5b5f38cecef7a95fccbd91b8964b997e637490d1, repo: https://repo.eco.co.kr/libteam/marc-converter.git, type: git}
+    version: 1.0.0
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -4820,6 +4827,8 @@ snapshots:
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  marc-eco@git+https://repo.eco.co.kr/libteam/marc-converter.git#5b5f38cecef7a95fccbd91b8964b997e637490d1: {}
 
   math-intrinsics@1.1.0: {}
 
