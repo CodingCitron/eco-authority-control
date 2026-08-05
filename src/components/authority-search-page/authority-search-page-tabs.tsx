@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { css } from "styled-system/css";
 
 import type {
-  AuthorityRow,
+  PersonalRow,
   GeographyRow,
   CorporationRow,
   SubjectRow,
@@ -12,7 +12,7 @@ import AuthoritySelectionCheckbox from "@/components/authority-search-page/autho
 import type { SearchTab } from "@/components/authority-search-page/authority-search-page-context";
 import type { TableColumn } from "@/components/ui/table";
 
-const personalColumns: TableColumn<AuthorityRow>[] = [
+const personalColumns: TableColumn<PersonalRow>[] = [
   {
     header: "no",
     cell: (row) => row.id,

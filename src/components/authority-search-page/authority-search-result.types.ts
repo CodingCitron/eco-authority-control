@@ -1,4 +1,4 @@
-export interface AuthorityRow {
+export interface PersonalRow {
   id: string;
   type: string;
   nationality: string;

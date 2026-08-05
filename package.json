@@ -8,8 +8,8 @@
     "dev": "vite --port 5176",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "test": "NODE_ENV=test vitest run",
-    "test:watch": "NODE_ENV=test vitest",
+    "test": "cross-env NODE_ENV=test vitest run",
+    "test:watch": "cross-env NODE_ENV=test vitest",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -43,6 +43,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "babel-plugin-react-compiler": "^1.0.0",
+    "cross-env": "^10.1.0",
     "jsdom": "^30.0.1",
     "msw": "^2.15.0",
     "oxlint": "^1.71.0",

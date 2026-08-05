@@ -1,12 +1,12 @@
 import type {
-  AuthorityRow,
+  PersonalRow,
   GeographyRow,
   CorporationRow,
   SubjectRow,
 } from "@/components/authority-search-page/authority-search-result.types";
-import type { AuthoritySearchResult } from "./authority-search";
+import type { AuthoritySearchResult } from "../../api/authority-search";
 
-const personalRows: AuthorityRow[] = [
+const personalRows: PersonalRow[] = [
   {
     id: "1",
     type: "개인명",

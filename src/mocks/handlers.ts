@@ -4,7 +4,7 @@ import {
   authorityTypeLabels,
   type AuthoritySearchType,
 } from "@/api/authority-search";
-import { authoritySearchMockData } from "@/api/authority-search.mock";
+import { authoritySearchMockData } from "@/mocks/api/authority-search.mock";
 
 const authoritySearchPath = new URL(
   "/api/authority-search",

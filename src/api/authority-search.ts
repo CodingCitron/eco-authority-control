@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/axios";
 import type {
-  AuthorityRow,
+  PersonalRow,
   GeographyRow,
   CorporationRow,
   SubjectRow,
@@ -21,7 +21,7 @@ export interface AuthoritySearchParams {
 }
 
 export type AuthoritySearchResult =
-  | AuthorityRow
+  | PersonalRow
   | CorporationRow
   | GeographyRow
   | SubjectRow;

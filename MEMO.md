@@ -43,6 +43,9 @@ pnpm run test:watch
 
 # 특정 테스트 파일만 실행
 pnpm run test -- src/components/authority-search-page/authority-search-page-provider.test.tsx
+a
+# windows
+pnpm test src/api/authority-search.test.ts
 ```
 
 현재 실행 환경의 `NODE_ENV`가 `production`이므로, 테스트 스크립트는 React 테스트 API가
