@@ -45,6 +45,7 @@ export function useAuthoritySearchByControlNumbersQuery() {
             ),
         [selectedControlNumbers],
       ),
+      refetchOnMount: false,
     },
   );
 }

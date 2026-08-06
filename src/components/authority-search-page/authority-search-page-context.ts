@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
 
-import type { AuthoritySearchType } from "@/api/authority-search";
+import type { AuthoritySearchType } from "@/types/authority.types";
 
 export interface SearchTab {
   id: string;

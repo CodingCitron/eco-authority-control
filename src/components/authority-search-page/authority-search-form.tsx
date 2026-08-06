@@ -1,9 +1,20 @@
+import { useTransition } from "react";
 import { useSearchParams } from "react-router";
 
 import { authorityTypeLabels } from "@/api/authority-search";
+import type { AuthoritySearchType } from "@/types/authority.types";
+
+interface SearchQueryParams {
+  type: AuthoritySearchType;
+  nationality: string;
+  controlNumber: string;
+  heading: string;
+  page: number;
+}
 
 export default function AuthoritySearchForm() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   return (
     <div className="card-header bg-white py-3">
