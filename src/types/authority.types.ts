@@ -1,3 +1,4 @@
+// 개인형
 export interface PersonalRow {
   id: string;
   type: string;
@@ -12,6 +13,7 @@ export interface PersonalRow {
   modifiedBy: string;
 }
 
+// 단체형
 export interface CorporationRow {
   id: string;
   type: string;
@@ -26,6 +28,7 @@ export interface CorporationRow {
   modifiedBy: string;
 }
 
+// 지리형
 export interface GeographyRow {
   id: string;
   type: string;
@@ -37,6 +40,7 @@ export interface GeographyRow {
   modifiedBy: string;
 }
 
+// 주제형
 export interface SubjectRow {
   id: string;
   type: string;

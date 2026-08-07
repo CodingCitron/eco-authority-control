@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import type { AuthoritySearchResult } from "@/api/authority-search";
 import { useAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
@@ -10,11 +9,9 @@ export default function AuthoritySelectionControl() {
   const { currentTab, selectedControlNumbers, toggleAllControlNumbers } =
     useSearchPage();
 
-  const { data = [] } = useAuthoritySearchQuery<AuthoritySearchResult>({
+  const { data = [] } = useAuthoritySearchQuery({
     type: currentTab.authorityType,
   });
-
-  console.log(data);
 
   const controlNumbers = useMemo(
     () => data.map((record) => record.controlNumber),
