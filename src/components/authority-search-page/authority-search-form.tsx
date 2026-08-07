@@ -1,24 +1,81 @@
-import { useTransition } from "react";
+import { useState, useTransition, useEffect, type SubmitEvent } from "react";
 import { useSearchParams } from "react-router";
 
+import queryClient from "@/lib/query-client";
 import { authorityTypeLabels } from "@/api/authority-search";
 import type { AuthoritySearchType } from "@/types/authority.types";
-
-interface SearchQueryParams {
-  type: AuthoritySearchType;
-  nationality: string;
-  controlNumber: string;
-  heading: string;
-  page: number;
-}
+import { authoritySearchQueryKeys } from "@/hooks/use-authority-search-query";
 
 export default function AuthoritySearchForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
+  const [type, setType] = useState<AuthoritySearchType | "all">(
+    (searchParams.get("type") as AuthoritySearchType | "all") || "all",
+  );
+  const [nationality, setNationality] = useState(
+    searchParams.get("nationality") || "",
+  );
+  const [controlNumber, setControlNumber] = useState(
+    searchParams.get("controlNumber") || "",
+  );
+  const [heading, setHeading] = useState(searchParams.get("heading") || "");
+
+  useEffect(() => {
+    setType((searchParams.get("type") as AuthoritySearchType | "all") || "all");
+    setNationality(searchParams.get("nationality") || "");
+    setControlNumber(searchParams.get("controlNumber") || "");
+    setHeading(searchParams.get("heading") || "");
+  }, [searchParams]);
+
+  const handleSubmit = (e: SubmitEvent) => {
+    e.preventDefault();
+
+    startTransition(() => {
+      const nextParams = new URLSearchParams();
+
+      if (type && type !== "all") {
+        nextParams.set("type", type);
+      } else {
+        nextParams.set("type", "all");
+      }
+
+      if (nationality) {
+        nextParams.set("nationality", nationality);
+      }
+
+      if (controlNumber.trim()) {
+        nextParams.set("controlNumber", controlNumber.trim());
+      }
+
+      if (heading.trim()) {
+        nextParams.set("heading", heading.trim());
+      }
+
+      nextParams.set("isSearched", "true");
+
+      setSearchParams(nextParams);
+    });
+  };
+
+  const handleReset = () => {
+    setType("all");
+    setNationality("");
+    setControlNumber("");
+    setHeading("");
+
+    startTransition(() => {
+      setSearchParams(new URLSearchParams());
+    });
+
+    queryClient.resetQueries({
+      queryKey: authoritySearchQueryKeys.all,
+    });
+  };
+
   return (
     <div className="card-header bg-white py-3">
-      <form className="row g-2 align-items-center">
+      <form className="row g-2 align-items-center" onSubmit={handleSubmit}>
         <div className="col-auto">
           <label
             className="form-label mb-0 fw-bold text-nowrap"
@@ -28,8 +85,15 @@ export default function AuthoritySearchForm() {
           </label>
         </div>
         <div className="col-auto">
-          <select className="form-select form-select-sm" id="searchType">
-            <option>전체</option>
+          <select
+            className="form-select form-select-sm"
+            id="searchType"
+            value={type}
+            onChange={(e) =>
+              setType(e.target.value as AuthoritySearchType | "all")
+            }
+          >
+            <option value="all">전체</option>
             {Object.entries(authorityTypeLabels).map(([key, value]) => (
               <option key={key} value={key}>
                 {value}
@@ -46,11 +110,16 @@ export default function AuthoritySearchForm() {
           </label>
         </div>
         <div className="col-auto">
-          <select className="form-select form-select-sm" id="searchArea">
-            <option>전체</option>
-            <option>한국</option>
-            <option>동양</option>
-            <option>서양</option>
+          <select
+            className="form-select form-select-sm"
+            id="searchArea"
+            value={nationality}
+            onChange={(e) => setNationality(e.target.value)}
+          >
+            <option value="">전체</option>
+            <option value="한국">한국</option>
+            <option value="동양">동양</option>
+            <option value="서양">서양</option>
           </select>
         </div>
         <div className="col-auto">
@@ -67,6 +136,8 @@ export default function AuthoritySearchForm() {
             className="form-control form-control-sm"
             id="searchCtrl"
             placeholder="검색어 입력"
+            value={controlNumber}
+            onChange={(e) => setControlNumber(e.target.value)}
           />
         </div>
         <div className="col-auto d-flex align-items-center gap-2">
@@ -81,6 +152,8 @@ export default function AuthoritySearchForm() {
             className="form-control form-control-sm"
             id="searchHeading"
             placeholder="검색어 입력"
+            value={heading}
+            onChange={(e) => setHeading(e.target.value)}
           />
           <label className="visually-hidden" htmlFor="searchTrunc">
             조회표목 절단방식
@@ -90,10 +163,19 @@ export default function AuthoritySearchForm() {
           </select>
         </div>
         <div className="col-auto ms-auto d-flex gap-1">
-          <button type="button" className="btn btn-primary btn-sm">
+          <button
+            type="submit"
+            className="btn btn-primary btn-sm"
+            disabled={isPending}
+          >
             찾기
           </button>
-          <button type="button" className="btn btn-secondary btn-sm">
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={handleReset}
+            disabled={isPending}
+          >
             화면초기화
           </button>
         </div>

@@ -11,6 +11,7 @@ import AuthoritySearchTable from "@/components/authority-search-page/authority-s
 import AuthoritySelectionCheckbox from "@/components/authority-search-page/authority-selection-checkbox";
 import type { SearchTab } from "@/components/authority-search-page/authority-search-page-context";
 import type { TableColumn } from "@/components/ui/table";
+import type { tab } from "@testing-library/user-event/dist/cjs/convenience/tab.js";
 
 const personalColumns: TableColumn<PersonalRow>[] = [
   {
@@ -291,7 +292,7 @@ export const tabList: SearchTab[] = [
       <AuthoritySearchTable
         caption="개인명 전거 목록"
         columns={personalColumns}
-        params={{ type: "personal" }}
+        tab="personal"
       />
     ),
   },
@@ -303,7 +304,7 @@ export const tabList: SearchTab[] = [
       <AuthoritySearchTable
         caption="단체명 전거 목록"
         columns={corporationColumns}
-        params={{ type: "corporation" }}
+        tab="corporation"
       />
     ),
   },
@@ -315,7 +316,7 @@ export const tabList: SearchTab[] = [
       <AuthoritySearchTable
         caption="지리명 전거 목록"
         columns={geographyColumns}
-        params={{ type: "geography" }}
+        tab="geography"
       />
     ),
   },
@@ -327,7 +328,7 @@ export const tabList: SearchTab[] = [
       <AuthoritySearchTable
         caption="주제명 전거 목록"
         columns={subjectColumns}
-        params={{ type: "subject" }}
+        tab="subject"
       />
     ),
   },

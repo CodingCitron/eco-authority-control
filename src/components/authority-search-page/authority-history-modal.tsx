@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-import { useAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
+import { useCurrentAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
 
 import BaseModal from "../ui/base-modal";
 import { useSearchPage } from "./authority-search-page-context";
@@ -52,7 +52,7 @@ export function AuthorityHistoryModalBody({ onHide }) {
   const { selectedControlNumbers } = useSearchPage();
 
   // 1. 검색된 data를 다 가져온다.
-  const { data = [] } = useAuthoritySearchQuery();
+  const { data = [] } = useCurrentAuthoritySearchQuery();
 
   // 2. controlNumber의 index는 현재 선택된 값이다.
   const currentIndex = data.findIndex(

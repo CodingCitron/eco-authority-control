@@ -9,10 +9,9 @@ import type { ApiResponse } from "@/types/api.types";
 import type { AuthoritySearchType } from "@/types/authority.types";
 
 export interface AuthoritySearchParams {
-  type?: AuthoritySearchType; // 전거 유형
+  type?: AuthoritySearchType | "all"; // 전거 유형
   nationality?: string; // 전거 지역
   controlNumber?: string; // 제어번호 단일 검색어
-  controlNumbers?: readonly string[]; // 제어번호 다중 선택 검색 리스트
   heading?: string; // 표목명
 }
 

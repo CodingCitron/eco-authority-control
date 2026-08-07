@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+
 import {
   fetchAuthoritySearchResults,
   type AuthoritySearchResult,
@@ -7,6 +8,8 @@ import {
 } from "@/api/authority-search";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
+import { useSearchParams } from "react-router";
+import type { AuthoritySearchType } from "@/types/authority.types";
 
 export const authoritySearchQueryKeys = {
   all: ["authority-search"] as const,
@@ -26,26 +29,63 @@ export function useAuthoritySearchQuery<T extends AuthoritySearchResult>(
   });
 }
 
+const isValidType = (
+  type: string | null,
+): type is "all" | AuthoritySearchType => {
+  return ["all", "personal", "corporation", "geography", "subject"].includes(
+    type || "",
+  );
+};
+
+export function useCurrentAuthoritySearchParams() {
+  const [searchParams] = useSearchParams();
+
+  const rawType = searchParams.get("type") || "all";
+  const type = isValidType(rawType) ? rawType : "all";
+
+  const params: AuthoritySearchParams = {
+    type,
+    nationality: searchParams.get("nationality") || "",
+    controlNumber: searchParams.get("controlNumber") || "",
+    heading: searchParams.get("heading") || "",
+  };
+
+  const isSearched = Boolean(searchParams.get("isSearched"));
+
+  return {
+    params,
+    isSearched,
+  };
+}
+
+export function useCurrentAuthoritySearchQuery<
+  T extends AuthoritySearchResult = AuthoritySearchResult,
+>(options?: Omit<UseQueryOptions<T[], Error>, "queryKey" | "queryFn">) {
+  const { params, isSearched } = useCurrentAuthoritySearchParams();
+
+  return useAuthoritySearchQuery<T>(params, {
+    enabled: isSearched,
+    ...options,
+  });
+}
+
 // 선택된 전거 가져오기
 export function useAuthoritySearchByControlNumbersQuery() {
   const { currentTab, selectedControlNumbers } = useSearchPage();
 
-  return useAuthoritySearchQuery<AuthoritySearchResult>(
-    { type: currentTab.authorityType },
-    {
-      // enabled: false
-      select: useCallback(
-        (data) =>
-          selectedControlNumbers
-            .map((controlNumber) =>
-              data.find((record) => record.controlNumber === controlNumber),
-            )
-            .filter(
-              (record): record is AuthoritySearchResult => record !== undefined,
-            ),
-        [selectedControlNumbers],
-      ),
-      refetchOnMount: false,
-    },
-  );
+  return useCurrentAuthoritySearchQuery<AuthoritySearchResult>({
+    enabled: false,
+    select: useCallback(
+      (data) =>
+        selectedControlNumbers
+          .map((controlNumber) =>
+            data.find((record) => record.controlNumber === controlNumber),
+          )
+          .filter(
+            (record): record is AuthoritySearchResult => record !== undefined,
+          ),
+      [currentTab, selectedControlNumbers],
+    ),
+    refetchOnMount: false,
+  });
 }
