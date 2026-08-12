@@ -9,7 +9,7 @@ import type {
   GeographyRow,
   CorporationRow,
   SubjectRow,
-} from "@/components/authority-search-page/authority-search-result.types";
+} from "@/types/authority.types";
 
 import AuthoritySelectionCheckbox from "@/components/authority-search-page/authority-selection-checkbox";
 import type { TableColumn } from "@/components/ui/table";

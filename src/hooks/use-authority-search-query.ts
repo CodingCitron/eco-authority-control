@@ -9,7 +9,6 @@ import {
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 import { useSearchParams } from "react-router";
-import type { AuthoritySearchType } from "@/types/authority.types";
 
 export const authoritySearchQueryKeys = {
   all: ["authority-search"] as const,

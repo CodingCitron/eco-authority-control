@@ -120,8 +120,6 @@ export interface AuthoritySearchQueryParams {
   nationality?: string | null;
   /** 제어번호 단일 검색어 */
   controlNumber?: string | null;
-  /** 제어번호 다중 선택 검색 리스트 */
-  controlNumbers: string[];
   /** 표목명 */
   heading?: string | null;
 }
@@ -137,10 +135,6 @@ function parseQueryParams(request: Request): AuthoritySearchQueryParams {
     type: params.get("type") as AuthoritySearchType | null,
     nationality: params.get("nationality"),
     controlNumber: params.get("controlNumber"),
-    controlNumbers: [
-      ...params.getAll("controlNumbers"),
-      ...params.getAll("controlNumbers[]"),
-    ],
     heading: params.get("heading"),
   };
 }
@@ -169,7 +163,11 @@ export const authoritySearchHandlers = [
         return false;
       }
       // 국적 필터링
-      if (query.nationality && row.nationality !== query.nationality) {
+      if (
+        query.nationality &&
+        (query.nationality as string) !== "all" &&
+        row.nationality !== query.nationality
+      ) {
         return false;
       }
       // 제어번호 포함 여부 검색
@@ -179,15 +177,9 @@ export const authoritySearchHandlers = [
       ) {
         return false;
       }
+
       // 표목명 포함 여부 검색
       if (query.heading && !row.heading.includes(query.heading)) {
-        return false;
-      }
-      // 제어번호 목록 선택 필터링
-      if (
-        query.controlNumbers.length > 0 &&
-        !query.controlNumbers.includes(row.controlNumber)
-      ) {
         return false;
       }
 

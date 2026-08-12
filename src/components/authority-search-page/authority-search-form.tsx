@@ -12,10 +12,22 @@ import {
 
 import queryClient from "@/lib/query-client";
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search-query";
+import { useSearchPage } from "./authority-search-page-context";
+
+function getSearchScope(params: URLSearchParams) {
+  return JSON.stringify({
+    type: params.get("type") ?? "personal",
+    nationality: params.get("nationality") ?? "",
+    controlNumber: params.get("controlNumber") ?? "",
+    heading: params.get("heading") ?? "",
+  });
+}
 
 export default function AuthoritySearchForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  const { clearSelectedControlNumbers } = useSearchPage();
 
   const [type, setType] = useState(
     parseAuthoritySearchType(searchParams.get("type")),
@@ -40,27 +52,27 @@ export default function AuthoritySearchForm() {
   const handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
 
+    const nextParams = new URLSearchParams();
+    const trimmedControlNumber = controlNumber.trim();
+    const trimmedHeading = heading.trim();
+
+    if (type) nextParams.set("type", type);
+    if (nationality) nextParams.set("nationality", nationality);
+
+    if (trimmedControlNumber)
+      nextParams.set("controlNumber", trimmedControlNumber);
+
+    if (trimmedHeading) nextParams.set("heading", trimmedHeading);
+
+    nextParams.set("isSearched", "true");
+
+    const hasSearchChanged =
+      getSearchScope(searchParams) !== getSearchScope(nextParams);
+
+    if (hasSearchChanged) {
+      clearSelectedControlNumbers();
+    }
     startTransition(() => {
-      const nextParams = new URLSearchParams();
-
-      if (type) {
-        nextParams.set("type", type);
-      }
-
-      if (nationality) {
-        nextParams.set("nationality", nationality);
-      }
-
-      if (controlNumber.trim()) {
-        nextParams.set("controlNumber", controlNumber.trim());
-      }
-
-      if (heading.trim()) {
-        nextParams.set("heading", heading.trim());
-      }
-
-      nextParams.set("isSearched", "true");
-
       setSearchParams(nextParams);
     });
   };
