@@ -12,6 +12,8 @@ export interface AuthoritySearchParams {
   nationality?: string; // 전거 지역
   controlNumber?: string; // 제어번호 단일 검색어
   heading?: string; // 표목명
+  page?: number; // 페이지
+  pageSize?: number; // 표시 개수
 }
 
 export type AuthoritySearchResult =

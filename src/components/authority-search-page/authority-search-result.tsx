@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { css } from "styled-system/css";
 
 import { useCurrentAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
@@ -11,9 +11,14 @@ import type {
   SubjectRow,
 } from "@/types/authority.types";
 
+import { useSearchPage } from "./authority-search-page-context";
+
 import AuthoritySelectionCheckbox from "@/components/authority-search-page/authority-selection-checkbox";
 import type { TableColumn } from "@/components/ui/table";
 import Table from "@/components/ui/table";
+import AppPagination, {
+  type AppPaginationProps,
+} from "@/components/ui/pagination";
 
 export const personalColumns: TableColumn<PersonalRow>[] = [
   {
@@ -360,6 +365,36 @@ export default function AuthoritySearchResult() {
         rows={data}
         getRowKey={(row) => row.controlNumber}
       />
+      <div className="d-flex justify-content-center">
+        <Pagination />
+      </div>
     </div>
+  );
+}
+
+function Pagination({
+  page,
+  pageSize,
+  totalCount,
+}: Omit<AppPaginationProps, "onPageChange">) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { clearSelectedControlNumbers } = useSearchPage();
+
+  const handlePageChange = (nextPage: number) => {
+    clearSelectedControlNumbers();
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("page", String(nextPage));
+
+    setSearchParams(nextParams);
+  };
+
+  return (
+    <AppPagination
+      page={page}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      onPageChange={handlePageChange}
+    />
   );
 }
