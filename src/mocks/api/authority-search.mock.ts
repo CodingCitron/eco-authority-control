@@ -4,10 +4,14 @@ import {
   type PersonalRow,
   type AuthoritySearchType,
   authorityTypeLabels,
-} from "@/types/authority.types";
+  type CorporationRow,
+  type GeographyRow,
+  type SubjectRow,
+} from "@/types/authority-search.types";
 import type {
   AuthorityRecord,
   AuthoritySearchResponse,
+  AuthoritySearchResult,
 } from "@/api/authority-search";
 import { createApiResponse } from "@/mocks/utils";
 
@@ -15,110 +19,107 @@ import { createApiResponse } from "@/mocks/utils";
 // 1. Mock 데이터 정의 (개인명 / 단체명 / 지리명 / 주제명)
 // ==========================================
 
-const personalRows: {
-  totalCount: number;
-  data: PersonalRow[];
-} = {
-  totalCount: 2,
-  data: [
-    {
-      id: "1",
-      type: "개인명",
-      nationality: "한국",
-      heading: "김소월",
-      hanjaName: "金素月",
-      years: "1902-1934",
-      field: "한국 시;문학(372$a)1",
-      source: "김소월 시집(670$a)",
-      controlNumber: "KAC202600001",
-      creator: "홍길동",
-      modifiedBy: "김영희",
-    },
-    {
-      id: "2",
-      type: "개인명",
-      nationality: "한국",
-      heading: "김소월",
-      hanjaName: "金素月",
-      years: "1902-1934",
-      field: "한국 시;문학(372$a)2",
-      source: "김소월 전집(670$a)",
-      controlNumber: "KAC202600002",
-      creator: "이몽룡",
-      modifiedBy: "김영희",
-    },
-  ],
+const personalRows: AuthoritySearchResponse<PersonalRow> = {
+  data: {
+    page: 1,
+    display: 10,
+    total: 1,
+    totalPages: 1,
+    items: [
+      {
+        recKey: 9276158304927164,
+        acType: 0,
+        acRegionDesc: "국내",
+        headingName: "김소월",
+        hanjaName: "金素月",
+        birthDeathDate: "1902-09-07~1934-12-24",
+        activityField: "문학",
+        sourceDataFound: "한국민족문화대백과사전",
+        acControlNo: "KAC199900000001",
+        firstWorker: "admin",
+        inputDate: "2026-08-12T08:40:09.517Z",
+        lastWorker: "librarian01",
+      },
+    ],
+  },
 };
 
-const corporationRows: AuthoritySearchResponse = {
-  totalCount: 1,
-  data: [
-    {
-      id: "1",
-      type: "단체명",
-      nationality: "한국",
-      heading: "헌법재판소.헌법재판연구원",
-      organizationType: "학술단체(연구소.연구단체)",
-      established: "20110101-",
-      field: "법학(法學)(372 $a)",
-      source: "헌법 연구 자료(670 $a)",
-      controlNumber: "KAB201206266",
-      creator: "홍길동",
-      modifiedBy: "김영희",
-    },
-  ],
+const corporationRows: AuthoritySearchResponse<CorporationRow> = {
+  data: {
+    page: 1,
+    display: 10,
+    total: 1,
+    totalPages: 1,
+    items: [
+      {
+        recKey: 927615830492716,
+        acType: 1,
+        acRegionDesc: "국내",
+        headingName: "국립중앙도서관",
+        organizationType: "정부기관",
+        establishmentDate: "1945-10-15",
+        terminationDate: null,
+        activityField: "도서관",
+        sourceDataFound: "국립중앙도서관 홈페이지",
+        acControlNo: "KAC199900000002",
+        firstWorker: "admin",
+        inputDate: "2026-08-12T08:44:08.573Z",
+        lastWorker: "librarian02",
+      },
+    ],
+  },
 };
 
-const geographyRows: AuthoritySearchResponse = {
-  totalCount: 1,
-  data: [
-    {
-      id: "1",
-      type: "지리명",
-      nationality: "한국",
-      heading: "울릉도[鬱陵島]",
-      source: "서울특별시 자료(670 $a)",
-      controlNumber: "KAG201206266",
-      creator: "홍길동",
-      modifiedBy: "김영희",
-    },
-  ],
+const geographyRows: AuthoritySearchResponse<GeographyRow> = {
+  data: {
+    page: 1,
+    display: 10,
+    total: 1,
+    totalPages: 1,
+    items: [
+      {
+        recKey: 9276158304927162,
+        acType: 5,
+        acRegionDesc: "국내",
+        headingName: "서울특별시",
+        sourceDataFound: "대한민국 행정구역",
+        acControlNo: "KAC200000000002",
+        firstWorker: "admin",
+        inputDate: "2026-08-12T08:45:33.295Z",
+        lastWorker: "librarian04",
+      },
+    ],
+  },
 };
 
-const subjectRows: AuthoritySearchResponse = {
-  totalCount: 2,
-  data: [
-    {
-      id: "1",
-      type: "주제명",
-      nationality: "한국",
-      heading: "부작위(不作爲)",
-      source: "법률용어사전(670 $a)",
-      note: "이 표목은 법률상 의무가 있는 자가 ...",
-      controlNumber: "KSH201400013",
-      creator: "홍길동",
-      modifiedBy: "김영희",
-    },
-    {
-      id: "2",
-      type: "주제명",
-      nationality: "한국",
-      heading: "부작위",
-      source: "",
-      note: "",
-      controlNumber: "KSH201300011",
-      creator: "관리자",
-      modifiedBy: "김영신",
-    },
-  ],
+const subjectRows: AuthoritySearchResponse<SubjectRow> = {
+  data: {
+    page: 1,
+    display: 10,
+    total: 1,
+    totalPages: 1,
+    items: [
+      {
+        recKey: 9276158304927166,
+        acType: 4,
+        acRegionDesc: "국내",
+        headingName: "인공지능",
+        sourceDataFound: "국립중앙도서관 주제명표목표",
+        acControlNo: "KAC200000000001",
+        firstWorker: "admin",
+        inputDate: "2026-08-12T08:45:57.440Z",
+        lastWorker: "librarian03",
+      },
+    ],
+  },
 };
 
 /** 전체 전거 레코드 Mock 데이터 */
 export const authoritySearchMockData: AuthorityRecord[] = [
-  ...personalRows.data,
-  ...corporationRows.data,
-  ...geographyRows.data,
-  ...subjectRows.data,
+  ...personalRows.data.items,
+  ...corporationRows.data.items,
+  ...geographyRows.data.items,
+  ...subjectRows.data.items,
 ];
 
 // ==========================================
@@ -177,7 +178,7 @@ export const authoritySearchHandlers = [
       if (
         query.type &&
         query.type !== "0" &&
-        row.type !== authorityTypeLabels[query.type]
+        row.acType !== authorityTypeLabels[query.type]
       ) {
         return false;
       }
@@ -185,20 +186,21 @@ export const authoritySearchHandlers = [
       if (
         query.nationality &&
         query.nationality !== "all" &&
-        row.nationality !== query.nationality
+        row.acType !== query.nationality
       ) {
         return false;
       }
+
       // 제어번호 포함 여부 검색
       if (
         query.controlNumber &&
-        !row.controlNumber.includes(query.controlNumber)
+        !row.acControlNo.includes(query.controlNumber)
       ) {
         return false;
       }
 
       // 표목명 포함 여부 검색
-      if (query.heading && !row.heading.includes(query.heading)) {
+      if (query.heading && !row.headingName.includes(query.heading)) {
         return false;
       }
 

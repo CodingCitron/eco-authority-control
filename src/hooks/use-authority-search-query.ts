@@ -90,7 +90,7 @@ export function useAuthoritySearchByControlNumbersQuery() {
         console.log(data);
         return selectedControlNumbers
           .map((controlNumber) =>
-            data.find((record) => record.controlNumber === controlNumber),
+            data.find((record) => record.acControlNo === controlNumber),
           )
           .filter((record): record is AuthorityRecord => record !== undefined);
       },

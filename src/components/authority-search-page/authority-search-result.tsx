@@ -8,7 +8,7 @@ import type {
   GeographyRow,
   CorporationRow,
   SubjectRow,
-} from "@/types/authority.types";
+} from "@/types/authority-search.types";
 
 import { useSearchPage } from "./authority-search-page-context";
 
@@ -20,57 +20,69 @@ import AppPagination from "@/components/ui/pagination";
 export const personalColumns: TableColumn<PersonalRow>[] = [
   {
     header: "no",
-    cell: (row) => row.id,
-    sortValue: (row) => row.id,
+    cell: (row) => row.recKey,
+    sortValue: (row) => row.recKey,
   },
   {
     header: "선택",
     cell: (row) => (
       <AuthoritySelectionCheckbox
-        controlNumber={row.controlNumber}
-        heading={row.heading}
-        inputId={`check-${row.controlNumber}`}
+        controlNumber={row.acControlNo}
+        heading={row.headingName}
+        inputId={`check-${row.acControlNo}`}
       />
     ),
   },
-  { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
+  {
+    header: "전거유형",
+    cell: (row) => row.acType,
+    sortValue: (row) => row.acType,
+  },
   {
     header: "전거지역",
-    cell: (row) => row.nationality,
-    sortValue: (row) => row.nationality,
+    cell: (row) => row.acRegionDesc,
+    sortValue: (row) => row.acRegionDesc,
   },
   {
     header: "채택표목",
     className: "text-start fw-bold text-primary",
-    cell: (row) => row.heading,
-    sortValue: (row) => row.heading,
+    cell: (row) => row.headingName,
+    sortValue: (row) => row.headingName,
   },
   {
     header: "한자명",
     cell: (row) => row.hanjaName,
     sortValue: (row) => row.hanjaName,
   },
-  { header: "생몰년", cell: (row) => row.years, sortValue: (row) => row.years },
-  { header: "분야", cell: (row) => row.field, sortValue: (row) => row.field },
+  {
+    header: "생몰년",
+    cell: (row) => row.birthDeathDate,
+    sortValue: (row) => row.birthDeathDate,
+  },
+  {
+    header: "분야",
+    cell: (row) => row.activityField,
+    sortValue: (row) => row.activityField,
+  },
   {
     header: "정보원",
-    cell: (row) => row.source,
-    sortValue: (row) => row.source,
+    cell: (row) => row.sourceDataFound,
+    sortValue: (row) => row.sourceDataFound,
   },
   {
     header: "제어번호",
-    cell: (row) => row.controlNumber,
-    sortValue: (row) => row.controlNumber,
+    cell: (row) => row.acControlNo,
+    sortValue: (row) => row.acControlNo,
   },
   {
     header: "입력자",
-    cell: (row) => row.creator,
-    sortValue: (row) => row.creator,
+    cell: (row) => row.firstWorker,
+    sortValue: (row) => row.firstWorker,
   },
   {
     header: "수정자",
-    cell: (row) => row.modifiedBy,
-    sortValue: (row) => row.modifiedBy,
+    cell: (row) => row.lastWorker,
+    sortValue: (row) => row.lastWorker,
   },
   {
     header: "관리",
@@ -91,27 +103,31 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
 ];
 
 export const corporationColumns: TableColumn<CorporationRow>[] = [
-  { header: "no", cell: (row) => row.id, sortValue: (row) => row.id },
+  { header: "no", cell: (row) => row.recKey, sortValue: (row) => row.recKey },
   {
     header: "선택",
     cell: (row) => (
       <AuthoritySelectionCheckbox
-        controlNumber={row.controlNumber}
-        heading={row.heading}
-        inputId={`check-corp-${row.controlNumber}`}
+        controlNumber={row.acControlNo}
+        heading={row.headingName}
+        inputId={`check-corp-${row.acControlNo}`}
       />
     ),
   },
-  { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
+  {
+    header: "전거유형",
+    cell: (row) => row.acType,
+    sortValue: (row) => row.acType,
+  },
   {
     header: "전거지역",
-    cell: (row) => row.nationality,
-    sortValue: (row) => row.nationality,
+    cell: (row) => row.acRegionDesc,
+    sortValue: (row) => row.acRegionDesc,
   },
   {
     header: "채택표목",
-    cell: (row) => row.heading,
-    sortValue: (row) => row.heading,
+    cell: (row) => row.headingName,
+    sortValue: (row) => row.headingName,
     className: "text-start fw-bold text-primary",
   },
   {
@@ -121,29 +137,33 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
   },
   {
     header: "설립일/폐쇄일",
-    cell: (row) => row.established,
-    sortValue: (row) => row.established,
+    cell: (row) => row.establishmentDate,
+    sortValue: (row) => row.establishmentDate,
   },
-  { header: "분야", cell: (row) => row.field, sortValue: (row) => row.field },
+  {
+    header: "분야",
+    cell: (row) => row.activityField,
+    sortValue: (row) => row.activityField,
+  },
   {
     header: "정보원",
-    cell: (row) => row.source,
-    sortValue: (row) => row.source,
+    cell: (row) => row.sourceDataFound,
+    sortValue: (row) => row.sourceDataFound,
   },
   {
     header: "제어번호",
-    cell: (row) => row.controlNumber,
-    sortValue: (row) => row.controlNumber,
+    cell: (row) => row.acControlNo,
+    sortValue: (row) => row.acControlNo,
   },
   {
     header: "입력자",
-    cell: (row) => row.creator,
-    sortValue: (row) => row.creator,
+    cell: (row) => row.firstWorker,
+    sortValue: (row) => row.firstWorker,
   },
   {
     header: "수정자",
-    cell: (row) => row.modifiedBy,
-    sortValue: (row) => row.modifiedBy,
+    cell: (row) => row.lastWorker,
+    sortValue: (row) => row.lastWorker,
   },
   {
     header: "관리",
@@ -161,48 +181,52 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
 ];
 
 export const geographyColumns: TableColumn<GeographyRow>[] = [
-  { header: "no", cell: (row) => row.id, sortValue: (row) => row.id },
+  { header: "no", cell: (row) => row.recKey, sortValue: (row) => row.recKey },
   {
     header: "선택",
     cell: (row) => (
       <AuthoritySelectionCheckbox
-        controlNumber={row.controlNumber}
-        heading={row.heading}
-        inputId={`check-geo-${row.controlNumber}`}
+        controlNumber={row.acControlNo}
+        heading={row.headingName}
+        inputId={`check-geo-${row.acControlNo}`}
       />
     ),
   },
-  { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
+  {
+    header: "전거유형",
+    cell: (row) => row.acType,
+    sortValue: (row) => row.acType,
+  },
   {
     header: "전거지역",
-    cell: (row) => row.nationality,
-    sortValue: (row) => row.nationality,
+    cell: (row) => row.acRegionDesc,
+    sortValue: (row) => row.acRegionDesc,
   },
   {
     header: "채택표목",
-    cell: (row) => row.heading,
-    sortValue: (row) => row.heading,
+    cell: (row) => row.headingName,
+    sortValue: (row) => row.headingName,
     className: "text-start fw-bold text-primary",
   },
   {
     header: "정보원",
-    cell: (row) => row.source,
-    sortValue: (row) => row.source,
+    cell: (row) => row.sourceDataFound,
+    sortValue: (row) => row.sourceDataFound,
   },
   {
     header: "제어번호",
-    cell: (row) => row.controlNumber,
-    sortValue: (row) => row.controlNumber,
+    cell: (row) => row.acControlNo,
+    sortValue: (row) => row.acControlNo,
   },
   {
     header: "입력자",
-    cell: (row) => row.creator,
-    sortValue: (row) => row.creator,
+    cell: (row) => row.firstWorker,
+    sortValue: (row) => row.firstWorker,
   },
   {
     header: "수정자",
-    cell: (row) => row.modifiedBy,
-    sortValue: (row) => row.modifiedBy,
+    cell: (row) => row.lastWorker,
+    sortValue: (row) => row.lastWorker,
   },
   {
     header: "관리",
@@ -220,54 +244,58 @@ export const geographyColumns: TableColumn<GeographyRow>[] = [
 ];
 
 export const subjectColumns: TableColumn<SubjectRow>[] = [
-  { header: "no", cell: (row) => row.id, sortValue: (row) => row.id },
+  { header: "no", cell: (row) => row.recKey, sortValue: (row) => row.recKey },
   {
     header: "선택",
     cell: (row) => (
       <AuthoritySelectionCheckbox
-        controlNumber={row.controlNumber}
-        heading={row.heading}
-        inputId={`check-subj-${row.controlNumber}`}
+        controlNumber={row.acControlNo}
+        heading={row.headingName}
+        inputId={`check-subj-${row.acControlNo}`}
       />
     ),
   },
-  { header: "전거유형", cell: (row) => row.type, sortValue: (row) => row.type },
+  {
+    header: "전거유형",
+    cell: (row) => row.acType,
+    sortValue: (row) => row.acType,
+  },
   {
     header: "전거지역",
-    cell: (row) => row.nationality,
-    sortValue: (row) => row.nationality,
+    cell: (row) => row.acRegionDesc,
+    sortValue: (row) => row.acRegionDesc,
   },
   {
     header: "채택표목",
-    cell: (row) => row.heading,
-    sortValue: (row) => row.heading,
+    cell: (row) => row.headingName,
+    sortValue: (row) => row.headingName,
     className: "text-start fw-bold text-primary",
   },
   {
     header: "정보원",
-    cell: (row) => row.source,
-    sortValue: (row) => row.source,
+    cell: (row) => row.sourceDataFound,
+    sortValue: (row) => row.sourceDataFound,
   },
-  {
-    header: "일반주기",
-    cell: (row) => <div className="text-truncate">{row.note}</div>,
-    sortValue: (row) => row.note,
-    className: css({ maxWidth: "200px" }),
-  },
+  // {
+  //   header: "일반주기",
+  //   cell: (row) => <div className="text-truncate">{row.note}</div>,
+  //   sortValue: (row) => row.note,
+  //   className: css({ maxWidth: "200px" }),
+  // },
   {
     header: "제어번호",
-    cell: (row) => row.controlNumber,
-    sortValue: (row) => row.controlNumber,
+    cell: (row) => row.acControlNo,
+    sortValue: (row) => row.acControlNo,
   },
   {
     header: "입력자",
-    cell: (row) => row.creator,
-    sortValue: (row) => row.creator,
+    cell: (row) => row.firstWorker,
+    sortValue: (row) => row.firstWorker,
   },
   {
     header: "수정자",
-    cell: (row) => row.modifiedBy,
-    sortValue: (row) => row.modifiedBy,
+    cell: (row) => row.lastWorker,
+    sortValue: (row) => row.lastWorker,
   },
   {
     header: "관리",
@@ -372,7 +400,7 @@ export default function AuthoritySearchResult() {
         caption={config.caption}
         columns={config.columns}
         rows={contents}
-        getRowKey={(row) => row.controlNumber}
+        getRowKey={(row) => row.acControlNo}
       />
       <div className="d-flex justify-content-center">
         <AppPagination

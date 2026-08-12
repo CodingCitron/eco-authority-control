@@ -13,7 +13,7 @@ export default function AuthoritySelectionControl() {
   const contents = data?.data ?? [];
 
   const controlNumbers = useMemo(
-    () => contents.map((record) => record.controlNumber),
+    () => contents.map((record) => record.acControlNo),
     [contents],
   );
   const selectedCount = controlNumbers.filter((controlNumber) =>

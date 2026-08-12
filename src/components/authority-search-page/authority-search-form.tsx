@@ -8,7 +8,7 @@ import {
   type AuthoritySearchType,
   authorityTypeLabels,
   authorityNationalLabels,
-} from "@/types/authority.types";
+} from "@/types/authority-search.types";
 
 import queryClient from "@/lib/query-client";
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search-query";
@@ -16,7 +16,7 @@ import { useSearchPage } from "./authority-search-page-context";
 
 function getSearchScope(params: URLSearchParams) {
   return JSON.stringify({
-    type: params.get("type") ?? "personal",
+    type: params.get("type") ?? "0",
     nationality: params.get("nationality") ?? "",
     controlNumber: params.get("controlNumber") ?? "",
     heading: params.get("heading") ?? "",
@@ -78,7 +78,7 @@ export default function AuthoritySearchForm() {
   };
 
   const handleReset = () => {
-    setType("personal");
+    setType("0");
     setNationality("all");
     setControlNumber("");
     setHeading("");

@@ -1,72 +1,52 @@
-// 개인형
-export interface PersonalRow {
-  id: string;
-  type: string;
-  nationality: string;
-  heading: string;
+// 0 - 개인형, 1 - 단체명, 4 - 주제명, 5 - 지리명
+
+export interface BaseRow {
+  recKey: number;
+  acType: number;
+  acRegionDesc: string;
+  headingName: string;
+  acControlNo: string;
+  firstWorker: string;
+  inputDate: string;
+  lastWorker: string;
+}
+
+// 개인형 - 0
+export interface PersonalRow extends BaseRow {
   hanjaName: string;
-  years: string;
-  field: string;
-  source: string;
-  controlNumber: string;
-  creator: string;
-  modifiedBy: string;
+  birthDeathDate: string;
+  activityField: string;
+  sourceDataFound: string;
 }
 
-// 단체형
-export interface CorporationRow {
-  id: string;
-  type: string;
-  nationality: string;
-  heading: string;
+// 단체형 - 1
+export interface CorporationRow extends BaseRow {
   organizationType: string;
-  established: string;
-  field: string;
-  source: string;
-  controlNumber: string;
-  creator: string;
-  modifiedBy: string;
+  establishmentDate: string;
+  terminationDate: string;
+  activityField: string;
+  sourceDataFound: string;
 }
 
-// 지리형
-export interface GeographyRow {
-  id: string;
-  type: string;
-  nationality: string;
-  heading: string;
-  source: string;
-  controlNumber: string;
-  creator: string;
-  modifiedBy: string;
+// 지리형 - 5
+export interface GeographyRow extends BaseRow {
+  sourceDataFound: string;
 }
 
-// 주제형
-export interface SubjectRow {
-  id: string;
-  type: string;
-  nationality: string;
-  heading: string;
-  source: string;
-  note: string;
-  controlNumber: string;
-  creator: string;
-  modifiedBy: string;
+// 주제형 - 4
+export interface SubjectRow extends BaseRow {
+  sourceDataFound: string;
 }
 
-export const authoritySearchTypes = [
-  "personal",
-  "corporation",
-  "geography",
-  "subject",
-] as const;
+export const authoritySearchTypes = ["0", "1", "5", "4"] as const;
 
 export const authorityNationalities = ["all", "한국", "동양", "서양"] as const;
 
 export const authorityTypeLabels: Record<AuthoritySearchType, string> = {
-  personal: "개인명",
-  corporation: "단체명",
-  geography: "지리명",
-  subject: "주제명",
+  "0": "개인명",
+  "1": "단체명",
+  "5": "지리명",
+  "4": "주제명",
 };
 
 export const authorityNationalLabels: Record<
@@ -101,7 +81,7 @@ export const isAuthoritySearchNationality = (
 export function parseAuthoritySearchType(
   value: string | null,
 ): AuthoritySearchType {
-  return isAuthoritySearchType(value) ? value : "personal";
+  return isAuthoritySearchType(value) ? value : "0";
 }
 
 export function parseAuthoritySearchNationality(

@@ -3,7 +3,7 @@ import type {
   GeographyRow,
   CorporationRow,
   SubjectRow,
-} from "@/types/authority.types";
+} from "@/types/authority-search.types";
 import { apiClient } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api.types";
 
@@ -22,28 +22,32 @@ export type AuthorityRecord =
   | GeographyRow
   | SubjectRow;
 
-export type AuthoritySearchResponse = {
-  totalCount: number;
-  data: AuthorityRecord[];
+export type AuthoritySearchResponse<T> = {
+  data: {
+    page: number;
+    display: number;
+    total: number; // totalCount
+    totalPages: number;
+    items: T[];
+  };
 };
 
 export type AuthoritySearchResult = AuthorityRecord;
 
 export async function fetchAuthoritySearch(
   params: AuthoritySearchParams,
-): Promise<AuthoritySearchResponse> {
-  const { data } = await apiClient.get<ApiResponse<AuthoritySearchResponse>>(
-    "/ac/search",
-    { params },
-  );
+): Promise<AuthoritySearchResponse<AuthorityRecord>> {
+  const { data } = await apiClient.get<
+    ApiResponse<AuthoritySearchResponse<AuthorityRecord>>
+  >("/ac/search", { params });
 
   if (data?.result?.code !== "Y") {
     throw new Error(data?.result?.message || "전거 검색 요청 실패");
   }
 
   if (
-    typeof data?.contents?.totalCount === "number" &&
-    Array.isArray(data.contents.data)
+    typeof data?.contents?.data?.total === "number" &&
+    Array.isArray(data.contents.data.items)
   ) {
     return data.contents;
   }

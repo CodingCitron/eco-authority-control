@@ -58,7 +58,7 @@ export function AuthorityHistoryModalBody({ onHide }) {
 
   // 2. controlNumber의 index는 현재 선택된 값이다.
   const currentIndex = contents.findIndex(
-    (item) => item.controlNumber === selectedControlNumbers[0],
+    (item) => item.acControlNo === selectedControlNumbers[0],
   );
 
   // 3. 히스토리 호출 api 필요
