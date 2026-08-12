@@ -10,8 +10,8 @@ export default function AuthoritySearchForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const [type, setType] = useState<AuthoritySearchType | "all">(
-    (searchParams.get("type") as AuthoritySearchType | "all") || "all",
+  const [type, setType] = useState<AuthoritySearchType>(
+    (searchParams.get("type") as AuthoritySearchType) || "personal",
   );
   const [nationality, setNationality] = useState(
     searchParams.get("nationality") || "",
@@ -22,7 +22,7 @@ export default function AuthoritySearchForm() {
   const [heading, setHeading] = useState(searchParams.get("heading") || "");
 
   useEffect(() => {
-    setType((searchParams.get("type") as AuthoritySearchType | "all") || "all");
+    setType((searchParams.get("type") as AuthoritySearchType) || "personal");
     setNationality(searchParams.get("nationality") || "");
     setControlNumber(searchParams.get("controlNumber") || "");
     setHeading(searchParams.get("heading") || "");
@@ -34,10 +34,8 @@ export default function AuthoritySearchForm() {
     startTransition(() => {
       const nextParams = new URLSearchParams();
 
-      if (type && type !== "all") {
+      if (type) {
         nextParams.set("type", type);
-      } else {
-        nextParams.set("type", "all");
       }
 
       if (nationality) {
@@ -59,7 +57,7 @@ export default function AuthoritySearchForm() {
   };
 
   const handleReset = () => {
-    setType("all");
+    setType("personal");
     setNationality("");
     setControlNumber("");
     setHeading("");
@@ -89,11 +87,8 @@ export default function AuthoritySearchForm() {
             className="form-select form-select-sm"
             id="searchType"
             value={type}
-            onChange={(e) =>
-              setType(e.target.value as AuthoritySearchType | "all")
-            }
+            onChange={(e) => setType(e.target.value as AuthoritySearchType)}
           >
-            <option value="all">전체</option>
             {Object.entries(authorityTypeLabels).map(([key, value]) => (
               <option key={key} value={key}>
                 {value}

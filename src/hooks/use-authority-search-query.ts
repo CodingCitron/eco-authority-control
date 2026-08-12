@@ -29,19 +29,21 @@ export function useAuthoritySearchQuery<T extends AuthoritySearchResult>(
   });
 }
 
-const isValidType = (
+export const isValidType = (
   type: string | null,
-): type is "all" | AuthoritySearchType => {
-  return ["all", "personal", "corporation", "geography", "subject"].includes(
+): type is AuthoritySearchType => {
+  return ["personal", "corporation", "geography", "subject"].includes(
     type || "",
   );
 };
 
+const defaultAuthoritySearchType: AuthoritySearchType = "personal";
+
 export function useCurrentAuthoritySearchParams() {
   const [searchParams] = useSearchParams();
 
-  const rawType = searchParams.get("type") || "all";
-  const type = isValidType(rawType) ? rawType : "all";
+  const rawType = searchParams.get("type");
+  const type = isValidType(rawType) ? rawType : defaultAuthoritySearchType;
 
   const params: AuthoritySearchParams = {
     type,
