@@ -16,17 +16,24 @@ export interface AuthoritySearchParams {
   pageSize?: number; // 표시 개수
 }
 
-export type AuthoritySearchResult =
+export type AuthorityRecord =
   | PersonalRow
   | CorporationRow
   | GeographyRow
   | SubjectRow;
 
-export async function fetchAuthoritySearchResults(
+export type AuthoritySearchResponse = {
+  totalCount: number;
+  data: AuthorityRecord[];
+};
+
+export type AuthoritySearchResult = AuthorityRecord;
+
+export async function fetchAuthoritySearch(
   params: AuthoritySearchParams,
-): Promise<AuthoritySearchResult[]> {
-  const { data } = await apiClient.get<ApiResponse<AuthoritySearchResult[]>>(
-    "/authority-search",
+): Promise<AuthoritySearchResponse> {
+  const { data } = await apiClient.get<ApiResponse<AuthoritySearchResponse>>(
+    "/ac/search",
     { params },
   );
 
@@ -34,7 +41,10 @@ export async function fetchAuthoritySearchResults(
     throw new Error(data?.result?.message || "전거 검색 요청 실패");
   }
 
-  if (Array.isArray(data?.contents)) {
+  if (
+    typeof data?.contents?.totalCount === "number" &&
+    Array.isArray(data.contents.data)
+  ) {
     return data.contents;
   }
 

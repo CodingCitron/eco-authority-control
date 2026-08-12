@@ -75,7 +75,7 @@ pnpm test src/api/authority-search.test.ts
 컴포넌트 → React Query → Axios API 함수 → MSW handler
 ```
 
-현재 `fetchAuthoritySearchResults`는 Axios로 `/api/authority-search`를 호출하며, 개발 환경에서는 MSW가
+현재 `fetchAuthoritySearch`는 Axios로 `/api/authority-search`를 호출하며, 개발 환경에서는 MSW가
 `src/mocks/handlers.ts`의 `authoritySearchMockData` 응답으로 이를 처리한다. 실제 백엔드가 준비되면
 `VITE_API_BASE_URL`을 실제 API 주소로 설정하고 `VITE_USE_MSW=false`로 실행한다.
 

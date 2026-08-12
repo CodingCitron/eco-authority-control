@@ -2,9 +2,10 @@ import { useCallback } from "react";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
 import {
-  fetchAuthoritySearchResults,
-  type AuthoritySearchResult,
+  fetchAuthoritySearch,
   type AuthoritySearchParams,
+  type AuthorityRecord,
+  type AuthoritySearchResponse,
 } from "@/api/authority-search";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
@@ -17,13 +18,19 @@ export const authoritySearchQueryKeys = {
     [...authoritySearchQueryKeys.lists(), params] as const,
 };
 
-export function useAuthoritySearchQuery<T extends AuthoritySearchResult>(
-  params: AuthoritySearchParams = {},
-  options?: Omit<UseQueryOptions<T[], Error>, "queryKey" | "queryFn">,
+export function useAuthoritySearchQuery<
+  TData = AuthoritySearchResponse,
+  TSelected = TData,
+>(
+  params: AuthoritySearchParams,
+  options?: Omit<
+    UseQueryOptions<TData, Error, TSelected>,
+    "queryKey" | "queryFn"
+  >,
 ) {
-  return useQuery<T[]>({
+  return useQuery<TData, Error, TSelected>({
     queryKey: authoritySearchQueryKeys.list(params),
-    queryFn: () => fetchAuthoritySearchResults(params) as Promise<T[]>,
+    queryFn: () => fetchAuthoritySearch(params) as Promise<TData>,
     ...options,
   });
 }
@@ -46,13 +53,21 @@ export function useCurrentAuthoritySearchParams() {
   };
 }
 
+type AuthoritySearchQueryOptions<TSelected> = Omit<
+  UseQueryOptions<AuthoritySearchResponse, Error, TSelected>,
+  "queryKey" | "queryFn"
+>;
+
 // 현재 검색된 전거 데이터
 export function useCurrentAuthoritySearchQuery<
-  T extends AuthoritySearchResult = AuthoritySearchResult,
->(options?: Omit<UseQueryOptions<T[], Error>, "queryKey" | "queryFn">) {
+  TSelected = AuthoritySearchResponse,
+>(options?: AuthoritySearchQueryOptions<TSelected>) {
   const { params, isSearched } = useCurrentAuthoritySearchParams();
 
-  const queryResult = useAuthoritySearchQuery<T>(params, {
+  const queryResult = useAuthoritySearchQuery<
+    AuthoritySearchResponse,
+    TSelected
+  >(params, {
     enabled: isSearched,
     ...options,
   });
@@ -68,17 +83,17 @@ export function useCurrentAuthoritySearchQuery<
 export function useAuthoritySearchByControlNumbersQuery() {
   const { selectedControlNumbers } = useSearchPage();
 
-  return useCurrentAuthoritySearchQuery<AuthoritySearchResult>({
+  return useCurrentAuthoritySearchQuery<AuthorityRecord[]>({
     enabled: false,
     select: useCallback(
-      (data) =>
-        selectedControlNumbers
+      ({ data }) => {
+        console.log(data);
+        return selectedControlNumbers
           .map((controlNumber) =>
             data.find((record) => record.controlNumber === controlNumber),
           )
-          .filter(
-            (record): record is AuthoritySearchResult => record !== undefined,
-          ),
+          .filter((record): record is AuthorityRecord => record !== undefined);
+      },
       [selectedControlNumbers],
     ),
     refetchOnMount: false,

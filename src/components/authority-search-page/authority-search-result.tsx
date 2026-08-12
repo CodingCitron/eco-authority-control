@@ -3,7 +3,6 @@ import { css } from "styled-system/css";
 
 import { useCurrentAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
 
-import type { AuthoritySearchResult } from "@/api/authority-search";
 import type {
   PersonalRow,
   GeographyRow,
@@ -16,9 +15,7 @@ import { useSearchPage } from "./authority-search-page-context";
 import AuthoritySelectionCheckbox from "@/components/authority-search-page/authority-selection-checkbox";
 import type { TableColumn } from "@/components/ui/table";
 import Table from "@/components/ui/table";
-import AppPagination, {
-  type AppPaginationProps,
-} from "@/components/ui/pagination";
+import AppPagination from "@/components/ui/pagination";
 
 export const personalColumns: TableColumn<PersonalRow>[] = [
   {
@@ -310,13 +307,11 @@ const tableConfig = {
 };
 
 export default function AuthoritySearchResult() {
-  const {
-    type,
-    data = [],
-    isLoading,
-    isError,
-    isSearched,
-  } = useCurrentAuthoritySearchQuery();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { clearSelectedControlNumbers } = useSearchPage();
+
+  const { type, data, isLoading, isError, isSearched } =
+    useCurrentAuthoritySearchQuery();
 
   if (!isSearched) {
     return (
@@ -347,7 +342,10 @@ export default function AuthoritySearchResult() {
     );
   }
 
-  if (data.length === 0) {
+  const contents = data?.data ?? [];
+  const totalCount = data?.totalCount ?? 0;
+
+  if (contents.length === 0) {
     return (
       <div className="pt-2">
         <p>검색된 전거 데이터가 없습니다.</p>
@@ -356,29 +354,8 @@ export default function AuthoritySearchResult() {
   }
 
   const config = tableConfig[type];
-
-  return (
-    <div className="pt-2 overflow-auto">
-      <Table
-        caption={config.caption}
-        columns={config.columns}
-        rows={data}
-        getRowKey={(row) => row.controlNumber}
-      />
-      <div className="d-flex justify-content-center">
-        <Pagination />
-      </div>
-    </div>
-  );
-}
-
-function Pagination({
-  page,
-  pageSize,
-  totalCount,
-}: Omit<AppPaginationProps, "onPageChange">) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { clearSelectedControlNumbers } = useSearchPage();
+  const page = Number(searchParams.get("page")) || 1;
+  const pageSize = Number(searchParams.get("pageSize")) || 10;
 
   const handlePageChange = (nextPage: number) => {
     clearSelectedControlNumbers();
@@ -390,11 +367,21 @@ function Pagination({
   };
 
   return (
-    <AppPagination
-      page={page}
-      pageSize={pageSize}
-      totalCount={totalCount}
-      onPageChange={handlePageChange}
-    />
+    <div className="pt-2 overflow-auto">
+      <Table
+        caption={config.caption}
+        columns={config.columns}
+        rows={contents}
+        getRowKey={(row) => row.controlNumber}
+      />
+      <div className="d-flex justify-content-center">
+        <AppPagination
+          page={page}
+          pageSize={pageSize}
+          totalCount={totalCount}
+          onPageChange={handlePageChange}
+        />
+      </div>
+    </div>
   );
 }

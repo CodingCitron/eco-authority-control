@@ -8,11 +8,13 @@ export default function AuthoritySelectionControl() {
   const checkboxRef = useRef<HTMLInputElement>(null);
   const { selectedControlNumbers, toggleAllControlNumbers } = useSearchPage();
 
-  const { data = [] } = useCurrentAuthoritySearchQuery();
+  const { data } = useCurrentAuthoritySearchQuery();
+
+  const contents = data?.data ?? [];
 
   const controlNumbers = useMemo(
-    () => data.map((record) => record.controlNumber),
-    [data],
+    () => contents.map((record) => record.controlNumber),
+    [contents],
   );
   const selectedCount = controlNumbers.filter((controlNumber) =>
     selectedControlNumbers.includes(controlNumber),
