@@ -29,24 +29,11 @@ export function useAuthoritySearchQuery<T extends AuthoritySearchResult>(
   });
 }
 
-export const isValidType = (
-  type: string | null,
-): type is AuthoritySearchType => {
-  return ["personal", "corporation", "geography", "subject"].includes(
-    type || "",
-  );
-};
-
-const defaultAuthoritySearchType: AuthoritySearchType = "personal";
-
 export function useCurrentAuthoritySearchParams() {
   const [searchParams] = useSearchParams();
 
-  const rawType = searchParams.get("type");
-  const type = isValidType(rawType) ? rawType : defaultAuthoritySearchType;
-
   const params: AuthoritySearchParams = {
-    type,
+    type: searchParams.get("type") || "",
     nationality: searchParams.get("nationality") || "",
     controlNumber: searchParams.get("controlNumber") || "",
     heading: searchParams.get("heading") || "",
@@ -73,13 +60,14 @@ export function useCurrentAuthoritySearchQuery<
 
   return {
     ...queryResult,
+    type: params.type,
     isSearched,
   };
 }
 
 // 선택된 전거 데이터 가져오기
 export function useAuthoritySearchByControlNumbersQuery() {
-  const { currentTab, selectedControlNumbers } = useSearchPage();
+  const { selectedControlNumbers } = useSearchPage();
 
   return useCurrentAuthoritySearchQuery<AuthoritySearchResult>({
     enabled: false,
@@ -92,7 +80,7 @@ export function useAuthoritySearchByControlNumbersQuery() {
           .filter(
             (record): record is AuthoritySearchResult => record !== undefined,
           ),
-      [currentTab, selectedControlNumbers],
+      [selectedControlNumbers],
     ),
     refetchOnMount: false,
   });

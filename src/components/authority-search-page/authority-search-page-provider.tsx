@@ -1,13 +1,8 @@
 import { useCallback, useState, type ReactNode } from "react";
 
-import {
-  SearchPageContext,
-  type SearchTab,
-} from "@/components/authority-search-page/authority-search-page-context";
-import { tabList } from "@/components/authority-search-page/authority-search-page-tabs";
+import { SearchPageContext } from "@/components/authority-search-page/authority-search-page-context";
 
 export function SearchPageProvider({ children }: { children: ReactNode }) {
-  const [currentTab, setCurrentTab] = useState<SearchTab>(tabList[0]);
   const [selectedControlNumbers, setSelectedControlNumbers] = useState<
     string[]
   >([]);
@@ -48,19 +43,9 @@ export function SearchPageProvider({ children }: { children: ReactNode }) {
     setSelectedControlNumbers([]);
   }, []);
 
-  const changeCurrentTab = useCallback(
-    (tab: SearchTab) => {
-      setCurrentTab(tab);
-      clearSelectedControlNumbers();
-    },
-    [clearSelectedControlNumbers],
-  );
-
   return (
     <SearchPageContext.Provider
       value={{
-        currentTab,
-        setCurrentTab: changeCurrentTab,
         selectedControlNumbers,
         toggleSelectedControlNumber,
         toggleAllControlNumbers,

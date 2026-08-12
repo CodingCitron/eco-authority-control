@@ -1,17 +1,15 @@
 import { http } from "msw";
 
 import {
+  type PersonalRow,
+  type GeographyRow,
+  type CorporationRow,
+  type SubjectRow,
+  type AuthoritySearchType,
   authorityTypeLabels,
-  type AuthoritySearchResult,
-} from "@/api/authority-search";
-import type {
-  PersonalRow,
-  GeographyRow,
-  CorporationRow,
-  SubjectRow,
-} from "@/components/authority-search-page/authority-search-result.types";
+} from "@/types/authority.types";
+import type { AuthoritySearchResult } from "@/api/authority-search";
 import { createApiResponse } from "@/mocks/utils";
-import type { AuthoritySearchType } from "@/types/authority.types";
 
 // ==========================================
 // 1. Mock 데이터 정의 (개인명 / 단체명 / 지리명 / 주제명)

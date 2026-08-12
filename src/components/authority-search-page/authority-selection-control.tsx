@@ -6,8 +6,7 @@ import { useSearchPage } from "@/components/authority-search-page/authority-sear
 
 export default function AuthoritySelectionControl() {
   const checkboxRef = useRef<HTMLInputElement>(null);
-  const { currentTab, selectedControlNumbers, toggleAllControlNumbers } =
-    useSearchPage();
+  const { selectedControlNumbers, toggleAllControlNumbers } = useSearchPage();
 
   const { data = [] } = useCurrentAuthoritySearchQuery();
 

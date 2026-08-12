@@ -1,15 +1,6 @@
-import type { ReactNode } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
 
-export interface SearchTab {
-  id: string;
-  label: string;
-  content: ReactNode;
-}
-
 export interface SearchPageContextValue {
-  currentTab: SearchTab; // 현재 선택된 탭
-  setCurrentTab: (tab: SearchTab) => void;
   selectedControlNumbers: readonly string[]; // 선택된 레코드 제어번호
   toggleSelectedControlNumber: (controlNumber: string) => void;
   toggleAllControlNumbers: (controlNumbers: readonly string[]) => void;
@@ -21,16 +12,6 @@ export const SearchPageContext = createContext<SearchPageContextValue | null>(
 );
 
 export function useSearchPage() {
-  const currentTab = useContextSelector(
-    SearchPageContext,
-    (context) => context?.currentTab,
-  );
-
-  const setCurrentTab = useContextSelector(
-    SearchPageContext,
-    (context) => context?.setCurrentTab,
-  );
-
   const selectedControlNumbers = useContextSelector(
     SearchPageContext,
     (context) => context?.selectedControlNumbers,
@@ -52,8 +33,6 @@ export function useSearchPage() {
   );
 
   if (
-    !currentTab ||
-    !setCurrentTab ||
     !selectedControlNumbers ||
     !toggleSelectedControlNumber ||
     !toggleAllControlNumbers ||
@@ -65,8 +44,6 @@ export function useSearchPage() {
   }
 
   return {
-    currentTab,
-    setCurrentTab,
     selectedControlNumbers,
     toggleSelectedControlNumber,
     toggleAllControlNumbers,

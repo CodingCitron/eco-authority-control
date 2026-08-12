@@ -1,20 +1,27 @@
 import { useState, useTransition, useEffect, type SubmitEvent } from "react";
 import { useSearchParams } from "react-router";
 
+import {
+  parseAuthoritySearchNationality,
+  parseAuthoritySearchType,
+  type AuthoritySearchNationality,
+  type AuthoritySearchType,
+  authorityTypeLabels,
+  authorityNationalLabels,
+} from "@/types/authority.types";
+
 import queryClient from "@/lib/query-client";
-import { authorityTypeLabels } from "@/api/authority-search";
-import type { AuthoritySearchType } from "@/types/authority.types";
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search-query";
 
 export default function AuthoritySearchForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const [type, setType] = useState<AuthoritySearchType>(
-    (searchParams.get("type") as AuthoritySearchType) || "personal",
+  const [type, setType] = useState(
+    parseAuthoritySearchType(searchParams.get("type")),
   );
   const [nationality, setNationality] = useState(
-    searchParams.get("nationality") || "",
+    parseAuthoritySearchNationality(searchParams.get("nationality")),
   );
   const [controlNumber, setControlNumber] = useState(
     searchParams.get("controlNumber") || "",
@@ -22,8 +29,10 @@ export default function AuthoritySearchForm() {
   const [heading, setHeading] = useState(searchParams.get("heading") || "");
 
   useEffect(() => {
-    setType((searchParams.get("type") as AuthoritySearchType) || "personal");
-    setNationality(searchParams.get("nationality") || "");
+    setType(parseAuthoritySearchType(searchParams.get("type")));
+    setNationality(
+      parseAuthoritySearchNationality(searchParams.get("nationality")),
+    );
     setControlNumber(searchParams.get("controlNumber") || "");
     setHeading(searchParams.get("heading") || "");
   }, [searchParams]);
@@ -58,7 +67,7 @@ export default function AuthoritySearchForm() {
 
   const handleReset = () => {
     setType("personal");
-    setNationality("");
+    setNationality("all");
     setControlNumber("");
     setHeading("");
 
@@ -109,12 +118,15 @@ export default function AuthoritySearchForm() {
             className="form-select form-select-sm"
             id="searchArea"
             value={nationality}
-            onChange={(e) => setNationality(e.target.value)}
+            onChange={(e) =>
+              setNationality(e.target.value as AuthoritySearchNationality)
+            }
           >
-            <option value="">전체</option>
-            <option value="한국">한국</option>
-            <option value="동양">동양</option>
-            <option value="서양">서양</option>
+            {Object.entries(authorityNationalLabels).map(([key, value]) => (
+              <option key={key} value={key}>
+                {value}
+              </option>
+            ))}
           </select>
         </div>
         <div className="col-auto">

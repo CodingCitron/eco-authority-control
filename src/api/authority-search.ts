@@ -3,13 +3,12 @@ import type {
   GeographyRow,
   CorporationRow,
   SubjectRow,
-} from "@/components/authority-search-page/authority-search-result.types";
+} from "@/types/authority.types";
 import { apiClient } from "@/lib/axios";
 import type { ApiResponse } from "@/types/api.types";
-import type { AuthoritySearchType } from "@/types/authority.types";
 
 export interface AuthoritySearchParams {
-  type?: AuthoritySearchType; // 전거 유형
+  type?: string; // 전거 유형
   nationality?: string; // 전거 지역
   controlNumber?: string; // 제어번호 단일 검색어
   heading?: string; // 표목명
@@ -20,13 +19,6 @@ export type AuthoritySearchResult =
   | CorporationRow
   | GeographyRow
   | SubjectRow;
-
-export const authorityTypeLabels: Record<AuthoritySearchType, string> = {
-  personal: "개인명",
-  corporation: "단체명",
-  geography: "지리명",
-  subject: "주제명",
-};
 
 export async function fetchAuthoritySearchResults(
   params: AuthoritySearchParams,
