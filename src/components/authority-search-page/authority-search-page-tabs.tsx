@@ -286,49 +286,41 @@ const subjectColumns: TableColumn<SubjectRow>[] = [
 export const tabList: SearchTab[] = [
   {
     id: "personal",
-    authorityType: "personal",
     label: "개인명",
     content: (
       <AuthoritySearchTable
         caption="개인명 전거 목록"
         columns={personalColumns}
-        tab="personal"
       />
     ),
   },
   {
-    id: "corp",
-    authorityType: "corporation",
+    id: "corporation",
     label: "단체명",
     content: (
       <AuthoritySearchTable
         caption="단체명 전거 목록"
         columns={corporationColumns}
-        tab="corporation"
       />
     ),
   },
   {
-    id: "geo",
-    authorityType: "geography",
+    id: "geography",
     label: "지리명",
     content: (
       <AuthoritySearchTable
         caption="지리명 전거 목록"
         columns={geographyColumns}
-        tab="geography"
       />
     ),
   },
   {
     id: "subject",
-    authorityType: "subject",
     label: "주제명",
     content: (
       <AuthoritySearchTable
         caption="주제명 전거 목록"
         columns={subjectColumns}
-        tab="subject"
       />
     ),
   },

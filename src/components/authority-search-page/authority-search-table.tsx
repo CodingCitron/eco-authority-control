@@ -2,26 +2,38 @@ import type { AuthoritySearchResult } from "@/api/authority-search";
 import { useCurrentAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
 
 import Table, { type TableColumn } from "@/components/ui/table";
-import type { AuthoritySearchType } from "@/types/authority.types";
 
 interface AuthoritySearchTableProps<T extends AuthoritySearchResult> {
   caption: string;
   columns: TableColumn<T>[];
-  tab: AuthoritySearchType;
 }
 
 export default function AuthoritySearchTable<T extends AuthoritySearchResult>({
   caption,
   columns,
-  tab,
 }: AuthoritySearchTableProps<T>) {
-  const { data = [], isLoading, isError } = useCurrentAuthoritySearchQuery();
+  const {
+    data = [],
+    isLoading,
+    isError,
+    isSearched,
+  } = useCurrentAuthoritySearchQuery();
 
-  // tab은 필터에 해당
+  if (!isSearched) {
+    return <div>찾기 버튼을 클릭하면 전거를 검색할 수 있습니다.</div>;
+  }
 
-  // 로딩이나, 에러에 대한 UI가 필요
+  if (isLoading) {
+    return <div>로딩 중...</div>;
+  }
 
-  console.log(data);
+  if (isError) {
+    return <div>에러 발생</div>;
+  }
+
+  if (data.length === 0) {
+    return <div>검색된 전거 데이터가 없습니다.</div>;
+  }
 
   return (
     <Table

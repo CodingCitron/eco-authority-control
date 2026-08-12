@@ -1,20 +1,26 @@
+import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
 
 import { SearchPageProvider } from "@/components/authority-search-page/authority-search-page-provider";
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 
 function SelectionHarness() {
-  const { selectedControlNumbers, toggleAllControlNumbers, toggleSelectedControlNumber } =
-    useSearchPage();
+  const {
+    selectedControlNumbers,
+    toggleAllControlNumbers,
+    toggleSelectedControlNumber,
+  } = useSearchPage();
 
   return (
     <>
       <output data-testid="selected-control-numbers">
         {selectedControlNumbers.join(",")}
       </output>
-      <button type="button" onClick={() => toggleSelectedControlNumber("other")}>
+      <button
+        type="button"
+        onClick={() => toggleSelectedControlNumber("other")}
+      >
         다른 항목 선택
       </button>
       <button

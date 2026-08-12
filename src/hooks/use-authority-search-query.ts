@@ -58,18 +58,24 @@ export function useCurrentAuthoritySearchParams() {
   };
 }
 
+// 현재 검색된 전거 데이터
 export function useCurrentAuthoritySearchQuery<
   T extends AuthoritySearchResult = AuthoritySearchResult,
 >(options?: Omit<UseQueryOptions<T[], Error>, "queryKey" | "queryFn">) {
   const { params, isSearched } = useCurrentAuthoritySearchParams();
 
-  return useAuthoritySearchQuery<T>(params, {
+  const queryResult = useAuthoritySearchQuery<T>(params, {
     enabled: isSearched,
     ...options,
   });
+
+  return {
+    ...queryResult,
+    isSearched,
+  };
 }
 
-// 선택된 전거 가져오기
+// 선택된 전거 데이터 가져오기
 export function useAuthoritySearchByControlNumbersQuery() {
   const { currentTab, selectedControlNumbers } = useSearchPage();
 
