@@ -2,17 +2,17 @@ import clsx from "clsx";
 import { css } from "styled-system/css";
 
 export interface AuthorityRecord {
-  controlNumber: string;
-  type: string;
-  heading: string;
-  source?: string;
+  acControlNo: string;
+  acType: string;
+  headingName: string;
+  sourceDataFound?: string;
   marcPreview?: string;
 }
 
 const keyToTag = {
-  controlNumber: "001",
-  heading: "150",
-  source: "670",
+  acControlNo: "001",
+  headingName: "150",
+  sourceDataFound: "670",
 };
 
 // 태그 기준 정렬

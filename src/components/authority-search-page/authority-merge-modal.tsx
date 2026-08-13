@@ -94,15 +94,17 @@ function AuthorityMergeModalBody({ show, onHide, onPreview, onMerge }) {
     isLoading,
   } = useAuthoritySearchByControlNumbersQuery();
 
+  console.log(data);
+
   useEffect(() => {
-    if (show) setMasterControlNumber(data[0]?.controlNumber);
+    if (show) setMasterControlNumber(data[0]?.acControlNo);
   }, [data, show]);
 
   const master = data.find(
-    (record) => record.controlNumber === masterControlNumber,
+    (record) => record.acControlNo === masterControlNumber,
   );
   const target = data.find(
-    (record) => record.controlNumber !== masterControlNumber,
+    (record) => record.acControlNo !== masterControlNumber,
   );
 
   const isRecordFetchComplete = !isLoading && !isError;
@@ -168,32 +170,34 @@ function AuthorityMergeModalBody({ show, onHide, onPreview, onMerge }) {
                 <tbody>
                   {data.map((record, index) => {
                     const isChecked =
-                      masterControlNumber === record.controlNumber;
+                      masterControlNumber === record.acControlNo;
 
                     return (
-                      <tr key={record.controlNumber}>
+                      <tr key={record.acControlNo}>
                         <td>{index + 1}</td>
                         <td>
                           <Form.Check
                             type="radio"
                             name="merge-master"
-                            aria-label={`${record.heading}을 통합 주자료로 선택`}
+                            aria-label={`${record.headingName}을 통합 주자료로 선택`}
                             checked={isChecked}
                             onChange={() =>
-                              setMasterControlNumber(record.controlNumber)
+                              setMasterControlNumber(record.acControlNo)
                             }
                           />
                         </td>
-                        <td>{record.type}</td>
-                        <td>{record.controlNumber}</td>
+                        <td>{record.acType}</td>
+                        <td>{record.acControlNo}</td>
                         <td
                           className={clsx("text-start", {
                             "fw-bold text-primary": isChecked,
                           })}
                         >
-                          {record.heading}
+                          {record.headingName}
                         </td>
-                        <td className="text-start">{record.source}</td>
+                        <td className="text-center">
+                          {record.sourceDataFound}
+                        </td>
                       </tr>
                     );
                   })}
@@ -205,7 +209,7 @@ function AuthorityMergeModalBody({ show, onHide, onPreview, onMerge }) {
                 <div className="border p-3 bg-light rounded h-100">
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <span className="badge bg-primary">
-                      통합주자료({master ? master.controlNumber : ""})
+                      통합주자료({master ? master.acControlNo : ""})
                     </span>
                     <div className="d-flex gap-2">
                       <MarcFontSizeSelect
@@ -235,7 +239,7 @@ function AuthorityMergeModalBody({ show, onHide, onPreview, onMerge }) {
                 <div className="border p-3 bg-white rounded h-100">
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <span className="badge bg-secondary">
-                      통합대상자료({target ? target.controlNumber : ""})
+                      통합대상자료({target ? target.acControlNo : ""})
                     </span>
                     <div className="d-flex gap-2">
                       <MarcFontSizeSelect
