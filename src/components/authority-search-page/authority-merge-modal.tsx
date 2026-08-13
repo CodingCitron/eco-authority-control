@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import clsx from "clsx";
 
+import { authorityTypeLabels } from "@/types/authority-search.types";
+
 import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
@@ -94,8 +96,6 @@ function AuthorityMergeModalBody({ show, onHide, onPreview, onMerge }) {
     isLoading,
   } = useAuthoritySearchByControlNumbersQuery();
 
-  console.log(data);
-
   useEffect(() => {
     if (show) setMasterControlNumber(data[0]?.acControlNo);
   }, [data, show]);
@@ -186,7 +186,7 @@ function AuthorityMergeModalBody({ show, onHide, onPreview, onMerge }) {
                             }
                           />
                         </td>
-                        <td>{record.acType}</td>
+                        <td>{authorityTypeLabels[record.acType]}</td>
                         <td>{record.acControlNo}</td>
                         <td
                           className={clsx("text-start", {
