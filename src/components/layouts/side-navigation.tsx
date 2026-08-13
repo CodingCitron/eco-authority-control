@@ -37,25 +37,25 @@ const navLinkCategories: NavLinkCategory[] = [
         to: "/personal/new",
         icon: <i className="bi bi-person me-2" aria-hidden="true"></i>,
         label: "개인명 등록/수정",
-        match: "/personal/new",
+        match: "/personal",
       },
       {
         to: "/corporation/new",
         icon: <i className="bi bi-building me-2" aria-hidden="true"></i>,
         label: "단체명 등록/수정",
-        match: "/corporation/new",
+        match: "/corporation",
       },
       {
         to: "/geography/new",
         icon: <i className="bi bi-geo-alt me-2" aria-hidden="true"></i>,
         label: "지리명 등록/수정",
-        match: "/geography/new",
+        match: "/geography",
       },
       {
         to: "/subject/new",
         icon: <i className="bi bi-book me-2" aria-hidden="true"></i>,
         label: "주제명 등록/수정",
-        match: "/subject/new",
+        match: "/subject",
       },
     ],
   },
@@ -85,6 +85,18 @@ const navLinkCategories: NavLinkCategory[] = [
   },
 ];
 
+function isNavItemActive(pathname: string, match?: string | string[]) {
+  if (!match) {
+    return false;
+  }
+
+  const matches = Array.isArray(match) ? match : [match];
+
+  return matches.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 export default function SideNavigation() {
   const { pathname } = useLocation();
 
@@ -96,10 +108,7 @@ export default function SideNavigation() {
       <div className="position-sticky pt-3 sidebar-sticky">
         {navLinkCategories.map((category) => (
           <Fragment key={category.id}>
-            <h6
-              key={category.id}
-              className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase"
-            >
+            <h6 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
               <span>{category.label}</span>
             </h6>
             <ul className="nav flex-column mb-3">
@@ -107,7 +116,7 @@ export default function SideNavigation() {
                 <li key={item.to} className="nav-item">
                   <Link
                     className={clsx("nav-link", {
-                      active: item.match === pathname,
+                      active: isNavItemActive(pathname, item.match),
                     })}
                     aria-current="page"
                     to={item.to}
