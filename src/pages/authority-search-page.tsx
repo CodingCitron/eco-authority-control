@@ -47,7 +47,10 @@ export default function SearchPage() {
                 <AuthorityControlButton /> <AuthorityDeleteButton />
               </div>
               <div>
-                <Link to="/" className="btn btn-light-success btn-sm">
+                <Link
+                  to="/personal/new"
+                  className="btn btn-light-success btn-sm"
+                >
                   <i className="bi bi-plus-circle me-1" aria-hidden="true"></i>
                   입력
                 </Link>

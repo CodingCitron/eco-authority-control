@@ -1,7 +1,7 @@
 import z from "zod";
 
 const baseRowSchema = z.object({
-  recKey: z.number(),
+  recKey: z.string(),
   acRegionDesc: z.string(),
   headingName: z.string(),
   acControlNo: z.string(),

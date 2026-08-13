@@ -46,7 +46,7 @@ export function useCurrentAuthoritySearchParams() {
     acControlNo: searchParams.get("acControlNo") || "",
     acType: searchParams.get("acType") || "",
     page: searchParams.get("page") || "1",
-    display: searchParams.get("display") || "10",
+    display: searchParams.get("display") || "20",
   };
 
   const isSearched = Boolean(searchParams.get("isSearched"));
