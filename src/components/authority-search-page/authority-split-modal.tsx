@@ -84,7 +84,7 @@ export function AuthoritySplitModalBody({ onHide }) {
             <div className="border p-3 bg-light rounded h-100">
               <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                 <span className="badge bg-primary">
-                  통합원본자료({master ? master.controlNumber : ""})
+                  통합원본자료({master ? master.acControlNo : ""})
                 </span>
                 <div className="d-flex gap-2">
                   <MarcFontSizeSelect

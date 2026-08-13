@@ -86,10 +86,10 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
   },
   {
     header: "관리",
-    cell: () => (
+    cell: (row) => (
       <>
         <Link
-          to="form_personal.html"
+          to={`personal/${row.acControlNo}/edit`}
           className="btn btn-sm btn-light-warning py-0"
         >
           수정
@@ -167,9 +167,12 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
   },
   {
     header: "관리",
-    cell: () => (
+    cell: (row) => (
       <>
-        <Link to="form_corp.html" className="btn btn-sm btn-light-warning py-0">
+        <Link
+          to={`/corporation/${row.acControlNo}/edit`}
+          className="btn btn-sm btn-light-warning py-0"
+        >
           수정
         </Link>{" "}
         <button type="button" className="btn btn-sm btn-light-danger py-0">
@@ -230,9 +233,12 @@ export const geographyColumns: TableColumn<GeographyRow>[] = [
   },
   {
     header: "관리",
-    cell: () => (
+    cell: (row) => (
       <>
-        <Link to="form_geo.html" className="btn btn-sm btn-light-warning py-0">
+        <Link
+          to={`/geography/${row.acControlNo}/edit`}
+          className="btn btn-sm btn-light-warning py-0"
+        >
           수정
         </Link>{" "}
         <button type="button" className="btn btn-sm btn-light-danger py-0">
@@ -299,10 +305,10 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
   },
   {
     header: "관리",
-    cell: () => (
+    cell: (row) => (
       <>
         <Link
-          to="form_subject.html"
+          to={`/subject/${row.acControlNo}/edit`}
           className="btn btn-sm btn-light-warning py-0"
         >
           수정
