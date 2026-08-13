@@ -1,5 +1,4 @@
 import { Link, useSearchParams } from "react-router";
-import { css } from "styled-system/css";
 
 import { useCurrentAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
 
@@ -316,19 +315,19 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
 ];
 
 const tableConfig = {
-  personal: {
+  "0": {
     caption: "개인명 전거 목록",
     columns: personalColumns,
   },
-  corporation: {
+  "1": {
     caption: "단체명 전거 목록",
     columns: corporationColumns,
   },
-  geography: {
+  "5": {
     caption: "지리명 전거 목록",
     columns: geographyColumns,
   },
-  subject: {
+  "4": {
     caption: "주제명 전거 목록",
     columns: subjectColumns,
   },
@@ -338,7 +337,7 @@ export default function AuthoritySearchResult() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { clearSelectedControlNumbers } = useSearchPage();
 
-  const { type, data, isLoading, isError, isSearched } =
+  const { acType, data, isLoading, isError, isSearched } =
     useCurrentAuthoritySearchQuery();
 
   if (!isSearched) {
@@ -370,8 +369,8 @@ export default function AuthoritySearchResult() {
     );
   }
 
-  const contents = data?.data ?? [];
-  const totalCount = data?.totalCount ?? 0;
+  const contents = data?.data.items ?? [];
+  const totalCount = data?.data.total ?? 0;
 
   if (contents.length === 0) {
     return (
@@ -381,9 +380,9 @@ export default function AuthoritySearchResult() {
     );
   }
 
-  const config = tableConfig[type];
+  const config = tableConfig[acType];
   const page = Number(searchParams.get("page")) || 1;
-  const pageSize = Number(searchParams.get("pageSize")) || 10;
+  const display = Number(searchParams.get("display")) || 10;
 
   const handlePageChange = (nextPage: number) => {
     clearSelectedControlNumbers();
@@ -405,7 +404,7 @@ export default function AuthoritySearchResult() {
       <div className="d-flex justify-content-center">
         <AppPagination
           page={page}
-          pageSize={pageSize}
+          pageSize={display}
           totalCount={totalCount}
           onPageChange={handlePageChange}
         />

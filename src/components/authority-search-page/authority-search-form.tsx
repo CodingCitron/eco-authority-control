@@ -12,14 +12,18 @@ import {
 
 import queryClient from "@/lib/query-client";
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search-query";
-import { useSearchPage } from "./authority-search-page-context";
+
+import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 
 function getSearchScope(params: URLSearchParams) {
   return JSON.stringify({
-    type: params.get("type") ?? "0",
-    nationality: params.get("nationality") ?? "",
-    controlNumber: params.get("controlNumber") ?? "",
-    heading: params.get("heading") ?? "",
+    searchKeyword: params.get("searchKeyword") ?? "",
+    searchType: params.get("acType") ?? "",
+    acRegionCode: params.get("acRegionCode") ?? "",
+    acControlNo: params.get("acControlNo") ?? "",
+    acType: params.get("acType") ?? "0",
+    page: params.get("page") ?? "",
+    display: params.get("display") ?? "",
   });
 }
 
@@ -30,23 +34,25 @@ export default function AuthoritySearchForm() {
   const { clearSelectedControlNumbers } = useSearchPage();
 
   const [type, setType] = useState(
-    parseAuthoritySearchType(searchParams.get("type")),
+    parseAuthoritySearchType(searchParams.get("acType")),
   );
   const [nationality, setNationality] = useState(
-    parseAuthoritySearchNationality(searchParams.get("nationality")),
+    parseAuthoritySearchNationality(searchParams.get("acRegionCode")),
   );
   const [controlNumber, setControlNumber] = useState(
-    searchParams.get("controlNumber") || "",
+    searchParams.get("acControlNo") || "",
   );
-  const [heading, setHeading] = useState(searchParams.get("heading") || "");
+  const [heading, setHeading] = useState(
+    searchParams.get("searchKeyword") || "",
+  );
 
   useEffect(() => {
-    setType(parseAuthoritySearchType(searchParams.get("type")));
+    setType(parseAuthoritySearchType(searchParams.get("acType")));
     setNationality(
-      parseAuthoritySearchNationality(searchParams.get("nationality")),
+      parseAuthoritySearchNationality(searchParams.get("acRegionCode")),
     );
-    setControlNumber(searchParams.get("controlNumber") || "");
-    setHeading(searchParams.get("heading") || "");
+    setControlNumber(searchParams.get("acControlNo") || "");
+    setHeading(searchParams.get("searchKeyword") || "");
   }, [searchParams]);
 
   const handleSubmit = (e: SubmitEvent) => {
@@ -56,13 +62,13 @@ export default function AuthoritySearchForm() {
     const trimmedControlNumber = controlNumber.trim();
     const trimmedHeading = heading.trim();
 
-    if (type) nextParams.set("type", type);
-    if (nationality) nextParams.set("nationality", nationality);
+    if (type) nextParams.set("acType", type);
+    if (nationality) nextParams.set("acRegionCode", nationality);
 
     if (trimmedControlNumber)
-      nextParams.set("controlNumber", trimmedControlNumber);
+      nextParams.set("acControlNo", trimmedControlNumber);
 
-    if (trimmedHeading) nextParams.set("heading", trimmedHeading);
+    if (trimmedHeading) nextParams.set("searchKeyword", trimmedHeading);
 
     nextParams.set("isSearched", "true");
 

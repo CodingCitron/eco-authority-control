@@ -1,17 +1,13 @@
 import { http } from "msw";
 
 import {
-  type PersonalRow,
   type AuthoritySearchType,
-  authorityTypeLabels,
-  type CorporationRow,
-  type GeographyRow,
-  type SubjectRow,
+  isAuthoritySearchType,
 } from "@/types/authority-search.types";
 import type {
   AuthorityRecord,
+  AuthoritySearchQueryParams,
   AuthoritySearchResponse,
-  AuthoritySearchResult,
 } from "@/api/authority-search";
 import { createApiResponse } from "@/mocks/utils";
 
@@ -19,7 +15,7 @@ import { createApiResponse } from "@/mocks/utils";
 // 1. Mock 데이터 정의 (개인명 / 단체명 / 지리명 / 주제명)
 // ==========================================
 
-const personalRows: AuthoritySearchResponse<PersonalRow> = {
+const personalRows: AuthoritySearchResponse = {
   data: {
     page: 1,
     display: 10,
@@ -44,7 +40,7 @@ const personalRows: AuthoritySearchResponse<PersonalRow> = {
   },
 };
 
-const corporationRows: AuthoritySearchResponse<CorporationRow> = {
+const corporationRows: AuthoritySearchResponse = {
   data: {
     page: 1,
     display: 10,
@@ -70,7 +66,7 @@ const corporationRows: AuthoritySearchResponse<CorporationRow> = {
   },
 };
 
-const geographyRows: AuthoritySearchResponse<GeographyRow> = {
+const geographyRows: AuthoritySearchResponse = {
   data: {
     page: 1,
     display: 10,
@@ -92,7 +88,7 @@ const geographyRows: AuthoritySearchResponse<GeographyRow> = {
   },
 };
 
-const subjectRows: AuthoritySearchResponse<SubjectRow> = {
+const subjectRows: AuthoritySearchResponse = {
   data: {
     page: 1,
     display: 10,
@@ -127,22 +123,6 @@ export const authoritySearchMockData: AuthorityRecord[] = [
 // ==========================================
 
 /**
- * GET /api/authority-search 쿼리 파라미터 규격
- */
-export interface AuthoritySearchQueryParams {
-  /** 전거 구분 타입 (personal | corporation | geography | subject) */
-  type?: AuthoritySearchType | null;
-  /** 국적 */
-  nationality?: string | null;
-  /** 제어번호 단일 검색어 */
-  controlNumber?: string | null;
-  /** 표목명 */
-  heading?: string | null;
-  page?: number | null;
-  pageSize?: number | null;
-}
-
-/**
  * Request 객체에서 쿼리 파라미터를 읽어 명확한 타입 객체로 변환합니다.
  */
 function parseQueryParams(request: Request): AuthoritySearchQueryParams {
@@ -150,12 +130,13 @@ function parseQueryParams(request: Request): AuthoritySearchQueryParams {
   const params = url.searchParams;
 
   return {
-    type: params.get("type") as AuthoritySearchType | null,
-    nationality: params.get("nationality"),
-    controlNumber: params.get("controlNumber"),
-    heading: params.get("heading"),
-    page: Number(params.get("page") || 1),
-    pageSize: Number(params.get("pageSize") || 10),
+    searchKeyword: params.get("searchKeyword"),
+    searchType: params.get("searchType"),
+    acRegionCode: params.get("acRegionCode"),
+    acType: params.get("acType") as AuthoritySearchType | null,
+    acControlNo: params.get("acControlNo"),
+    page: params.get("page") || "1",
+    display: params.get("display") || params.get("pageSize") || "10",
   };
 }
 
@@ -164,7 +145,7 @@ function parseQueryParams(request: Request): AuthoritySearchQueryParams {
 // ==========================================
 
 /**
- * [GET] /api/authority-search
+ * [GET] /api/ac/search
  * 전거 레코드(개인명, 단체명, 지리명, 주제명) 통합 검색 Mock API
  */
 export const authoritySearchHandlers = [
@@ -174,47 +155,46 @@ export const authoritySearchHandlers = [
 
     // 2) 검색 조건에 따른 데이터 필터링 (Early Return)
     const results = authoritySearchMockData.filter((row) => {
-      // ① 전거 구분(타입) 필터링 ("all"이거나 없을 경우 전체 검색)
+      // ① 전거 구분(타입) 필터링
       if (
-        query.type &&
-        query.type !== "0" &&
-        row.acType !== authorityTypeLabels[query.type]
-      ) {
-        return false;
-      }
-      // 국적 필터링
-      if (
-        query.nationality &&
-        query.nationality !== "all" &&
-        row.acType !== query.nationality
+        query.acType &&
+        isAuthoritySearchType(query.acType) &&
+        row.acType !== Number(query.acType)
       ) {
         return false;
       }
 
       // 제어번호 포함 여부 검색
-      if (
-        query.controlNumber &&
-        !row.acControlNo.includes(query.controlNumber)
-      ) {
+      if (query.acControlNo && !row.acControlNo.includes(query.acControlNo)) {
         return false;
       }
 
       // 표목명 포함 여부 검색
-      if (query.heading && !row.headingName.includes(query.heading)) {
+      if (
+        query.searchKeyword &&
+        !row.headingName.includes(query.searchKeyword)
+      ) {
         return false;
       }
 
       return true;
     });
 
+    console.log(results);
+
     // 3) 공통 API 응답 구조 ({ result: { code: 'Y', ... }, contents: [...] })로 반환
-    const page = Math.max(query.page || 1, 1);
-    const pageSize = Math.max(query.pageSize || 10, 1);
+    const page = Math.max(Number(query.page) || 1, 1);
+    const pageSize = Math.max(Number(query.display) || 10, 1);
     const start = (page - 1) * pageSize;
 
     return createApiResponse({
-      totalCount: results.length,
-      data: results.slice(start, start + pageSize),
+      data: {
+        page,
+        display: pageSize,
+        total: results.length,
+        totalPages: Math.ceil(results.length / pageSize),
+        items: results,
+      },
     });
   }),
 ];

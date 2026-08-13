@@ -10,7 +10,7 @@ export default function AuthoritySelectionControl() {
 
   const { data } = useCurrentAuthoritySearchQuery();
 
-  const contents = data?.data ?? [];
+  const contents = data?.data?.items ?? [];
 
   const controlNumbers = useMemo(
     () => contents.map((record) => record.acControlNo),

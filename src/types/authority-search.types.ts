@@ -1,5 +1,3 @@
-// 0 - 개인형, 1 - 단체명, 4 - 주제명, 5 - 지리명
-
 export interface BaseRow {
   recKey: number;
   acType: number;

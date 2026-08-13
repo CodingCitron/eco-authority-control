@@ -9,7 +9,12 @@ function compareValues(a: string, b: string) {
   const numericA = Number.parseFloat(a.replace(/,/g, ""));
   const numericB = Number.parseFloat(b.replace(/,/g, ""));
 
-  if (a !== "" && b !== "" && !Number.isNaN(numericA) && !Number.isNaN(numericB)) {
+  if (
+    a !== "" &&
+    b !== "" &&
+    !Number.isNaN(numericA) &&
+    !Number.isNaN(numericB)
+  ) {
     return numericA - numericB;
   }
 
@@ -32,7 +37,7 @@ export function nextGridSort(
 export function sortGridRows<T>(
   rows: readonly T[],
   sort: GridSort | null,
-  getValue: (row: T, column: number) => string,
+  getValue: (row: T, column: number) => string | number,
 ): T[] {
   if (!sort) return [...rows];
 
@@ -40,8 +45,8 @@ export function sortGridRows<T>(
     .map((row, index) => ({ row, index }))
     .sort((a, b) => {
       const result = compareValues(
-        getValue(a.row, sort.column),
-        getValue(b.row, sort.column),
+        String(getValue(a.row, sort.column)),
+        String(getValue(b.row, sort.column)),
       );
       return result === 0
         ? a.index - b.index

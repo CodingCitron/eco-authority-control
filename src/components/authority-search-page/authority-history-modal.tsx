@@ -54,7 +54,7 @@ export function AuthorityHistoryModalBody({ onHide }) {
   // 1. 검색된 data를 다 가져온다.
   const { data } = useCurrentAuthoritySearchQuery();
 
-  const contents = data?.data ?? [];
+  const contents = data?.data.items ?? [];
 
   // 2. controlNumber의 index는 현재 선택된 값이다.
   const currentIndex = contents.findIndex(

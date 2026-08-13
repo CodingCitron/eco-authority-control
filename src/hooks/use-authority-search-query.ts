@@ -1,20 +1,20 @@
 import { useCallback } from "react";
+import { useSearchParams } from "react-router";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
 import {
   fetchAuthoritySearch,
-  type AuthoritySearchParams,
+  type AuthoritySearchQueryParams,
   type AuthorityRecord,
   type AuthoritySearchResponse,
 } from "@/api/authority-search";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
-import { useSearchParams } from "react-router";
 
 export const authoritySearchQueryKeys = {
   all: ["authority-search"] as const,
   lists: () => [...authoritySearchQueryKeys.all, "list"] as const,
-  list: (params: AuthoritySearchParams) =>
+  list: (params: AuthoritySearchQueryParams) =>
     [...authoritySearchQueryKeys.lists(), params] as const,
 };
 
@@ -22,7 +22,7 @@ export function useAuthoritySearchQuery<
   TData = AuthoritySearchResponse,
   TSelected = TData,
 >(
-  params: AuthoritySearchParams,
+  params: AuthoritySearchQueryParams,
   options?: Omit<
     UseQueryOptions<TData, Error, TSelected>,
     "queryKey" | "queryFn"
@@ -38,11 +38,14 @@ export function useAuthoritySearchQuery<
 export function useCurrentAuthoritySearchParams() {
   const [searchParams] = useSearchParams();
 
-  const params: AuthoritySearchParams = {
-    type: searchParams.get("type") || "",
-    nationality: searchParams.get("nationality") || "",
-    controlNumber: searchParams.get("controlNumber") || "",
-    heading: searchParams.get("heading") || "",
+  const params: AuthoritySearchQueryParams = {
+    searchKeyword: searchParams.get("searchKeyword") || "",
+    searchType: searchParams.get("searchType") || "",
+    acRegionCode: searchParams.get("acRegionCode") || "",
+    acControlNo: searchParams.get("acControlNo") || "",
+    acType: searchParams.get("acType") || "",
+    page: searchParams.get("page") || "1",
+    display: searchParams.get("display") || "10",
   };
 
   const isSearched = Boolean(searchParams.get("isSearched"));
@@ -74,7 +77,7 @@ export function useCurrentAuthoritySearchQuery<
 
   return {
     ...queryResult,
-    type: params.type,
+    acType: params.acType,
     isSearched,
   };
 }
@@ -87,10 +90,11 @@ export function useAuthoritySearchByControlNumbersQuery() {
     enabled: false,
     select: useCallback(
       ({ data }) => {
-        console.log(data);
+        const items = data.items;
+
         return selectedControlNumbers
           .map((controlNumber) =>
-            data.find((record) => record.acControlNo === controlNumber),
+            items.find((record) => record.acControlNo === controlNumber),
           )
           .filter((record): record is AuthorityRecord => record !== undefined);
       },

@@ -4,7 +4,7 @@ import { nextGridSort, sortGridRows, type GridSort } from "@/utils/grid-sort";
 export interface TableColumn<T> {
   header: ReactNode;
   cell: (row: T) => ReactNode;
-  sortValue?: (row: T) => string;
+  sortValue?: (row: T) => string | number;
   className?: string;
 }
 
