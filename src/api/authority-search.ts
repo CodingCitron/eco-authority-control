@@ -42,8 +42,6 @@ export async function fetchAuthoritySearch(
     throw new Error("올바르지 않은 응답 데이터 형식입니다.");
   }
 
-  console.log(data);
-
   return result.data;
 }
 
