@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 
 import BaseModal from "../ui/base-modal";
 
@@ -317,16 +317,14 @@ export function AuthorityControlModalBody({ onHide }) {
         </div>
       </Modal.Body>
       <Modal.Footer className="justify-content-between">
-        <button className="btn btn-secondary">화면 초기화</button>
+        <Button variant="secondary">화면 초기화</Button>
         <div>
-          <button className="btn btn-primary">확인</button>{" "}
-          <button
-            type="button"
-            className="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
+          <Button className="px-4 fw-bold" variant="primary">
+            확인
+          </Button>{" "}
+          <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
             닫기
-          </button>
+          </Button>
         </div>
       </Modal.Footer>
     </>

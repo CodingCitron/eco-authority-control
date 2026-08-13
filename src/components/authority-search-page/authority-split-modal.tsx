@@ -133,11 +133,11 @@ export function AuthoritySplitModalBody({ onHide }) {
           </section>
         </div>
       </Modal.Body>
-      <Modal.Footer className="justify-content-between">
-        <Button className="px-4 fw-bold" variant="outline-primary">
+      <Modal.Footer className="justify-content-center">
+        <Button className="px-4 fw-bold" variant="primary">
           MARC 분리 실행
         </Button>
-        <Button className="px-4 fw-bold" variant="primary">
+        <Button className="px-4 fw-bold" variant="secondary">
           저장
         </Button>
         <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
