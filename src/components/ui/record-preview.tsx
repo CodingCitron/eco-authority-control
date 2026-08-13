@@ -3,7 +3,7 @@ import { css } from "styled-system/css";
 
 export interface AuthorityRecord {
   acControlNo: string;
-  acType: string;
+  acType: number;
   headingName: string;
   sourceDataFound?: string;
   marcPreview?: string;
