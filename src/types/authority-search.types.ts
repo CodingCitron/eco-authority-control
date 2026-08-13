@@ -1,40 +1,54 @@
-export interface BaseRow {
-  recKey: number;
-  acType: number;
-  acRegionDesc: string;
-  headingName: string;
-  acControlNo: string;
-  firstWorker: string;
-  inputDate: string;
-  lastWorker: string;
-}
+import z from "zod";
 
-// 개인형 - 0
-export interface PersonalRow extends BaseRow {
-  hanjaName: string;
-  birthDeathDate: string;
-  activityField: string;
-  sourceDataFound: string;
-}
+const baseRowSchema = z.object({
+  recKey: z.number(),
+  acRegionDesc: z.string(),
+  headingName: z.string(),
+  acControlNo: z.string(),
+  firstWorker: z.string(),
+  inputDate: z.string(),
+  lastWorker: z.string(),
+});
 
-// 단체형 - 1
-export interface CorporationRow extends BaseRow {
-  organizationType: string;
-  establishmentDate: string;
-  terminationDate: string;
-  activityField: string;
-  sourceDataFound: string;
-}
+export const personalRowSchema = baseRowSchema.extend({
+  acType: z.literal(0),
+  hanjaName: z.string(),
+  birthDeathDate: z.string(),
+  activityField: z.string(),
+  sourceDataFound: z.string(),
+});
 
-// 지리형 - 5
-export interface GeographyRow extends BaseRow {
-  sourceDataFound: string;
-}
+export const corporationRowSchema = baseRowSchema.extend({
+  acType: z.literal(1),
+  organizationType: z.string(),
+  establishmentDate: z.string(),
+  terminationDate: z.string().nullable(),
+  activityField: z.string(),
+  sourceDataFound: z.string(),
+});
 
-// 주제형 - 4
-export interface SubjectRow extends BaseRow {
-  sourceDataFound: string;
-}
+export const geographyRowSchema = baseRowSchema.extend({
+  acType: z.literal(5),
+  sourceDataFound: z.string(),
+});
+
+export const subjectRowSchema = baseRowSchema.extend({
+  acType: z.literal(4),
+  sourceDataFound: z.string(),
+});
+
+export const authorityRecordSchema = z.discriminatedUnion("acType", [
+  personalRowSchema,
+  corporationRowSchema,
+  geographyRowSchema,
+  subjectRowSchema,
+]);
+
+export type PersonalRow = z.infer<typeof personalRowSchema>;
+export type CorporationRow = z.infer<typeof corporationRowSchema>;
+export type GeographyRow = z.infer<typeof geographyRowSchema>;
+export type SubjectRow = z.infer<typeof subjectRowSchema>;
+export type AuthorityRecord = z.infer<typeof authorityRecordSchema>;
 
 export const authoritySearchTypes = ["0", "1", "5", "4"] as const;
 

@@ -3,9 +3,10 @@ import { http } from "msw";
 import {
   type AuthoritySearchType,
   isAuthoritySearchType,
+  type AuthorityRecord,
 } from "@/types/authority-search.types";
+
 import type {
-  AuthorityRecord,
   AuthoritySearchQueryParams,
   AuthoritySearchResponse,
 } from "@/api/authority-search";
@@ -179,8 +180,6 @@ export const authoritySearchHandlers = [
 
       return true;
     });
-
-    console.log(results);
 
     // 3) 공통 API 응답 구조 ({ result: { code: 'Y', ... }, contents: [...] })로 반환
     const page = Math.max(Number(query.page) || 1, 1);

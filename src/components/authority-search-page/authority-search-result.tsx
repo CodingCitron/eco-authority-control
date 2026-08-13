@@ -2,11 +2,12 @@ import { Link, useSearchParams } from "react-router";
 
 import { useCurrentAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
 
-import type {
-  PersonalRow,
-  GeographyRow,
-  CorporationRow,
-  SubjectRow,
+import {
+  type PersonalRow,
+  type GeographyRow,
+  type CorporationRow,
+  type SubjectRow,
+  authorityTypeLabels,
 } from "@/types/authority-search.types";
 
 import { useSearchPage } from "./authority-search-page-context";
@@ -34,7 +35,7 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
   },
   {
     header: "전거유형",
-    cell: (row) => row.acType,
+    cell: (row) => authorityTypeLabels[row.acType],
     sortValue: (row) => row.acType,
   },
   {
@@ -115,7 +116,7 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
   },
   {
     header: "전거유형",
-    cell: (row) => row.acType,
+    cell: (row) => authorityTypeLabels[row.acType],
     sortValue: (row) => row.acType,
   },
   {
@@ -193,7 +194,7 @@ export const geographyColumns: TableColumn<GeographyRow>[] = [
   },
   {
     header: "전거유형",
-    cell: (row) => row.acType,
+    cell: (row) => authorityTypeLabels[row.acType],
     sortValue: (row) => row.acType,
   },
   {
@@ -256,7 +257,7 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
   },
   {
     header: "전거유형",
-    cell: (row) => row.acType,
+    cell: (row) => authorityTypeLabels[row.acType],
     sortValue: (row) => row.acType,
   },
   {

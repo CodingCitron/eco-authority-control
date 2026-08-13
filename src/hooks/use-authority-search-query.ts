@@ -2,10 +2,11 @@ import { useCallback } from "react";
 import { useSearchParams } from "react-router";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
+import type { AuthorityRecord } from "@/types/authority-search.types";
+
 import {
   fetchAuthoritySearch,
   type AuthoritySearchQueryParams,
-  type AuthorityRecord,
   type AuthoritySearchResponse,
 } from "@/api/authority-search";
 
