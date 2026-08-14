@@ -10,6 +10,9 @@
     "oxlint-plugin-query/no-unstable-deps": "error",
     "oxlint-plugin-query/no-rest-destructuring": "warn",
     "oxlint-plugin-query/infinite-query-property-order": "error",
-    "oxlint-plugin-query/mutation-property-order": "error"
+    "oxlint-plugin-query/mutation-property-order": "error",
+
+    "no-unused-vars": "warn",
+    "typescript/no-unused-vars": "warn"
   }
 }

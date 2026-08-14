@@ -28,7 +28,13 @@ export function AuthorityControlButton() {
   );
 }
 
-export default function AuthorityControlModal({ show, onHide }) {
+export default function AuthorityControlModal({
+  show,
+  onHide,
+}: {
+  show: boolean;
+  onHide: () => void;
+}) {
   return (
     <BaseModal show={show} onHide={onHide}>
       <AuthorityControlModalBody onHide={onHide} />
@@ -36,7 +42,7 @@ export default function AuthorityControlModal({ show, onHide }) {
   );
 }
 
-export function AuthorityControlModalBody({ onHide }) {
+export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
   return (
     <>
       <Modal.Header

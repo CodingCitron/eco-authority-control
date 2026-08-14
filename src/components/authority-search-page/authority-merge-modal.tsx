@@ -84,7 +84,12 @@ export default function AuthorityMergeModal({
   );
 }
 
-function AuthorityMergeModalBody({ show, onHide, onPreview, onMerge }) {
+function AuthorityMergeModalBody({
+  show,
+  onHide,
+  onPreview,
+  onMerge,
+}: AuthorityMergeModalProps) {
   const [masterControlNumber, setMasterControlNumber] = useState<string>();
 
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);

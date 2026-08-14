@@ -40,7 +40,13 @@ export function AuthorityHistoryButton() {
   );
 }
 
-export default function AuthorityHistoryModal({ show, onHide }) {
+export default function AuthorityHistoryModal({
+  show,
+  onHide,
+}: {
+  show: boolean;
+  onHide: () => void;
+}) {
   return (
     <BaseModal show={show} onHide={onHide}>
       <AuthorityHistoryModalBody onHide={onHide} />
@@ -48,7 +54,7 @@ export default function AuthorityHistoryModal({ show, onHide }) {
   );
 }
 
-export function AuthorityHistoryModalBody({ onHide }) {
+export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
   const { selectedControlNumbers } = useSearchPage();
 
   // 1. 검색된 data를 다 가져온다.
