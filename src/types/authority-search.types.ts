@@ -59,12 +59,29 @@ export const subjectRowSchema = baseRowSchema.extend({
   sourceDataFound: z.string(),
 });
 
-export const authorityRecordSchema = z.discriminatedUnion("acType", [
-  personalRowSchema,
-  corporationRowSchema,
-  geographyRowSchema,
-  subjectRowSchema,
-]);
+const normalizeAuthorityRecord = (value: unknown) => {
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+
+  const row = value as Record<string, unknown>;
+
+  return {
+    ...row,
+    recKey: row.recKey == null ? row.recKey : String(row.recKey),
+    acType: row.acType == null ? row.acType : String(row.acType),
+  };
+};
+
+export const authorityRecordSchema = z.preprocess(
+  normalizeAuthorityRecord,
+  z.discriminatedUnion("acType", [
+    personalRowSchema,
+    corporationRowSchema,
+    geographyRowSchema,
+    subjectRowSchema,
+  ]),
+);
 
 export type PersonalRow = z.infer<typeof personalRowSchema>;
 export type CorporationRow = z.infer<typeof corporationRowSchema>;
