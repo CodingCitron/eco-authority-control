@@ -2,7 +2,11 @@ import { useCallback } from "react";
 import { useSearchParams } from "react-router";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
-import type { AuthorityRecord } from "@/types/authority-search.types";
+import {
+  isValidAcType,
+  type AuthorityRecord,
+  type AuthoritySearchType,
+} from "@/types/authority-search.types";
 
 import {
   fetchAuthoritySearch,
@@ -76,9 +80,13 @@ export function useCurrentAuthoritySearchQuery<
     ...options,
   });
 
+  const acType: AuthoritySearchType | "" = isValidAcType(params.acType)
+    ? params.acType
+    : "0";
+
   return {
     ...queryResult,
-    acType: params.acType,
+    acType: acType,
     isSearched,
   };
 }

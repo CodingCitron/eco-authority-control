@@ -3,7 +3,7 @@ import { css } from "styled-system/css";
 
 export interface AuthorityRecord {
   acControlNo: string;
-  acType: number;
+  acType: string;
   headingName: string;
   sourceDataFound?: string;
   marcPreview?: string;
@@ -16,14 +16,18 @@ const keyToTag = {
 };
 
 // 태그 기준 정렬
-function sortingByTag(record?: AuthorityRecord) {
+function sortingByTag(record?: AuthorityRecord | null) {
   if (!record) return [];
 
   const keys = Object.keys(keyToTag);
-  const sorted = keys.sort((a, b) => keyToTag[a].localeCompare(keyToTag[b]));
+  const sorted = keys.sort((a, b) =>
+    keyToTag[a as keyof typeof keyToTag].localeCompare(
+      keyToTag[b as keyof typeof keyToTag],
+    ),
+  );
 
   return sorted.map((key) => ({
-    tag: keyToTag[key],
+    tag: keyToTag[key as keyof typeof keyToTag],
     line: record[key as keyof AuthorityRecord],
   }));
 }
@@ -34,7 +38,7 @@ export default function RecordPreview({
   message = "선택된 데이터가 없습니다.",
   className,
 }: {
-  record?: AuthorityRecord;
+  record?: AuthorityRecord | null;
   fontSize: string;
   message?: string;
   className?: string;

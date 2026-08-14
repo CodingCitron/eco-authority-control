@@ -8,6 +8,8 @@ import {
   type CorporationRow,
   type SubjectRow,
   authorityTypeLabels,
+  type AuthoritySearchType,
+  type AuthorityRecord,
 } from "@/types/authority-search.types";
 
 import { useSearchPage } from "./authority-search-page-context";
@@ -321,7 +323,21 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
   },
 ];
 
-const tableConfig = {
+type AuthorityRowByType = {
+  "0": PersonalRow;
+  "1": CorporationRow;
+  "5": GeographyRow;
+  "4": SubjectRow;
+};
+
+type TableConfig = {
+  [K in AuthoritySearchType]: {
+    caption: string;
+    columns: TableColumn<AuthorityRowByType[K]>[];
+  };
+};
+
+const tableConfig: TableConfig = {
   "0": {
     caption: "개인명 전거 목록",
     columns: personalColumns,
@@ -339,6 +355,61 @@ const tableConfig = {
     columns: subjectColumns,
   },
 };
+
+function AuthorityTable({
+  type,
+  rows,
+}: {
+  type: AuthoritySearchType;
+  rows: readonly AuthorityRecord[];
+}) {
+  switch (type) {
+    case "0":
+      return (
+        <Table<PersonalRow>
+          caption={tableConfig["0"].caption}
+          columns={tableConfig["0"].columns}
+          rows={rows.filter(
+            (row): row is PersonalRow => row.acType === "0",
+          )}
+          getRowKey={(row) => row.acControlNo}
+        />
+      );
+    case "1":
+      return (
+        <Table<CorporationRow>
+          caption={tableConfig["1"].caption}
+          columns={tableConfig["1"].columns}
+          rows={rows.filter(
+            (row): row is CorporationRow => row.acType === "1",
+          )}
+          getRowKey={(row) => row.acControlNo}
+        />
+      );
+    case "5":
+      return (
+        <Table<GeographyRow>
+          caption={tableConfig["5"].caption}
+          columns={tableConfig["5"].columns}
+          rows={rows.filter(
+            (row): row is GeographyRow => row.acType === "5",
+          )}
+          getRowKey={(row) => row.acControlNo}
+        />
+      );
+    case "4":
+      return (
+        <Table<SubjectRow>
+          caption={tableConfig["4"].caption}
+          columns={tableConfig["4"].columns}
+          rows={rows.filter(
+            (row): row is SubjectRow => row.acType === "4",
+          )}
+          getRowKey={(row) => row.acControlNo}
+        />
+      );
+  }
+}
 
 export default function AuthoritySearchResult() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -385,7 +456,6 @@ export default function AuthoritySearchResult() {
     );
   }
 
-  const config = tableConfig[acType];
   const page = Number(searchParams.get("page")) || 1;
   const display = Number(searchParams.get("display")) || 20;
 
@@ -400,12 +470,7 @@ export default function AuthoritySearchResult() {
 
   return (
     <div className="pt-2 overflow-auto">
-      <Table
-        caption={config.caption}
-        columns={config.columns}
-        rows={contents}
-        getRowKey={(row) => row.acControlNo}
-      />
+      <AuthorityTable type={acType} rows={contents} />
       <div className="d-flex justify-content-center">
         <AppPagination
           page={page}

@@ -3,7 +3,7 @@ import { useReactToPrint } from "react-to-print";
 export default function PrintButton<T extends HTMLElement>({
   contentRef,
 }: {
-  contentRef: React.RefObject<T>;
+  contentRef: React.RefObject<T | null>;
 }) {
   const reactToPrintFn = useReactToPrint({ contentRef });
 

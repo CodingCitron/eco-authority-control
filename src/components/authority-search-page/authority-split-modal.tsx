@@ -44,7 +44,13 @@ export function AuthoritySplitButton() {
   );
 }
 
-export default function AuthoritySplitModal({ show, onHide }) {
+export default function AuthoritySplitModal({
+  show,
+  onHide,
+}: {
+  show: boolean;
+  onHide: () => void;
+}) {
   return (
     <BaseModal show={show} onHide={onHide}>
       <AuthoritySplitModalBody onHide={onHide} />
@@ -52,12 +58,12 @@ export default function AuthoritySplitModal({ show, onHide }) {
   );
 }
 
-export function AuthoritySplitModalBody({ onHide }) {
+export function AuthoritySplitModalBody({ onHide }: { onHide: () => void }) {
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
   const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
 
   // 분리 데이터
-  const [targetRecord, setTargetRecord] = useState(null);
+  const [targetRecord, setTargetRecord] = useState();
 
   const {
     data = [],

@@ -279,7 +279,7 @@ function AuthorityMergeModalBody({
           className="px-4 fw-bold"
           variant="outline-primary"
           disabled={!canMerge}
-          onClick={() => canMerge && onPreview?.(master, target)}
+          // onClick={() => canMerge && onPreview?.(master, target)}
         >
           MARC 통합
         </Button>
@@ -287,7 +287,7 @@ function AuthorityMergeModalBody({
           className="px-4 fw-bold"
           variant="primary"
           disabled={!canMerge}
-          onClick={() => canMerge && onMerge?.(master, target)}
+          // onClick={() => canMerge && onMerge?.(master, target)}
         >
           통합
         </Button>

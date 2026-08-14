@@ -1,10 +1,7 @@
 import { http } from "msw";
 
 import { authoritySearchMockData } from "@/mocks/data/authority-search.data";
-import {
-  isAuthoritySearchType,
-  type AuthoritySearchType,
-} from "@/types/authority-search.types";
+import { isAuthoritySearchType } from "@/types/authority-search.types";
 import type { AuthoritySearchQueryParams } from "@/api/authority-search";
 import { createApiResponse } from "@/mocks/utils";
 
@@ -15,7 +12,7 @@ function parseQueryParams(request: Request): AuthoritySearchQueryParams {
     searchKeyword: params.get("searchKeyword") ?? undefined,
     searchType: params.get("searchType") ?? undefined,
     acRegionCode: params.get("acRegionCode") ?? undefined,
-    acType: params.get("acType") as AuthoritySearchType | undefined,
+    acType: params.get("acType") ?? "0",
     acControlNo: params.get("acControlNo") ?? undefined,
     page: params.get("page") || "1",
     display: params.get("display") || "20",
@@ -29,7 +26,7 @@ export const authoritySearchHandlers = [
       if (
         query.acType &&
         isAuthoritySearchType(query.acType) &&
-        row.acType !== Number(query.acType)
+        row.acType !== query.acType
       ) {
         return false;
       }

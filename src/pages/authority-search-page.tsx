@@ -17,7 +17,7 @@ import PrintButton from "@/components/ui/print-button";
 import BulkExportButton from "@/components/ui/bulk-export-button";
 
 export default function SearchPage() {
-  const printRef = useRef<HTMLDivElement>(null);
+  const printRef = useRef<HTMLElement>(null);
 
   return (
     <SearchPageProvider>

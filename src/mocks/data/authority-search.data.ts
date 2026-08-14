@@ -8,7 +8,7 @@ import type {
 export const personalRows: PersonalRow[] = [
   {
     recKey: "9276158304927164",
-    acType: 0,
+    acType: "0",
     acRegionDesc: "국내",
     headingName: "김소월",
     hanjaName: "金素月",
@@ -22,7 +22,7 @@ export const personalRows: PersonalRow[] = [
   },
   {
     recKey: "9276158304927165",
-    acType: 0,
+    acType: "0",
     acRegionDesc: "국내",
     headingName: "윤동주",
     hanjaName: "尹東柱",
@@ -36,7 +36,7 @@ export const personalRows: PersonalRow[] = [
   },
   ...Array.from({ length: 28 }, (_, index) => ({
     recKey: `9276158304928${String(index + 1).padStart(3, "0")}`,
-    acType: 0 as const,
+    acType: "0" as const,
     acRegionDesc: index % 3 === 0 ? "국내" : "해외",
     headingName: `개인명 샘플 ${index + 3}`,
     hanjaName: `個人名${index + 3}`,
@@ -53,7 +53,7 @@ export const personalRows: PersonalRow[] = [
 export const corporationRows: CorporationRow[] = [
   {
     recKey: "927615830492716",
-    acType: 1,
+    acType: "1",
     acRegionDesc: "국내",
     headingName: "국립중앙도서관",
     organizationType: "정부기관",
@@ -68,7 +68,7 @@ export const corporationRows: CorporationRow[] = [
   },
   {
     recKey: "927615830492715",
-    acType: 1,
+    acType: "1",
     acRegionDesc: "국내",
     headingName: "한국도서관협회",
     organizationType: "민간단체",
@@ -83,7 +83,7 @@ export const corporationRows: CorporationRow[] = [
   },
   ...Array.from({ length: 28 }, (_, index) => ({
     recKey: `9276158304929${String(index + 1).padStart(3, "0")}`,
-    acType: 1 as const,
+    acType: "1" as const,
     acRegionDesc: index % 3 === 0 ? "국내" : "해외",
     headingName: `기관명 샘플 ${index + 3}`,
     organizationType: index % 2 === 0 ? "정부기관" : "민간단체",
@@ -101,7 +101,7 @@ export const corporationRows: CorporationRow[] = [
 export const geographyRows: GeographyRow[] = [
   {
     recKey: "9276158304927162",
-    acType: 5,
+    acType: "5",
     acRegionDesc: "국내",
     headingName: "서울특별시",
     sourceDataFound: "대한민국 행정구역 자료",
@@ -112,7 +112,7 @@ export const geographyRows: GeographyRow[] = [
   },
   {
     recKey: "9276158304927163",
-    acType: 5,
+    acType: "5",
     acRegionDesc: "국내",
     headingName: "제주특별자치도",
     sourceDataFound: "대한민국 지명 자료",
@@ -123,7 +123,7 @@ export const geographyRows: GeographyRow[] = [
   },
   ...Array.from({ length: 28 }, (_, index) => ({
     recKey: `9276158304930${String(index + 1).padStart(3, "0")}`,
-    acType: 5 as const,
+    acType: "5" as const,
     acRegionDesc: index % 3 === 0 ? "국내" : "해외",
     headingName: `지명 샘플 ${index + 3}`,
     sourceDataFound: `지명 참고자료 ${index + 3}`,
@@ -137,7 +137,7 @@ export const geographyRows: GeographyRow[] = [
 export const subjectRows: SubjectRow[] = [
   {
     recKey: "9276158304927166",
-    acType: 4,
+    acType: "4",
     acRegionDesc: "국내",
     headingName: "부작위",
     sourceDataFound: "법률용어사전",
@@ -148,7 +148,7 @@ export const subjectRows: SubjectRow[] = [
   },
   {
     recKey: "9276158304927167",
-    acType: 4,
+    acType: "4",
     acRegionDesc: "국내",
     headingName: "저작권",
     sourceDataFound: "법률 주제명표목표",
@@ -159,7 +159,7 @@ export const subjectRows: SubjectRow[] = [
   },
   ...Array.from({ length: 28 }, (_, index) => ({
     recKey: `9276158304931${String(index + 1).padStart(3, "0")}`,
-    acType: 4 as const,
+    acType: "4" as const,
     acRegionDesc: index % 3 === 0 ? "국내" : "해외",
     headingName: `주제명 샘플 ${index + 3}`,
     sourceDataFound: `주제명 참고자료 ${index + 3}`,
