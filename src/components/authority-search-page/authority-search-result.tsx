@@ -366,9 +366,7 @@ export default function AuthoritySearchResult() {
   if (isError) {
     return (
       <div className="pt-2">
-        <p className="alert alert-danger" role="alert">
-          전거 데이터를 불러오지 못했습니다.
-        </p>
+        전거 데이터를 불러오지 못했습니다.
         <button type="button" className="btn btn-outline-secondary">
           다시 시도
         </button>
@@ -389,7 +387,7 @@ export default function AuthoritySearchResult() {
 
   const config = tableConfig[acType];
   const page = Number(searchParams.get("page")) || 1;
-  const display = Number(searchParams.get("display")) || 10;
+  const display = Number(searchParams.get("display")) || 20;
 
   const handlePageChange = (nextPage: number) => {
     clearSelectedControlNumbers();

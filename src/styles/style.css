@@ -1,6 +1,6 @@
 @charset "utf-8";
-@import url('krds_tokens.css');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+@import url("krds_tokens.css");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap");
 
 /* Bootstrap 파란 계열 → krds primary(버건디) 오버라이드 */
 :root {
@@ -16,14 +16,23 @@
   --bs-info-rgb: 6, 58, 116;
 }
 
+.pagination {
+  --bs-pagination-active-bg: var(--krds-color-light-primary-50);
+  --bs-pagination-active-border-color: var(--krds-color-light-primary-50);
+}
+
 /* 버튼 primary */
 .btn-primary {
   --bs-btn-bg: var(--krds-light-color-button-primary-fill);
   --bs-btn-border-color: var(--krds-light-color-button-primary-fill);
   --bs-btn-hover-bg: var(--krds-light-color-button-primary-fill-hover);
-  --bs-btn-hover-border-color: var(--krds-light-color-button-primary-fill-hover);
+  --bs-btn-hover-border-color: var(
+    --krds-light-color-button-primary-fill-hover
+  );
   --bs-btn-active-bg: var(--krds-light-color-button-primary-fill-pressed);
-  --bs-btn-active-border-color: var(--krds-light-color-button-primary-fill-pressed);
+  --bs-btn-active-border-color: var(
+    --krds-light-color-button-primary-fill-pressed
+  );
   --bs-btn-disabled-bg: var(--krds-light-color-button-disabled-fill);
   --bs-btn-disabled-border-color: var(--krds-light-color-button-disabled-fill);
 }
@@ -63,7 +72,8 @@
 /* 탭 활성 상태 */
 .nav-tabs .nav-link.active {
   color: var(--krds-light-color-text-primary);
-  border-color: var(--krds-light-color-border-primary) var(--krds-light-color-border-primary) #fff;
+  border-color: var(--krds-light-color-border-primary)
+    var(--krds-light-color-border-primary) #fff;
 }
 
 .nav-tabs .nav-link:hover {
@@ -139,7 +149,7 @@
 
 body {
   font-size: 1rem;
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: "Noto Sans KR", sans-serif;
 }
 
 .sr-only {
@@ -156,7 +166,7 @@ body {
 
 /* Bootstrap sm 컴포넌트 폰트 최솟값 16px으로 */
 .btn-sm,
-.btn-group-sm>.btn {
+.btn-group-sm > .btn {
   font-size: 1rem;
 }
 
@@ -246,7 +256,6 @@ body {
   margin-top: 5px;
   border-color: var(--krds-color-light-primary-10) !important;
 }
-
 
 /* MARC 레코드 뷰 컬러 하이라이트 */
 .marc-record-view {
@@ -338,6 +347,6 @@ textarea:focus {
 }
 
 /* 모달 */
-.modal-body .marc-record-view{
-  max-height:60vh;
+.modal-body .marc-record-view {
+  max-height: 60vh;
 }
