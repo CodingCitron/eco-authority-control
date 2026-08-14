@@ -9,11 +9,11 @@ function parseQueryParams(request: Request): AuthoritySearchQueryParams {
   const params = new URL(request.url).searchParams;
 
   return {
-    searchKeyword: params.get("searchKeyword") ?? undefined,
-    searchType: params.get("searchType") ?? undefined,
-    acRegionCode: params.get("acRegionCode") ?? undefined,
-    acType: params.get("acType") ?? "0",
-    acControlNo: params.get("acControlNo") ?? undefined,
+    searchKeyword: params.get("searchKeyword") || undefined,
+    searchType: params.get("searchType") || undefined,
+    acRegionCode: params.get("acRegionCode") || undefined,
+    acType: params.get("acType") || "0",
+    acControlNo: params.get("acControlNo") || undefined,
     page: params.get("page") || "1",
     display: params.get("display") || "20",
   };
