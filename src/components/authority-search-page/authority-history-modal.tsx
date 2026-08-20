@@ -7,12 +7,12 @@ import BaseModal from "../ui/base-modal";
 import { useSearchPage } from "./authority-search-page-context";
 
 export function AuthorityHistoryButton() {
-  const { selectedControlNumbers } = useSearchPage();
+  const { selectedRecordKeys } = useSearchPage();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const handleClick = () => {
-    if (selectedControlNumbers.length !== 1) {
+    if (selectedRecordKeys.length !== 1) {
       alert(
         "변경이력보기는 1건씩 조회합니다. 조회할 전거자료를 정확히 1건 선택해주세요.",
       );
@@ -55,7 +55,7 @@ export default function AuthorityHistoryModal({
 }
 
 export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
-  const { selectedControlNumbers } = useSearchPage();
+  const { selectedRecordKeys } = useSearchPage();
 
   // 1. 검색된 data를 다 가져온다.
   const { data } = useCurrentAuthoritySearchQuery();
@@ -64,7 +64,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
 
   // 2. controlNumber의 index는 현재 선택된 값이다.
   const currentIndex = contents.findIndex(
-    (item) => item.acControlNo === selectedControlNumbers[0],
+    (item) => item.recKey === selectedRecordKeys[0],
   );
 
   // 3. 히스토리 호출 api 필요

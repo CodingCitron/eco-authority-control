@@ -92,8 +92,8 @@ export function useCurrentAuthoritySearchQuery<
 }
 
 // 선택된 전거 데이터 가져오기
-export function useAuthoritySearchByControlNumbersQuery() {
-  const { selectedControlNumbers } = useSearchPage();
+export function useAuthoritySearchByRecordKeysQuery() {
+  const { selectedRecordKeys } = useSearchPage();
 
   return useCurrentAuthoritySearchQuery<AuthorityRecord[]>({
     enabled: false,
@@ -101,13 +101,13 @@ export function useAuthoritySearchByControlNumbersQuery() {
       ({ data }) => {
         const items = data.items;
 
-        return selectedControlNumbers
-          .map((controlNumber) =>
-            items.find((record) => record.acControlNo === controlNumber),
+        return selectedRecordKeys
+          .map((recordKey) =>
+            items.find((record) => record.recKey === recordKey),
           )
           .filter((record): record is AuthorityRecord => record !== undefined);
       },
-      [selectedControlNumbers],
+      [selectedRecordKeys],
     ),
     refetchOnMount: false,
   });

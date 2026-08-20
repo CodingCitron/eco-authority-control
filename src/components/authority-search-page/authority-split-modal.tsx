@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
+import { useAuthoritySearchByRecordKeysQuery } from "@/hooks/use-authority-search-query";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 import BaseModal from "@/components/ui/base-modal";
@@ -11,12 +11,12 @@ import MarcFontSizeSelect, {
 import RecordPreview from "@/components/ui/record-preview";
 
 export function AuthoritySplitButton() {
-  const { selectedControlNumbers } = useSearchPage();
+  const { selectedRecordKeys } = useSearchPage();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const handleClick = () => {
-    if (selectedControlNumbers.length !== 1) {
+    if (selectedRecordKeys.length !== 1) {
       alert(
         "전거분리는 1건씩 진행합니다. 분리할 전거자료를 정확히 1건 선택해주세요.",
       );
@@ -69,7 +69,7 @@ export function AuthoritySplitModalBody({ onHide }: { onHide: () => void }) {
     data = [],
     isError,
     isLoading,
-  } = useAuthoritySearchByControlNumbersQuery();
+  } = useAuthoritySearchByRecordKeysQuery();
 
   const master = data[0];
 

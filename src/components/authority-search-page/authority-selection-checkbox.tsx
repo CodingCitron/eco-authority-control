@@ -3,25 +3,25 @@ import { useContextSelector } from "use-context-selector";
 import { SearchPageContext } from "@/components/authority-search-page/authority-search-page-context";
 
 export default function AuthoritySelectionCheckbox({
-  controlNumber,
+  recordKey,
   heading,
   inputId,
 }: {
-  controlNumber: string;
+  recordKey: string;
   heading: string;
   inputId: string;
 }) {
   const isSelected = useContextSelector(
     SearchPageContext,
     (context) =>
-      context?.selectedControlNumbers.includes(controlNumber) ?? false,
+      context?.selectedRecordKeys.includes(recordKey) ?? false,
   );
-  const toggleSelectedControlNumber = useContextSelector(
+  const toggleSelectedRecordKey = useContextSelector(
     SearchPageContext,
-    (context) => context?.toggleSelectedControlNumber,
+    (context) => context?.toggleSelectedRecordKey,
   );
 
-  if (!toggleSelectedControlNumber) {
+  if (!toggleSelectedRecordKey) {
     throw new Error(
       "AuthoritySelectionCheckbox는 SearchPageProvider 내부에서 사용해야 합니다.",
     );
@@ -36,7 +36,7 @@ export default function AuthoritySelectionCheckbox({
         type="checkbox"
         id={inputId}
         checked={isSelected}
-        onChange={() => toggleSelectedControlNumber(controlNumber)}
+        onChange={() => toggleSelectedRecordKey(recordKey)}
       />
     </>
   );

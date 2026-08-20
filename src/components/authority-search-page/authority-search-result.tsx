@@ -29,9 +29,9 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
     header: "선택",
     cell: (row) => (
       <AuthoritySelectionCheckbox
-        controlNumber={row.acControlNo}
+        recordKey={row.recKey}
         heading={row.headingName}
-        inputId={`check-${row.acControlNo}`}
+        inputId={`check-${row.recKey}`}
       />
     ),
   },
@@ -110,9 +110,9 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
     header: "선택",
     cell: (row) => (
       <AuthoritySelectionCheckbox
-        controlNumber={row.acControlNo}
+        recordKey={row.recKey}
         heading={row.headingName}
-        inputId={`check-corp-${row.acControlNo}`}
+        inputId={`check-corp-${row.recKey}`}
       />
     ),
   },
@@ -191,9 +191,9 @@ export const geographyColumns: TableColumn<GeographyRow>[] = [
     header: "선택",
     cell: (row) => (
       <AuthoritySelectionCheckbox
-        controlNumber={row.acControlNo}
+        recordKey={row.recKey}
         heading={row.headingName}
-        inputId={`check-geo-${row.acControlNo}`}
+        inputId={`check-geo-${row.recKey}`}
       />
     ),
   },
@@ -257,9 +257,9 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
     header: "선택",
     cell: (row) => (
       <AuthoritySelectionCheckbox
-        controlNumber={row.acControlNo}
+        recordKey={row.recKey}
         heading={row.headingName}
-        inputId={`check-subj-${row.acControlNo}`}
+        inputId={`check-subj-${row.recKey}`}
       />
     ),
   },
@@ -372,7 +372,7 @@ function AuthorityTable({
           rows={rows.filter(
             (row): row is PersonalRow => row.acType === "0",
           )}
-          getRowKey={(row) => row.acControlNo}
+          getRowKey={(row) => row.recKey}
         />
       );
     case "1":
@@ -383,7 +383,7 @@ function AuthorityTable({
           rows={rows.filter(
             (row): row is CorporationRow => row.acType === "1",
           )}
-          getRowKey={(row) => row.acControlNo}
+          getRowKey={(row) => row.recKey}
         />
       );
     case "5":
@@ -394,7 +394,7 @@ function AuthorityTable({
           rows={rows.filter(
             (row): row is GeographyRow => row.acType === "5",
           )}
-          getRowKey={(row) => row.acControlNo}
+          getRowKey={(row) => row.recKey}
         />
       );
     case "4":
@@ -405,7 +405,7 @@ function AuthorityTable({
           rows={rows.filter(
             (row): row is SubjectRow => row.acType === "4",
           )}
-          getRowKey={(row) => row.acControlNo}
+          getRowKey={(row) => row.recKey}
         />
       );
   }
@@ -413,7 +413,7 @@ function AuthorityTable({
 
 export default function AuthoritySearchResult() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { clearSelectedControlNumbers } = useSearchPage();
+  const { clearSelectedRecordKeys } = useSearchPage();
 
   const { acType, data, isLoading, isError, isSearched } =
     useCurrentAuthoritySearchQuery();
@@ -460,7 +460,7 @@ export default function AuthoritySearchResult() {
   const display = Number(searchParams.get("display")) || 20;
 
   const handlePageChange = (nextPage: number) => {
-    clearSelectedControlNumbers();
+    clearSelectedRecordKeys();
 
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("page", String(nextPage));

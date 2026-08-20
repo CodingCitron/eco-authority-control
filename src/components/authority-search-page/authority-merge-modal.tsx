@@ -4,7 +4,7 @@ import clsx from "clsx";
 
 import { authorityTypeLabels } from "@/types/authority-search.types";
 
-import { useAuthoritySearchByControlNumbersQuery } from "@/hooks/use-authority-search-query";
+import { useAuthoritySearchByRecordKeysQuery } from "@/hooks/use-authority-search-query";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 import MarcFontSizeSelect, {
@@ -31,12 +31,12 @@ const MERGE_TABLE_HEADS = [
 ];
 
 export function AuthorityMergeButton() {
-  const { selectedControlNumbers } = useSearchPage();
+  const { selectedRecordKeys } = useSearchPage();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const handleClick = () => {
-    if (selectedControlNumbers.length !== 2) {
+    if (selectedRecordKeys.length !== 2) {
       alert(
         "전거통합은 2건씩 비교하여 진행합니다. 통합할 전거자료를 정확히 2건 선택해주세요.",
       );
@@ -90,7 +90,7 @@ function AuthorityMergeModalBody({
   onPreview,
   onMerge,
 }: AuthorityMergeModalProps) {
-  const [masterControlNumber, setMasterControlNumber] = useState<string>();
+  const [masterRecordKey, setMasterRecordKey] = useState<string>();
 
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
   const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
@@ -99,17 +99,17 @@ function AuthorityMergeModalBody({
     data = [],
     isError,
     isLoading,
-  } = useAuthoritySearchByControlNumbersQuery();
+  } = useAuthoritySearchByRecordKeysQuery();
 
   useEffect(() => {
-    if (show) setMasterControlNumber(data[0]?.acControlNo);
+    if (show) setMasterRecordKey(data[0]?.recKey);
   }, [data, show]);
 
   const master = data.find(
-    (record) => record.acControlNo === masterControlNumber,
+    (record) => record.recKey === masterRecordKey,
   );
   const target = data.find(
-    (record) => record.acControlNo !== masterControlNumber,
+    (record) => record.recKey !== masterRecordKey,
   );
 
   const isRecordFetchComplete = !isLoading && !isError;
@@ -174,11 +174,10 @@ function AuthorityMergeModalBody({
                 </thead>
                 <tbody>
                   {data.map((record, index) => {
-                    const isChecked =
-                      masterControlNumber === record.acControlNo;
+                    const isChecked = masterRecordKey === record.recKey;
 
                     return (
-                      <tr key={record.acControlNo}>
+                      <tr key={record.recKey}>
                         <td>{index + 1}</td>
                         <td>
                           <Form.Check
@@ -187,7 +186,7 @@ function AuthorityMergeModalBody({
                             aria-label={`${record.headingName}을 통합 주자료로 선택`}
                             checked={isChecked}
                             onChange={() =>
-                              setMasterControlNumber(record.acControlNo)
+                              setMasterRecordKey(record.recKey)
                             }
                           />
                         </td>

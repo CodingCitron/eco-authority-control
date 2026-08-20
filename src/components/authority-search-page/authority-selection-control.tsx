@@ -6,21 +6,21 @@ import { useSearchPage } from "@/components/authority-search-page/authority-sear
 
 export default function AuthoritySelectionControl() {
   const checkboxRef = useRef<HTMLInputElement>(null);
-  const { selectedControlNumbers, toggleAllControlNumbers } = useSearchPage();
+  const { selectedRecordKeys, toggleAllRecordKeys } = useSearchPage();
 
   const { data } = useCurrentAuthoritySearchQuery();
 
   const contents = data?.data?.items ?? [];
 
-  const controlNumbers = useMemo(
-    () => contents.map((record) => record.acControlNo),
+  const recordKeys = useMemo(
+    () => contents.map((record) => record.recKey),
     [contents],
   );
-  const selectedCount = controlNumbers.filter((controlNumber) =>
-    selectedControlNumbers.includes(controlNumber),
+  const selectedCount = recordKeys.filter((recordKey) =>
+    selectedRecordKeys.includes(recordKey),
   ).length;
   const isAllSelected =
-    controlNumbers.length > 0 && selectedCount === controlNumbers.length;
+    recordKeys.length > 0 && selectedCount === recordKeys.length;
   const isIndeterminate = selectedCount > 0 && !isAllSelected;
 
   useEffect(() => {
@@ -39,10 +39,10 @@ export default function AuthoritySelectionControl() {
         type="checkbox"
         id="checkAll"
         checked={isAllSelected}
-        disabled={controlNumbers.length === 0}
-        onChange={() => toggleAllControlNumbers(controlNumbers)}
+        disabled={recordKeys.length === 0}
+        onChange={() => toggleAllRecordKeys(recordKeys)}
       />{" "}
-      전체 <strong id="listTotalCount">{controlNumbers.length}</strong>건 / 선택{" "}
+      전체 <strong id="listTotalCount">{recordKeys.length}</strong>건 / 선택{" "}
       <strong className="text-primary" id="listCheckedCount">
         {selectedCount}
       </strong>

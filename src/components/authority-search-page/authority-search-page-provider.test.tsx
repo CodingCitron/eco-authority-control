@@ -7,25 +7,25 @@ import { useSearchPage } from "@/components/authority-search-page/authority-sear
 
 function SelectionHarness() {
   const {
-    selectedControlNumbers,
-    toggleAllControlNumbers,
-    toggleSelectedControlNumber,
+    selectedRecordKeys,
+    toggleAllRecordKeys,
+    toggleSelectedRecordKey,
   } = useSearchPage();
 
   return (
     <>
       <output data-testid="selected-control-numbers">
-        {selectedControlNumbers.join(",")}
+        {selectedRecordKeys.join(",")}
       </output>
       <button
         type="button"
-        onClick={() => toggleSelectedControlNumber("other")}
+        onClick={() => toggleSelectedRecordKey("other")}
       >
         다른 항목 선택
       </button>
       <button
         type="button"
-        onClick={() => toggleAllControlNumbers(["first", "second", "second"])}
+        onClick={() => toggleAllRecordKeys(["first", "second", "second"])}
       >
         현재 목록 전체 선택
       </button>

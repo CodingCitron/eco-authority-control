@@ -31,7 +31,7 @@ export default function AuthoritySearchForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const { clearSelectedControlNumbers } = useSearchPage();
+  const { clearSelectedRecordKeys } = useSearchPage();
 
   const [type, setType] = useState(
     parseAuthoritySearchType(searchParams.get("acType")),
@@ -76,7 +76,7 @@ export default function AuthoritySearchForm() {
       getSearchScope(searchParams) !== getSearchScope(nextParams);
 
     if (hasSearchChanged) {
-      clearSelectedControlNumbers();
+      clearSelectedRecordKeys();
     }
     startTransition(() => {
       setSearchParams(nextParams);

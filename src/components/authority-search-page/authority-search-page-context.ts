@@ -1,10 +1,10 @@
 import { createContext, useContextSelector } from "use-context-selector";
 
 export interface SearchPageContextValue {
-  selectedControlNumbers: readonly string[]; // 선택된 레코드 제어번호
-  toggleSelectedControlNumber: (controlNumber: string) => void;
-  toggleAllControlNumbers: (controlNumbers: readonly string[]) => void;
-  clearSelectedControlNumbers: () => void;
+  selectedRecordKeys: readonly string[];
+  toggleSelectedRecordKey: (recordKey: string) => void;
+  toggleAllRecordKeys: (recordKeys: readonly string[]) => void;
+  clearSelectedRecordKeys: () => void;
 }
 
 export const SearchPageContext = createContext<SearchPageContextValue | null>(
@@ -12,31 +12,28 @@ export const SearchPageContext = createContext<SearchPageContextValue | null>(
 );
 
 export function useSearchPage() {
-  const selectedControlNumbers = useContextSelector(
+  const selectedRecordKeys = useContextSelector(
     SearchPageContext,
-    (context) => context?.selectedControlNumbers,
+    (context) => context?.selectedRecordKeys,
   );
-
-  const toggleSelectedControlNumber = useContextSelector(
+  const toggleSelectedRecordKey = useContextSelector(
     SearchPageContext,
-    (context) => context?.toggleSelectedControlNumber,
+    (context) => context?.toggleSelectedRecordKey,
   );
-
-  const toggleAllControlNumbers = useContextSelector(
+  const toggleAllRecordKeys = useContextSelector(
     SearchPageContext,
-    (context) => context?.toggleAllControlNumbers,
+    (context) => context?.toggleAllRecordKeys,
   );
-
-  const clearSelectedControlNumbers = useContextSelector(
+  const clearSelectedRecordKeys = useContextSelector(
     SearchPageContext,
-    (context) => context?.clearSelectedControlNumbers,
+    (context) => context?.clearSelectedRecordKeys,
   );
 
   if (
-    !selectedControlNumbers ||
-    !toggleSelectedControlNumber ||
-    !toggleAllControlNumbers ||
-    !clearSelectedControlNumbers
+    !selectedRecordKeys ||
+    !toggleSelectedRecordKey ||
+    !toggleAllRecordKeys ||
+    !clearSelectedRecordKeys
   ) {
     throw new Error(
       "useSearchPage는 SearchPageProvider 내부에서 사용해야 합니다.",
@@ -44,9 +41,9 @@ export function useSearchPage() {
   }
 
   return {
-    selectedControlNumbers,
-    toggleSelectedControlNumber,
-    toggleAllControlNumbers,
-    clearSelectedControlNumbers,
+    selectedRecordKeys,
+    toggleSelectedRecordKey,
+    toggleAllRecordKeys,
+    clearSelectedRecordKeys,
   };
 }
