@@ -21,10 +21,7 @@ interface AuthorityMergeModalProps {
     master: AuthorityDetailData,
     target: AuthorityDetailData,
   ) => void;
-  onMerge?: (
-    master: AuthorityDetailData,
-    target: AuthorityDetailData,
-  ) => void;
+  onMerge?: (master: AuthorityDetailData, target: AuthorityDetailData) => void;
 }
 
 const MERGE_TABLE_HEADS = [
@@ -97,7 +94,6 @@ function AuthorityMergeModalBody({
   onMerge,
 }: AuthorityMergeModalProps) {
   const [masterRecordKey, setMasterRecordKey] = useState<string>();
-  const [targetRecordKey, setTargetRecordKey] = useState<string>();
 
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
   const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
@@ -107,41 +103,38 @@ function AuthorityMergeModalBody({
   useEffect(() => {
     if (show) {
       setMasterRecordKey(data[0]?.recKey);
-      setTargetRecordKey(data[1]?.recKey);
     }
   }, [data, show]);
 
-  const {
-    data: masterResponse,
-    isLoading: isMasterLoading,
-    isError: isMasterError,
-  } = useAuthorityDetail(
-    masterRecordKey,
-    {
-      enabled: !!masterRecordKey,
-    },
-  );
+  const firstRecordKey = data[0]?.recKey;
+  const secondRecordKey = data[1]?.recKey;
 
   const {
-    data: targetResponse,
-    isLoading: isTargetLoading,
-    isError: isTargetError,
-  } = useAuthorityDetail(
-    targetRecordKey,
-    {
-      enabled: !!targetRecordKey,
-    },
-  );
+    data: firstResponse,
+    isLoading: isFirstLoading,
+    isError: isFirstError,
+  } = useAuthorityDetail(firstRecordKey, {
+    enabled: show && !!firstRecordKey,
+  });
 
-  const master = masterResponse?.data;
-  const target = targetResponse?.data;
-  const isDetailLoading = isMasterLoading || isTargetLoading;
-  const isDetailError = isMasterError || isTargetError;
+  const {
+    data: secondResponse,
+    isLoading: isSecondLoading,
+    isError: isSecondError,
+  } = useAuthorityDetail(secondRecordKey, {
+    enabled: show && !!secondRecordKey,
+  });
+
+  const firstDetail = firstResponse?.data;
+  const secondDetail = secondResponse?.data;
+  const isFirstMaster = masterRecordKey === firstRecordKey;
+  const master = isFirstMaster ? firstDetail : secondDetail;
+  const target = isFirstMaster ? secondDetail : firstDetail;
+  const isDetailLoading = isFirstLoading || isSecondLoading;
+  const isDetailError = isFirstError || isSecondError;
   const isRecordFetchComplete = !isLoading && !isError;
   const canMerge =
-    data.length === 2 &&
-    master !== undefined &&
-    target !== undefined;
+    data.length === 2 && master !== undefined && target !== undefined;
 
   return (
     <>
@@ -217,7 +210,10 @@ function AuthorityMergeModalBody({
                     const isChecked = masterRecordKey === record.recKey;
 
                     return (
-                      <tr key={record.recKey}>
+                      <tr
+                        key={record.recKey}
+                        onClick={() => setMasterRecordKey(record.recKey)}
+                      >
                         <td>{index + 1}</td>
                         <td>
                           <Form.Check
