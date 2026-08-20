@@ -22,12 +22,25 @@ export const authorityDataFieldSchema = z.object({
 
 /** 전거 상세 데이터 */
 export const authorityDetailDataSchema = z.object({
-  acType: z.number().int(),
-  leader: z.string(),
-  // 서버 응답의 필드명이 control_fields로 내려오므로 그대로 정의한다.
-  control_fields: z.array(authorityControlFieldSchema),
-  // 서버 응답의 필드명이 data_fields로 내려오므로 그대로 정의한다.
-  data_fields: z.array(authorityDataFieldSchema),
+  recKey: z.string(),
+  acType: z.string(),
+  acControlNo: z.string(),
+  acRegionCode: z.string().nullish(),
+  activityField: z.string(),
+  hanjaName: z.string().nullish(),
+  headingName: z.string().nullish(),
+  birthDeathDate: z.string().nullish(),
+  firstInputDate: z.string(),
+  firstWorker: z.string(),
+  lastUpdateDate: z.string(),
+  lastWorker: z.string(),
+  record: z.object({
+    leader: z.string(),
+    control_fields: z.array(authorityControlFieldSchema),
+    data_fields: z.array(authorityDataFieldSchema),
+  }),
+  sourceControlNo: z.string(),
+  sourceDataFound: z.string(),
 });
 
 export type AuthorityControlField = z.infer<typeof authorityControlFieldSchema>;

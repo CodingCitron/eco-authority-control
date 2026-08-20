@@ -99,6 +99,8 @@ function AuthorityMergeModalBody({
 
   const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 
+  console.log(data);
+
   useEffect(() => {
     if (show) {
       setMasterRecordKey(data[0]?.recKey);
@@ -106,19 +108,22 @@ function AuthorityMergeModalBody({
     }
   }, [data, show]);
 
-  const { data: master } = useAuthorityDetail(masterRecordKey, {
-    enabled: !!masterRecordKey,
-  });
+  const { data: master, error: masterError } = useAuthorityDetail(
+    masterRecordKey,
+    {
+      enabled: !!masterRecordKey,
+    },
+  );
 
-  const { data: target } = useAuthorityDetail(targetRecordKey, {
-    enabled: !!targetRecordKey,
-  });
+  const { data: target, error: targetError } = useAuthorityDetail(
+    targetRecordKey,
+    {
+      enabled: !!targetRecordKey,
+    },
+  );
 
   const isRecordFetchComplete = !isLoading && !isError;
   const canMerge = data.length === 2 && master && target;
-
-  console.log(master);
-  console.log(target);
 
   return (
     <>
