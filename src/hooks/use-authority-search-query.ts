@@ -44,11 +44,11 @@ export function useCurrentAuthoritySearchParams() {
   const [searchParams] = useSearchParams();
 
   const params: AuthoritySearchQueryParams = {
-    searchKeyword: searchParams.get("searchKeyword") || "",
-    searchType: searchParams.get("searchType") || "",
-    acRegionCode: searchParams.get("acRegionCode") || "",
-    acControlNo: searchParams.get("acControlNo") || "",
-    acType: searchParams.get("acType") || "",
+    searchKeyword: searchParams.get("searchKeyword") || undefined,
+    searchType: searchParams.get("searchType") || undefined,
+    acRegionCode: searchParams.get("acRegionCode") || undefined,
+    acType: searchParams.get("acType") || "0",
+    acControlNo: searchParams.get("acControlNo") || undefined,
     page: searchParams.get("page") || "1",
     display: searchParams.get("display") || "20",
   };

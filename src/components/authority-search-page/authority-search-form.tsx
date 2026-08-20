@@ -17,13 +17,13 @@ import { useSearchPage } from "@/components/authority-search-page/authority-sear
 
 function getSearchScope(params: URLSearchParams) {
   return JSON.stringify({
-    searchKeyword: params.get("searchKeyword") ?? "",
-    searchType: params.get("acType") ?? "",
-    acRegionCode: params.get("acRegionCode") ?? "",
-    acControlNo: params.get("acControlNo") ?? "",
-    acType: params.get("acType") ?? "0",
-    page: params.get("page") ?? "",
-    display: params.get("display") ?? "",
+    searchKeyword: params.get("searchKeyword") || undefined,
+    searchType: params.get("acType") || undefined,
+    acRegionCode: params.get("acRegionCode") || undefined,
+    acType: params.get("acType") || "0",
+    acControlNo: params.get("acControlNo") || undefined,
+    page: params.get("page") || "1",
+    display: params.get("display") || "20",
   });
 }
 
