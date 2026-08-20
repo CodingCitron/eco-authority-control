@@ -3,6 +3,7 @@ import { Button, Form, Modal, Table } from "react-bootstrap";
 import clsx from "clsx";
 
 import { authorityTypeLabels } from "@/types/authority-search.types";
+import type { AuthorityDetailData } from "@/types/authority-detail.types";
 
 import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
 
@@ -11,15 +12,19 @@ import MarcFontSizeSelect, {
   fontSizeList,
 } from "@/components/ui/marc-font-size-select";
 import BaseModal from "@/components/ui/base-modal";
-import type { AuthorityRecord } from "@/components/ui/record-preview";
-import RecordPreview from "@/components/ui/record-preview";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 
 interface AuthorityMergeModalProps {
   show: boolean;
   onHide: () => void;
-  onPreview?: (master: AuthorityRecord, target: AuthorityRecord) => void;
-  onMerge?: (master: AuthorityRecord, target: AuthorityRecord) => void;
+  onPreview?: (
+    master: AuthorityDetailData,
+    target: AuthorityDetailData,
+  ) => void;
+  onMerge?: (
+    master: AuthorityDetailData,
+    target: AuthorityDetailData,
+  ) => void;
 }
 
 const MERGE_TABLE_HEADS = [
@@ -99,8 +104,6 @@ function AuthorityMergeModalBody({
 
   const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 
-  console.log(data);
-
   useEffect(() => {
     if (show) {
       setMasterRecordKey(data[0]?.recKey);
@@ -108,22 +111,37 @@ function AuthorityMergeModalBody({
     }
   }, [data, show]);
 
-  const { data: master, error: masterError } = useAuthorityDetail(
+  const {
+    data: masterResponse,
+    isLoading: isMasterLoading,
+    isError: isMasterError,
+  } = useAuthorityDetail(
     masterRecordKey,
     {
       enabled: !!masterRecordKey,
     },
   );
 
-  const { data: target, error: targetError } = useAuthorityDetail(
+  const {
+    data: targetResponse,
+    isLoading: isTargetLoading,
+    isError: isTargetError,
+  } = useAuthorityDetail(
     targetRecordKey,
     {
       enabled: !!targetRecordKey,
     },
   );
 
+  const master = masterResponse?.data;
+  const target = targetResponse?.data;
+  const isDetailLoading = isMasterLoading || isTargetLoading;
+  const isDetailError = isMasterError || isTargetError;
   const isRecordFetchComplete = !isLoading && !isError;
-  const canMerge = data.length === 2 && master && target;
+  const canMerge =
+    data.length === 2 &&
+    master !== undefined &&
+    target !== undefined;
 
   return (
     <>
@@ -158,6 +176,18 @@ function AuthorityMergeModalBody({
           <p className="alert alert-warning mb-0" role="alert">
             선택한 전거자료 2건 중 {data.length}건만 조회되었습니다. 목록을
             확인한 후 다시 시도해주세요.
+          </p>
+        )}
+
+        {isRecordFetchComplete && isDetailLoading && (
+          <p className="alert alert-info mb-0" role="status">
+            선택한 전거의 상세 정보를 불러오는 중입니다.
+          </p>
+        )}
+
+        {isRecordFetchComplete && !isDetailLoading && isDetailError && (
+          <p className="alert alert-danger mb-0" role="alert">
+            선택한 전거의 상세 정보를 불러오지 못했습니다.
           </p>
         )}
 
@@ -238,13 +268,11 @@ function AuthorityMergeModalBody({
                       </button>
                     </div>
                   </div>
-                  {master && (
-                    <RecordPreview
-                      record={master}
-                      fontSize={`${masterFontSize}px`}
-                      className="bg-white"
-                    />
-                  )}
+                  <MarcRecordPreview
+                    detail={master}
+                    fontSize={`${masterFontSize}px`}
+                    className="bg-white"
+                  />
                 </div>
               </section>
               <section className="col-md-6">
@@ -268,13 +296,11 @@ function AuthorityMergeModalBody({
                       </button>
                     </div>
                   </div>
-                  {target && (
-                    <RecordPreview
-                      record={target}
-                      fontSize={`${targetFontSize}px`}
-                      className="bg-light"
-                    />
-                  )}
+                  <MarcRecordPreview
+                    detail={target}
+                    fontSize={`${targetFontSize}px`}
+                    className="bg-light"
+                  />
                 </div>
               </section>
             </div>
@@ -286,7 +312,11 @@ function AuthorityMergeModalBody({
           className="px-4 fw-bold"
           variant="outline-primary"
           disabled={!canMerge}
-          // onClick={() => canMerge && onPreview?.(master, target)}
+          onClick={() => {
+            if (master && target) {
+              onPreview?.(master, target);
+            }
+          }}
         >
           MARC 통합
         </Button>
@@ -294,7 +324,11 @@ function AuthorityMergeModalBody({
           className="px-4 fw-bold"
           variant="primary"
           disabled={!canMerge}
-          // onClick={() => canMerge && onMerge?.(master, target)}
+          onClick={() => {
+            if (master && target) {
+              onMerge?.(master, target);
+            }
+          }}
         >
           통합
         </Button>
@@ -303,5 +337,58 @@ function AuthorityMergeModalBody({
         </Button>
       </Modal.Footer>
     </>
+  );
+}
+
+function MarcRecordPreview({
+  detail,
+  fontSize,
+  className,
+}: {
+  detail?: AuthorityDetailData;
+  fontSize: string;
+  className?: string;
+}) {
+  if (!detail) {
+    return (
+      <div className={clsx("marc-record-view border rounded p-2", className)}>
+        상세 정보를 불러오는 중입니다.
+      </div>
+    );
+  }
+
+  const { record } = detail;
+
+  return (
+    <div
+      className={clsx(
+        "marc-record-view font-monospace border rounded p-2",
+        className,
+      )}
+      style={{ fontSize }}
+    >
+      <div className="marc-line">
+        <span className="marc-tag">LDR</span>
+        {record.leader}
+      </div>
+      {record.control_fields.map((field) => (
+        <div className="marc-line" key={`${field.tag}-${field.value}`}>
+          <span className="marc-tag">{field.tag}</span>
+          {field.value}
+        </div>
+      ))}
+      {record.data_fields.map((field, index) => (
+        <div className="marc-line" key={`${field.tag}-${index}`}>
+          <span className="marc-tag">{field.tag}</span>
+          {field.ind1}
+          {field.ind2}
+          {field.subfields.map((subfield) => (
+            <span key={`${subfield.code}-${subfield.value}`}>
+              <span className="ms-1">${subfield.code}</span> {subfield.value}
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }

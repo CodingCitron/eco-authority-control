@@ -13,15 +13,16 @@ export function useAuthorityDetail<
   TData = AuthorityDetailResponse,
   TSelected = TData,
 >(
-  reckey: string,
+  reckey: string | undefined,
   options?: Omit<
     UseQueryOptions<TData, Error, TSelected>,
     "queryKey" | "queryFn"
   >,
 ) {
   return useQuery<TData, Error, TSelected>({
-    queryKey: authorityDetailKeys.detail(reckey),
-    queryFn: () => fetchAuthorityDetail(reckey) as Promise<TData>,
+    queryKey: authorityDetailKeys.detail(reckey ?? ""),
+    queryFn: () => fetchAuthorityDetail(reckey!) as Promise<TData>,
+    enabled: Boolean(reckey),
     ...options,
   });
 }
