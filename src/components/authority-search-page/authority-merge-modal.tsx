@@ -4,7 +4,7 @@ import clsx from "clsx";
 
 import { authorityTypeLabels } from "@/types/authority-search.types";
 
-import { useAuthoritySearchByRecordKeysQuery } from "@/hooks/use-authority-search-query";
+import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 import MarcFontSizeSelect, {
@@ -95,22 +95,14 @@ function AuthorityMergeModalBody({
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
   const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
 
-  const {
-    data = [],
-    isError,
-    isLoading,
-  } = useAuthoritySearchByRecordKeysQuery();
+  const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 
   useEffect(() => {
     if (show) setMasterRecordKey(data[0]?.recKey);
   }, [data, show]);
 
-  const master = data.find(
-    (record) => record.recKey === masterRecordKey,
-  );
-  const target = data.find(
-    (record) => record.recKey !== masterRecordKey,
-  );
+  const master = data.find((record) => record.recKey === masterRecordKey);
+  const target = data.find((record) => record.recKey !== masterRecordKey);
 
   const isRecordFetchComplete = !isLoading && !isError;
   const canMerge = data.length === 2 && master && target;
@@ -185,9 +177,7 @@ function AuthorityMergeModalBody({
                             name="merge-master"
                             aria-label={`${record.headingName}을 통합 주자료로 선택`}
                             checked={isChecked}
-                            onChange={() =>
-                              setMasterRecordKey(record.recKey)
-                            }
+                            onChange={() => setMasterRecordKey(record.recKey)}
                           />
                         </td>
                         <td>{authorityTypeLabels[record.acType]}</td>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-import { useCurrentAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
+import { useCurrentAuthoritySearch } from "@/hooks/use-authority-search";
 
 import BaseModal from "../ui/base-modal";
 import { useSearchPage } from "./authority-search-page-context";
@@ -58,7 +58,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
   const { selectedRecordKeys } = useSearchPage();
 
   // 1. 검색된 data를 다 가져온다.
-  const { data } = useCurrentAuthoritySearchQuery();
+  const { data } = useCurrentAuthoritySearch();
 
   const contents = data?.data.items ?? [];
 

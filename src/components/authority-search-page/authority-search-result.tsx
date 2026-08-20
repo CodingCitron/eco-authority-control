@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from "react-router";
 
-import { useCurrentAuthoritySearchQuery } from "@/hooks/use-authority-search-query";
+import { useCurrentAuthoritySearch } from "@/hooks/use-authority-search";
 
 import {
   type PersonalRow,
@@ -369,9 +369,7 @@ function AuthorityTable({
         <Table<PersonalRow>
           caption={tableConfig["0"].caption}
           columns={tableConfig["0"].columns}
-          rows={rows.filter(
-            (row): row is PersonalRow => row.acType === "0",
-          )}
+          rows={rows.filter((row): row is PersonalRow => row.acType === "0")}
           getRowKey={(row) => row.recKey}
         />
       );
@@ -380,9 +378,7 @@ function AuthorityTable({
         <Table<CorporationRow>
           caption={tableConfig["1"].caption}
           columns={tableConfig["1"].columns}
-          rows={rows.filter(
-            (row): row is CorporationRow => row.acType === "1",
-          )}
+          rows={rows.filter((row): row is CorporationRow => row.acType === "1")}
           getRowKey={(row) => row.recKey}
         />
       );
@@ -391,9 +387,7 @@ function AuthorityTable({
         <Table<GeographyRow>
           caption={tableConfig["5"].caption}
           columns={tableConfig["5"].columns}
-          rows={rows.filter(
-            (row): row is GeographyRow => row.acType === "5",
-          )}
+          rows={rows.filter((row): row is GeographyRow => row.acType === "5")}
           getRowKey={(row) => row.recKey}
         />
       );
@@ -402,9 +396,7 @@ function AuthorityTable({
         <Table<SubjectRow>
           caption={tableConfig["4"].caption}
           columns={tableConfig["4"].columns}
-          rows={rows.filter(
-            (row): row is SubjectRow => row.acType === "4",
-          )}
+          rows={rows.filter((row): row is SubjectRow => row.acType === "4")}
           getRowKey={(row) => row.recKey}
         />
       );
@@ -416,7 +408,7 @@ export default function AuthoritySearchResult() {
   const { clearSelectedRecordKeys } = useSearchPage();
 
   const { acType, data, isLoading, isError, isSearched } =
-    useCurrentAuthoritySearchQuery();
+    useCurrentAuthoritySearch();
 
   if (!isSearched) {
     return (

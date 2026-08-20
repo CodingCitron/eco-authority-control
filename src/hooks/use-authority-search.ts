@@ -23,7 +23,7 @@ export const authoritySearchQueryKeys = {
     [...authoritySearchQueryKeys.lists(), params] as const,
 };
 
-export function useAuthoritySearchQuery<
+export function useAuthoritySearch<
   TData = AuthoritySearchResponse,
   TSelected = TData,
 >(
@@ -67,18 +67,18 @@ type AuthoritySearchQueryOptions<TSelected> = Omit<
 >;
 
 // 현재 검색된 전거 데이터
-export function useCurrentAuthoritySearchQuery<
-  TSelected = AuthoritySearchResponse,
->(options?: AuthoritySearchQueryOptions<TSelected>) {
+export function useCurrentAuthoritySearch<TSelected = AuthoritySearchResponse>(
+  options?: AuthoritySearchQueryOptions<TSelected>,
+) {
   const { params, isSearched } = useCurrentAuthoritySearchParams();
 
-  const queryResult = useAuthoritySearchQuery<
-    AuthoritySearchResponse,
-    TSelected
-  >(params, {
-    enabled: isSearched,
-    ...options,
-  });
+  const queryResult = useAuthoritySearch<AuthoritySearchResponse, TSelected>(
+    params,
+    {
+      enabled: isSearched,
+      ...options,
+    },
+  );
 
   const acType: AuthoritySearchType | "" = isValidAcType(params.acType)
     ? params.acType
@@ -92,10 +92,10 @@ export function useCurrentAuthoritySearchQuery<
 }
 
 // 선택된 전거 데이터 가져오기
-export function useAuthoritySearchByRecordKeysQuery() {
+export function useAuthoritySearchByRecordKeys() {
   const { selectedRecordKeys } = useSearchPage();
 
-  return useCurrentAuthoritySearchQuery<AuthorityRecord[]>({
+  return useCurrentAuthoritySearch<AuthorityRecord[]>({
     enabled: false,
     select: useCallback(
       ({ data }) => {

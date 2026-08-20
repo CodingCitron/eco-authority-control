@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-import { useAuthoritySearchByRecordKeysQuery } from "@/hooks/use-authority-search-query";
+import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 import BaseModal from "@/components/ui/base-modal";
@@ -65,11 +65,7 @@ export function AuthoritySplitModalBody({ onHide }: { onHide: () => void }) {
   // 분리 데이터
   const [targetRecord, setTargetRecord] = useState();
 
-  const {
-    data = [],
-    isError,
-    isLoading,
-  } = useAuthoritySearchByRecordKeysQuery();
+  const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 
   const master = data[0];
 

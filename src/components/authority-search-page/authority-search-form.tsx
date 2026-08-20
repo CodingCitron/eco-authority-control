@@ -11,7 +11,7 @@ import {
 } from "@/types/authority-search.types";
 
 import queryClient from "@/lib/query-client";
-import { authoritySearchQueryKeys } from "@/hooks/use-authority-search-query";
+import { authoritySearchQueryKeys } from "@/hooks/use-authority-search";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 
