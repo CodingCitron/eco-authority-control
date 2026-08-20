@@ -1,7 +1,7 @@
 import z from "zod";
 
-import { authorityRecordSchema } from "@/types/authority-search.types";
 import { apiClient } from "@/lib/axios";
+import { authorityRecordSchema } from "@/types/authority-search.types";
 
 export interface AuthoritySearchQueryParams {
   searchKeyword?: string; // 전거 표목 검색 키워드
@@ -12,8 +12,6 @@ export interface AuthoritySearchQueryParams {
   page?: string; // 페이지
   display?: string; // 표시 개수
 }
-
-export type AuthoritySearchResult = AuthoritySearchResponse;
 
 export const authoritySearchResponseSchema = z.object({
   data: z.object({
@@ -44,5 +42,3 @@ export async function fetchAuthoritySearch(
 
   return result.data;
 }
-
-// 검색 조건에 따라 데이터 가져오기
