@@ -13,11 +13,14 @@ export default function AppPagination({
   pageSize,
   onPageChange,
 }: AppPaginationProps) {
-  const totalPages = Math.ceil(totalCount / pageSize);
+  const totalPages = Math.ceil(totalCount / Math.max(pageSize, 1));
 
   if (totalPages <= 1) {
     return null;
   }
+
+  const pageGroupStart = Math.floor((page - 1) / 10) * 10 + 1;
+  const pageGroupEnd = Math.min(pageGroupStart + 9, totalPages);
 
   return (
     <Pagination className="mb-0">
@@ -27,19 +30,22 @@ export default function AppPagination({
         onClick={() => onPageChange(page - 1)}
       />
 
-      {Array.from({ length: totalPages }, (_, index) => {
-        const pageNumber = index + 1;
+      {Array.from(
+        { length: pageGroupEnd - pageGroupStart + 1 },
+        (_, index) => {
+          const pageNumber = pageGroupStart + index;
 
-        return (
-          <Pagination.Item
-            key={pageNumber}
-            active={pageNumber === page}
-            onClick={() => onPageChange(pageNumber)}
-          >
-            {pageNumber}
-          </Pagination.Item>
-        );
-      })}
+          return (
+            <Pagination.Item
+              key={pageNumber}
+              active={pageNumber === page}
+              onClick={() => onPageChange(pageNumber)}
+            >
+              {pageNumber}
+            </Pagination.Item>
+          );
+        },
+      )}
 
       <Pagination.Next
         disabled={page === totalPages}

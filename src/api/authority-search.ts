@@ -37,6 +37,7 @@ export async function fetchAuthoritySearch(
   const result = authoritySearchResponseSchema.safeParse(data);
 
   if (!result.success) {
+    console.log(result.error);
     throw new Error("올바르지 않은 응답 데이터 형식입니다.");
   }
 

@@ -24,18 +24,19 @@ export type AuthoritySearchType = (typeof authoritySearchTypes)[number];
 
 const baseRowSchema = z.object({
   recKey: z.string(),
-  acRegionDesc: z.string(),
-  headingName: z.string(),
+  acRegionDesc: z.string().nullish(),
+  headingName: z.string().nullish(),
   acControlNo: z.string(),
-  firstWorker: z.string(),
-  inputDate: z.string(),
-  lastWorker: z.string(),
+  firstWorker: z.string().nullish(),
+  firstInputDate: z.string().nullish(),
+  lastWorker: z.string().nullish(),
+  lastUpdateDate: z.string().nullish(),
 });
 
 export const personalRowSchema = baseRowSchema.extend({
   acType: z.literal("0"),
-  hanjaName: z.string(),
-  birthDeathDate: z.string(),
+  hanjaName: z.string().nullish(),
+  birthDeathDate: z.string().nullish(),
   activityField: z.string(),
   sourceDataFound: z.string(),
 });
@@ -44,7 +45,7 @@ export const corporationRowSchema = baseRowSchema.extend({
   acType: z.literal("1"),
   organizationType: z.string(),
   establishmentDate: z.string(),
-  terminationDate: z.string().nullable(),
+  terminationDate: z.string(),
   activityField: z.string(),
   sourceDataFound: z.string(),
 });

@@ -13,6 +13,7 @@ import MarcFontSizeSelect, {
 import BaseModal from "@/components/ui/base-modal";
 import type { AuthorityRecord } from "@/components/ui/record-preview";
 import RecordPreview from "@/components/ui/record-preview";
+import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 
 interface AuthorityMergeModalProps {
   show: boolean;
@@ -91,6 +92,7 @@ function AuthorityMergeModalBody({
   onMerge,
 }: AuthorityMergeModalProps) {
   const [masterRecordKey, setMasterRecordKey] = useState<string>();
+  const [targetRecordKey, setTargetRecordKey] = useState<string>();
 
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
   const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
@@ -98,14 +100,25 @@ function AuthorityMergeModalBody({
   const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 
   useEffect(() => {
-    if (show) setMasterRecordKey(data[0]?.recKey);
+    if (show) {
+      setMasterRecordKey(data[0]?.recKey);
+      setTargetRecordKey(data[1]?.recKey);
+    }
   }, [data, show]);
 
-  const master = data.find((record) => record.recKey === masterRecordKey);
-  const target = data.find((record) => record.recKey !== masterRecordKey);
+  const { data: master } = useAuthorityDetail(masterRecordKey, {
+    enabled: !!masterRecordKey,
+  });
+
+  const { data: target } = useAuthorityDetail(targetRecordKey, {
+    enabled: !!targetRecordKey,
+  });
 
   const isRecordFetchComplete = !isLoading && !isError;
   const canMerge = data.length === 2 && master && target;
+
+  console.log(master);
+  console.log(target);
 
   return (
     <>
