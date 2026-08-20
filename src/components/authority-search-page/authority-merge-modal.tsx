@@ -380,9 +380,12 @@ function MarcRecordPreview({
           {field.ind2}
           {field.subfields.map((subfield) => (
             <span key={`${subfield.code}-${subfield.value}`}>
-              <span className="ms-1">${subfield.code}</span> {subfield.value}
+              <span className="marc-sf">${subfield.code}</span> {subfield.value}
             </span>
           ))}
+
+          {/* 필수 x: 마크 필드의 끝 의미 */}
+          <span className="marc-eof">%</span>
         </div>
       ))}
     </div>
