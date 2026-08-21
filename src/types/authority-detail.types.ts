@@ -47,3 +47,5 @@ export type AuthorityControlField = z.infer<typeof authorityControlFieldSchema>;
 export type AuthoritySubfield = z.infer<typeof authoritySubfieldSchema>;
 export type AuthorityDataField = z.infer<typeof authorityDataFieldSchema>;
 export type AuthorityDetailData = z.infer<typeof authorityDetailDataSchema>;
+
+// AuthorityDetailData 비슷한 형태의 미완성 데이터 필요

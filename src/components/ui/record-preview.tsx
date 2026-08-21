@@ -1,67 +1,72 @@
 import clsx from "clsx";
 import { css } from "styled-system/css";
 
-export interface AuthorityRecord {
-  acControlNo: string;
-  acType: string;
-  headingName: string;
-  sourceDataFound?: string;
-  marcPreview?: string;
+import type { AuthorityDetailData } from "@/types/authority-detail.types";
+
+function sort<T extends { tag: string }>(items: readonly T[]) {
+  return items.toSorted((a, b) => a.tag.localeCompare(b.tag));
 }
 
-const keyToTag = {
-  acControlNo: "001",
-  headingName: "150",
-  sourceDataFound: "670",
-};
-
-// 태그 기준 정렬
-function sortingByTag(record?: AuthorityRecord | null) {
-  if (!record) return [];
-
-  const keys = Object.keys(keyToTag);
-  const sorted = keys.sort((a, b) =>
-    keyToTag[a as keyof typeof keyToTag].localeCompare(
-      keyToTag[b as keyof typeof keyToTag],
-    ),
-  );
-
-  return sorted.map((key) => ({
-    tag: keyToTag[key as keyof typeof keyToTag],
-    line: record[key as keyof AuthorityRecord],
-  }));
-}
-
-export default function RecordPreview({
-  record,
+export default function MarcRecordPreview({
+  detail,
   fontSize,
-  message = "선택된 데이터가 없습니다.",
   className,
+  message,
 }: {
-  record?: AuthorityRecord | null;
+  detail?: AuthorityDetailData;
   fontSize: string;
-  message?: string;
   className?: string;
+  message?: string;
 }) {
-  const marcLines = sortingByTag(record);
+  if (!detail) {
+    return (
+      <div
+        className={clsx(
+          "marc-record-view border rounded p-2",
+          css({
+            minHeight: "280px",
+          }),
+          className,
+        )}
+      >
+        {message || "상세 정보를 불러오는 중입니다."}
+      </div>
+    );
+  }
+
+  const { record } = detail;
 
   return (
     <div
       className={clsx(
         "marc-record-view font-monospace border rounded p-2",
-        css({
-          minHeight: "280px",
-        }),
         className,
       )}
       style={{ fontSize }}
     >
-      {!record && <p className="mb-0">{message}</p>}
+      <div className="marc-line">
+        <span className="marc-tag">LDR</span>
+        {record.leader}
+      </div>
+      {sort(record.control_fields).map((field) => (
+        <div className="marc-line" key={`${field.tag}-${field.value}`}>
+          <span className="marc-tag">{field.tag}</span>
+          {field.value}
+        </div>
+      ))}
+      {sort(record.data_fields).map((field, index) => (
+        <div className="marc-line" key={`${field.tag}-${index}`}>
+          <span className="marc-tag">{field.tag}</span>
+          {field.ind1}
+          {field.ind2}
+          {field.subfields.map((subfield) => (
+            <span key={`${subfield.code}-${subfield.value}`}>
+              <span className="marc-sf">${subfield.code}</span> {subfield.value}
+            </span>
+          ))}
 
-      {marcLines.map((item) => (
-        <div className="marc-line marc-line-control">
-          <span className="marc-tag">{item.tag}</span>
-          {item.line}
+          {/* 필수 x: 마크 필드의 끝 의미 */}
+          <span className="marc-eof">%</span>
         </div>
       ))}
     </div>
