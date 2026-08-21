@@ -26,12 +26,12 @@ const router = createBrowserRouter([
       {
         // 개인명 등록
         path: "personal/new",
-        element: <AuthorityPersonalFormPage />,
+        element: <AuthorityPersonalFormPage mode="create" />,
       },
       {
         // 개인명 수정
         path: "personal/edit",
-        element: <AuthorityPersonalFormPage />,
+        element: <AuthorityPersonalFormPage mode="edit" />,
       },
       {
         // 단체명 등록

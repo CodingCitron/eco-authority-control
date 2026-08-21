@@ -1,15 +1,34 @@
 //  개인명 등록/수정
-import { useLocation, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 
 import { AuthorityFixedFieldEditButton } from "@/components/ui/authority-fixed-field-edit-modal";
 
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 
-export default function AuthorityPersonalFormPage() {
-  const searchParams = useSearchParams();
-  const { pathname } = useLocation();
+export type AuthorityPersonalFormMode = "create" | "edit";
 
-  const isCreatePage = pathname === "/personal/new";
+interface AuthorityPersonalFormPageProps {
+  mode: AuthorityPersonalFormMode;
+}
+
+export default function AuthorityPersonalFormPage({
+  mode,
+}: AuthorityPersonalFormPageProps) {
+  const [searchParams] = useSearchParams();
+  const isCreatePage = mode === "create";
+
+  // 등록은 대상 레코드가 없고, 수정은 하나 또는 여러 recKey
+  const recordKeys = isCreatePage
+    ? []
+    : parseRecordKeys(
+        searchParams.get("recKeys") ?? searchParams.get("recKey"),
+      );
+  const currentRecordKey = isCreatePage
+    ? undefined
+    : (searchParams.get("current") ?? recordKeys[0]);
+  const currentRecordIndex = currentRecordKey
+    ? recordKeys.indexOf(currentRecordKey)
+    : -1;
 
   // const { data } = useAuthorityDetail()
 
@@ -997,4 +1016,19 @@ export default function AuthorityPersonalFormPage() {
       </div>
     </main>
   );
+}
+
+function parseRecordKeys(value: string | null): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return [
+    ...new Set(
+      value
+        .split(",")
+        .map((key) => key.trim())
+        .filter(Boolean),
+    ),
+  ];
 }
