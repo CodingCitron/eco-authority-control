@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
@@ -10,6 +10,13 @@ import MarcFontSizeSelect, {
   fontSizeList,
 } from "@/components/ui/marc-font-size-select";
 import MarcRecordPreview from "@/components/ui/record-preview";
+import { useMutation } from "@tanstack/react-query";
+import { fetchGenerateAuthorityControlNumber } from "@/api/authortiy-control-number";
+import {
+  isValidAcType,
+  type AuthoritySearchType,
+} from "@/types/authority-search.types";
+import type { AuthorityDetailData } from "@/types/authority-detail.types";
 
 export function AuthoritySplitButton() {
   const { selectedRecordKeys } = useSearchPage();
@@ -69,8 +76,12 @@ export function AuthoritySplitModalBody({
   const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
   const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
 
+  const requestedAcTypeRef = useRef<AuthoritySearchType | null>(null);
+
   // 분리 데이터
-  const [targetRecord, setTargetRecord] = useState();
+  const [targetRecord, setTargetRecord] = useState<{
+    data: AuthorityDetailData;
+  } | null>(null);
 
   const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 
@@ -86,7 +97,72 @@ export function AuthoritySplitModalBody({
 
   const isRecordFetchComplete = !isLoading && !isError;
 
-  console.log(detailData);
+  // 전거 제어 번호 가져오기
+  const {
+    mutate: generateControlNumber,
+    isPending: isGeneratingControlNumber,
+    isError: isGenerateError,
+  } = useMutation({
+    mutationFn: fetchGenerateAuthorityControlNumber,
+    onSuccess: (data) => {
+      setTargetRecord(() => {
+        return {
+          ...detailData,
+          data: {
+            ...detailData.data,
+            acControlNo: data.data,
+            recKey: "",
+            record: {
+              ...detailData.data.record,
+              control_fields: detailData.data.record.control_fields.map(
+                (controlField) => {
+                  if (controlField.tag === "001") {
+                    return {
+                      ...controlField,
+                      value: data.data,
+                    };
+                  }
+
+                  return controlField;
+                },
+              ),
+              data_fields: [...detailData.data.record.data_fields],
+            },
+          },
+        };
+      });
+    },
+    onError: () => {
+      requestedAcTypeRef.current = null;
+    },
+  });
+
+  const acType = detailData?.data.acType;
+
+  useEffect(() => {
+    if (!show) {
+      requestedAcTypeRef.current = null;
+      return;
+    }
+
+    if (!acType || !isValidAcType(acType)) {
+      return;
+    }
+
+    if (requestedAcTypeRef.current === acType) {
+      return;
+    }
+
+    requestedAcTypeRef.current = acType;
+    generateControlNumber(acType);
+  }, [show, acType, generateControlNumber]);
+
+  useEffect(() => {
+    if (!show) {
+      setTargetRecord(null);
+      return;
+    }
+  }, [show]);
 
   return (
     <>
@@ -155,7 +231,9 @@ export function AuthoritySplitModalBody({
             <section className="col-md-6">
               <div className="border p-3 bg-white rounded h-100">
                 <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                  <span className="badge bg-secondary">분리대상자료</span>
+                  <span className="badge bg-secondary">
+                    분리대상자료 ({targetRecord?.data.acControlNo || ""})
+                  </span>
                   <div className="d-flex gap-2">
                     <MarcFontSizeSelect
                       aria-label="대상자료 글자크기"
@@ -172,7 +250,7 @@ export function AuthoritySplitModalBody({
                   </div>
                 </div>
                 <MarcRecordPreview
-                  detail={targetRecord}
+                  detail={targetRecord?.data}
                   fontSize={`${targetFontSize}px`}
                   message="분리할 자료가 선택되지 않았습니다."
                   className="bg-light"
