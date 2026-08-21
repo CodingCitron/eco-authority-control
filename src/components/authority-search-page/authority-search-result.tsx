@@ -18,6 +18,7 @@ import AuthoritySelectionCheckbox from "@/components/authority-search-page/autho
 import type { TableColumn } from "@/components/ui/table";
 import Table from "@/components/ui/table";
 import AppPagination from "@/components/ui/pagination";
+import { AuthorityDeleteButton } from "./authority-delete-modal";
 
 export const personalColumns: TableColumn<PersonalRow>[] = [
   {
@@ -96,9 +97,14 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
         >
           수정
         </Link>{" "}
-        <button type="button" className="btn btn-sm btn-light-danger py-0">
+        <AuthorityDeleteButton
+          reckey={row.recKey}
+          controlNumber={row.acControlNo}
+          type="button"
+          className="btn btn-sm btn-light-danger py-0"
+        >
           삭제
-        </button>
+        </AuthorityDeleteButton>
       </>
     ),
   },
@@ -177,9 +183,14 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
         >
           수정
         </Link>{" "}
-        <button type="button" className="btn btn-sm btn-light-danger py-0">
+        <AuthorityDeleteButton
+          reckey={row.recKey}
+          controlNumber={row.acControlNo}
+          type="button"
+          className="btn btn-sm btn-light-danger py-0"
+        >
           삭제
-        </button>
+        </AuthorityDeleteButton>
       </>
     ),
   },
@@ -243,9 +254,14 @@ export const geographyColumns: TableColumn<GeographyRow>[] = [
         >
           수정
         </Link>{" "}
-        <button type="button" className="btn btn-sm btn-light-danger py-0">
+        <AuthorityDeleteButton
+          reckey={row.recKey}
+          controlNumber={row.acControlNo}
+          type="button"
+          className="btn btn-sm btn-light-danger py-0"
+        >
           삭제
-        </button>
+        </AuthorityDeleteButton>
       </>
     ),
   },
@@ -315,9 +331,14 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
         >
           수정
         </Link>{" "}
-        <button type="button" className="btn btn-sm btn-light-danger py-0">
+        <AuthorityDeleteButton
+          reckey={row.recKey}
+          controlNumber={row.acControlNo}
+          type="button"
+          className="btn btn-sm btn-light-danger py-0"
+        >
           삭제
-        </button>
+        </AuthorityDeleteButton>
       </>
     ),
   },
