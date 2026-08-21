@@ -1,15 +1,27 @@
 //  개인명 등록/수정
+import { useLocation, useSearchParams } from "react-router";
 
 import { AuthorityFixedFieldEditButton } from "@/components/ui/authority-fixed-field-edit-modal";
 
+import { useAuthorityDetail } from "@/hooks/use-authority-detail";
+
 export default function AuthorityPersonalFormPage() {
+  const searchParams = useSearchParams();
+  const { pathname } = useLocation();
+
+  const isCreatePage = pathname === "/personal/new";
+
+  // const { data } = useAuthorityDetail()
+
   return (
     <main
       id="main-content"
       className="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4 pb-5 min-vh-100"
     >
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-        <h1 className="h2 fw-bold">개인명 전거관리 - 입력/수정</h1>
+        <h1 className="h2 fw-bold">
+          개인명 전거관리 - {isCreatePage ? "입력" : "수정"}
+        </h1>
         <div className="d-flex gap-2">
           <button className="btn btn-sm btn-primary">서지 목록보기</button>
           <button className="btn btn-sm btn-secondary">화면 초기화</button>

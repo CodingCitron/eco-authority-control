@@ -92,7 +92,7 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
     cell: (row) => (
       <>
         <Link
-          to={`personal/${row.acControlNo}/edit`}
+          to={`personal/edit?recKey=${row.recKey}`}
           className="btn btn-sm btn-light-warning py-0"
         >
           수정
@@ -178,7 +178,7 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
     cell: (row) => (
       <>
         <Link
-          to={`/corporation/${row.acControlNo}/edit`}
+          to={`corporation/edit?recKey=${row.recKey}`}
           className="btn btn-sm btn-light-warning py-0"
         >
           수정
@@ -249,7 +249,7 @@ export const geographyColumns: TableColumn<GeographyRow>[] = [
     cell: (row) => (
       <>
         <Link
-          to={`/geography/${row.acControlNo}/edit`}
+          to={`geography/edit?recKey=${row.recKey}`}
           className="btn btn-sm btn-light-warning py-0"
         >
           수정
@@ -326,7 +326,7 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
     cell: (row) => (
       <>
         <Link
-          to={`/subject/${row.acControlNo}/edit`}
+          to={`subject/edit?recKey=${row.recKey}`}
           className="btn btn-sm btn-light-warning py-0"
         >
           수정
