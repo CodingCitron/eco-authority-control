@@ -1,5 +1,7 @@
 //  개인명 등록/수정
 
+import { AuthorityFixedFieldEditButton } from "@/components/ui/authority-fixed-field-edit-modal";
+
 export default function AuthorityPersonalFormPage() {
   return (
     <main
@@ -849,13 +851,7 @@ export default function AuthorityPersonalFormPage() {
           <div className="card shadow-sm h-100">
             <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
               <span>MARC 레코드 뷰</span>
-              <button
-                className="btn btn-sm btn-light"
-                data-bs-toggle="modal"
-                data-bs-target="#modal008"
-              >
-                고정길이편집
-              </button>
+              <AuthorityFixedFieldEditButton />
             </div>
             <div className="card-body p-0">
               <div
