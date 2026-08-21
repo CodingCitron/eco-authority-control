@@ -86,6 +86,8 @@ export function AuthoritySplitModalBody({
 
   const isRecordFetchComplete = !isLoading && !isError;
 
+  console.log(detailData);
+
   return (
     <>
       <Modal.Header

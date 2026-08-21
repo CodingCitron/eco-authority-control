@@ -437,8 +437,6 @@ export default function AuthoritySearchResult() {
     );
   }
 
-  // console.log(data);
-
   const contents = data?.data.items ?? [];
   const totalCount = data?.data.total ?? 0;
 

@@ -7,6 +7,8 @@ function sort<T extends { tag: string }>(items: readonly T[]) {
   return items.toSorted((a, b) => a.tag.localeCompare(b.tag));
 }
 
+// split으로 동작하는
+
 export default function MarcRecordPreview({
   detail,
   fontSize,

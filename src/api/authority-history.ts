@@ -25,11 +25,7 @@ export default async function fetchAuthorityHistory(
     params,
   });
 
-  const result = authorityHistoryResponseSchema.safeParse(data);
+  const result = authorityHistoryResponseSchema.parse(data);
 
-  if (!result.success) {
-    throw result.error;
-  }
-
-  return result.data;
+  return result;
 }

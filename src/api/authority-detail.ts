@@ -17,11 +17,7 @@ export async function fetchAuthorityDetail(reckey: string) {
     `/ac/${reckey}`,
   );
 
-  const result = authorityDetailResponseSchema.safeParse(data);
+  const result = authorityDetailResponseSchema.parse(data);
 
-  if (!result.success) {
-    throw result.error;
-  }
-
-  return result.data;
+  return result;
 }

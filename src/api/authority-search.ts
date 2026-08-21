@@ -34,11 +34,7 @@ export async function fetchAuthoritySearch(
     params,
   });
 
-  const result = authoritySearchResponseSchema.safeParse(data);
+  const result = authoritySearchResponseSchema.parse(data);
 
-  if (!result.success) {
-    throw result.error;
-  }
-
-  return result.data;
+  return result;
 }
