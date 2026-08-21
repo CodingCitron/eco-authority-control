@@ -212,6 +212,7 @@ function AuthorityMergeModalBody({
                     return (
                       <tr
                         key={record.recKey}
+                        role="button"
                         onClick={() => setMasterRecordKey(record.recKey)}
                       >
                         <td>{index + 1}</td>
