@@ -1,6 +1,6 @@
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 
-export default function MarcEditor({}) {
+export default function MarcEditor({ fontSize }: { fontSize: string }) {
   return (
     <>
       <div className="card shadow-sm h-100">
@@ -14,7 +14,7 @@ export default function MarcEditor({}) {
         <div className="card-body p-0">
           <div
             className="form-control marc-textarea marc-record-view h-100 border-0 rounded-0 font-monospace bg-light"
-            style={{ minHeight: "200px" }}
+            style={{ minHeight: "200px", fontSize }}
           >
             <div className="marc-line marc-line-control">
               <span className="marc-tag">001</span> KAC201206266

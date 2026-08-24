@@ -45,7 +45,7 @@ export interface MarcData {
   leaderData?: LeaderData;
   variableFields?: MarcField[];
   setLeaderData: (leaderData: LeaderData) => void;
-  setVariableField: (variableFields: MarcField[]) => void;
+  setVariableFields: (variableFields: MarcField[]) => void;
 }
 
 export const MarcEditorContext = createContext<MarcData | null>(null);
@@ -63,12 +63,12 @@ export function useMarcEditor() {
     MarcEditorContext,
     (context) => context?.setLeaderData,
   );
-  const setVariableField = useContextSelector(
+  const setVariableFields = useContextSelector(
     MarcEditorContext,
-    (context) => context?.setVariableField,
+    (context) => context?.setVariableFields,
   );
 
-  if (!leaderData || !variableFields || !setLeaderData || !setVariableField) {
+  if (!leaderData || !variableFields || !setLeaderData || !setVariableFields) {
     throw new Error(
       "useMarcEditor는 MarcEditorProvider 내부에서 사용해야 합니다.",
     );
@@ -78,6 +78,6 @@ export function useMarcEditor() {
     leaderData,
     variableFields,
     setLeaderData,
-    setVariableField,
+    setVariableFields,
   };
 }
