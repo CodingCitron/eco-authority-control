@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
-import { useMarcEditor } from "./marc-editor-context";
+import { useMarcEditor, type SubField } from "./marc-editor-context";
 
 interface MarcEditorProps {
   fontSize: string;
@@ -13,6 +13,7 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
   const { leaderData, variableFields, setVariableFields } = useMarcEditor();
 
   console.log(leaderData);
+  console.log(variableFields);
 
   return (
     <>
@@ -35,107 +36,9 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
             className="form-control marc-textarea marc-record-view h-100 border-0 rounded-0 font-monospace bg-light"
             style={{ minHeight: "200px", fontSize }}
           >
-            <div className="marc-line marc-line-control">
-              <span className="marc-tag">001</span> KAC201206266
-            </div>
-            <div className="marc-line marc-line-control">
-              <span className="marc-tag">005</span> 20200918145415
-            </div>
-            <div className="marc-line marc-line-control">
-              <span className="marc-tag">008</span> 120224 b aznnnaabn a aaa{" "}
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-control">
-              <span className="marc-tag">046</span>{" "}
-              <span className="marc-sf">$f</span>1902
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">100</span> 1
-              <span className="marc-sf">$a</span>김소월,
-              <span className="marc-sf">$g</span>金素月,
-              <span className="marc-sf">$d</span>1902-1934
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">370</span>{" "}
-              <span className="marc-sf">$c</span>한국(국명)[韓國]{" "}
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">370</span>{" "}
-              <span className="marc-sf">$a</span>평안북도 구성
-              <span className="marc-sf">$b</span>평안북도 곽산
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">372</span>{" "}
-              <span className="marc-sf">$a</span>한국 시[韓國時]{" "}
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">372</span>{" "}
-              <span className="marc-sf">$a</span>문학(예술)[문학]{" "}
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">373</span>{" "}
-              <span className="marc-sf">$a</span>동아일보 정주지국(설립자){" "}
-              <span className="marc-sf">$s</span>1926
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">374</span>{" "}
-              <span className="marc-sf">$a</span>작가(사람)[作家]{" "}
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">375</span>{" "}
-              <span className="marc-sf">$a</span>남성
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">377</span>{" "}
-              <span className="marc-sf">$i</span>한국어
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">400</span>{" "}
-              <span className="marc-sf">$a</span>소월,{" "}
-              <span className="marc-sf">$g</span>素月,{" "}
-              <span className="marc-sf">$d</span>1902-1934
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">400</span>{" "}
-              <span className="marc-sf">$a</span>김정식,{" "}
-              <span className="marc-sf">$g</span>金廷湜,{" "}
-              <span className="marc-sf">$d</span>1902-1934
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">400</span>{" "}
-              <span className="marc-sf">$a</span>KIM,Sowol,{" "}
-              <span className="marc-sf">$d</span>1902-1934
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">670</span>{" "}
-              <span className="marc-sf">$a</span>
-              진달래꽃,(Human&amp;Books),2011
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">670</span>{" "}
-              <span className="marc-sf">$a</span>김소월 시집,(스타북스),2018
-              <span className="marc-eof">%</span>
-            </div>
-            <div className="marc-line marc-line-data">
-              <span className="marc-tag">678</span>{" "}
-              <span className="marc-sf">$a</span>시인;
-              <span className="marc-sf">$a</span>1920년 등단
-              <span className="marc-eof">%</span>
-            </div>
+            <button className="marc-line marc-line-data d-flex justify-content-center">
+              <i className="bi bi-plus fs-3"></i>
+            </button>
           </div>
         </div>
         <div className="card-footer bg-white d-flex justify-content-between">
@@ -164,12 +67,26 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
 
 interface MarcRowProps {
   mode: EditorMode;
+  tag: string;
+  ind1: string;
+  ind2: string;
+  subfields: SubField[];
 }
 
-function MarcRow({ mode }: MarcRowProps) {
+function MarcRow({ mode, tag, ind1, ind2, subfields }: MarcRowProps) {
   return (
     <div className="marc-line marc-line-control">
-      <span className="marc-tag">001</span> KAC201206266
+      <span className="marc-tag">{tag}</span>
+      {ind1}
+      {ind2}
+      {subfields.map((subfield) => (
+        <span key={`${subfield.code}-${subfield.value}`}>
+          <span className="marc-sf">${subfield.code}</span> {subfield.value}
+        </span>
+      ))}
+
+      {/* 필수 x: 마크 필드의 끝 의미 */}
+      <span className="marc-eof">%</span>
     </div>
   );
 }
