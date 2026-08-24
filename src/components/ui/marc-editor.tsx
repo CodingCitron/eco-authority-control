@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 import { useMarcEditor, type SubField } from "./marc-editor-context";
 
@@ -12,8 +13,17 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
   const [mode, setMode] = useState<EditorMode>("form");
   const { leaderData, variableFields, setVariableFields } = useMarcEditor();
 
-  console.log(leaderData);
-  console.log(variableFields);
+  const addVariableField = () => {
+    setVariableFields([
+      ...variableFields,
+      {
+        tag: "",
+        indicator1: "",
+        indicator2: "",
+        subfields: [],
+      },
+    ]);
+  };
 
   return (
     <>
@@ -36,7 +46,21 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
             className="form-control marc-textarea marc-record-view h-100 border-0 rounded-0 font-monospace bg-light"
             style={{ minHeight: "200px", fontSize }}
           >
-            <button className="marc-line marc-line-data d-flex justify-content-center">
+            {variableFields.map((field, index) => (
+              <MarcRow
+                ind1={field.indicator1}
+                ind2={field.indicator2}
+                key={`${field.tag}-${index}`}
+                mode={mode}
+                subfields={field.subfields}
+                tag={field.tag}
+              />
+            ))}
+            <button
+              type="button"
+              className="marc-line marc-line-data d-flex justify-content-center"
+              onClick={addVariableField}
+            >
               <i className="bi bi-plus fs-3"></i>
             </button>
           </div>
