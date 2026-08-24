@@ -37,27 +37,27 @@ export const personalRowSchema = baseRowSchema.extend({
   acType: z.literal("0"),
   hanjaName: z.string().nullish(),
   birthDeathDate: z.string().nullish(),
-  activityField: z.string(),
-  sourceDataFound: z.string(),
+  activityField: z.string().nullish(),
+  sourceDataFound: z.string().nullish(),
 });
 
 export const corporationRowSchema = baseRowSchema.extend({
   acType: z.literal("1"),
-  organizationType: z.string(),
-  establishmentDate: z.string(),
-  terminationDate: z.string(),
-  activityField: z.string(),
-  sourceDataFound: z.string(),
+  organizationType: z.string().nullish(),
+  establishmentDate: z.string().nullish(),
+  terminationDate: z.string().nullish(),
+  activityField: z.string().nullish(),
+  sourceDataFound: z.string().nullish(),
 });
 
 export const geographyRowSchema = baseRowSchema.extend({
   acType: z.literal("5"),
-  sourceDataFound: z.string(),
+  sourceDataFound: z.string().nullish(),
 });
 
 export const subjectRowSchema = baseRowSchema.extend({
   acType: z.literal("4"),
-  sourceDataFound: z.string(),
+  sourceDataFound: z.string().nullish(),
 });
 
 const normalizeAuthorityRecord = (value: unknown) => {

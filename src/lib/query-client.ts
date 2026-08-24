@@ -6,6 +6,8 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: (failureCount, error) => {
+        console.error(error);
+
         if (error instanceof ZodError) {
           return false;
         }
