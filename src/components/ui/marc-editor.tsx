@@ -25,6 +25,12 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
     ]);
   };
 
+  const removeVariableField = (index: number) => {
+    setVariableFields(
+      variableFields.filter((_, fieldIndex) => fieldIndex !== index),
+    );
+  };
+
   return (
     <>
       <div className="card shadow-sm h-100">
@@ -52,6 +58,7 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
                 ind2={field.indicator2}
                 key={`${field.tag}-${index}`}
                 mode={mode}
+                onRemove={() => removeVariableField(index)}
                 subfields={field.subfields}
                 tag={field.tag}
               />
@@ -61,7 +68,7 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
               className="marc-line marc-line-data d-flex justify-content-center"
               onClick={addVariableField}
             >
-              <i className="bi bi-plus fs-3"></i>
+              <i className="bi bi-plus-circle fs-3"></i>
             </button>
           </div>
         </div>
@@ -94,12 +101,13 @@ interface MarcRowProps {
   tag: string;
   ind1: string;
   ind2: string;
+  onRemove: () => void;
   subfields: SubField[];
 }
 
-function MarcRow({ mode, tag, ind1, ind2, subfields }: MarcRowProps) {
+function MarcRow({ mode, tag, ind1, ind2, onRemove, subfields }: MarcRowProps) {
   return (
-    <div className="marc-line marc-line-control">
+    <div className="marc-line marc-line-control d-flex align-items-center">
       <span className="marc-tag">{tag}</span>
       {ind1}
       {ind2}
@@ -111,6 +119,14 @@ function MarcRow({ mode, tag, ind1, ind2, subfields }: MarcRowProps) {
 
       {/* 필수 x: 마크 필드의 끝 의미 */}
       <span className="marc-eof">%</span>
+      <button
+        type="button"
+        className="btn btn-sm p-0 ms-auto"
+        aria-label="행 삭제"
+        onClick={onRemove}
+      >
+        <i className="bi bi-dash-circle fs-5"></i>
+      </button>
     </div>
   );
 }
