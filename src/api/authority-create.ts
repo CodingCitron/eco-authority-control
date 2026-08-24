@@ -27,9 +27,6 @@ export interface AuthorityCreateQueryParams {
 }
 
 export async function fetchAuthorityCreate(params: AuthorityCreateQueryParams) {
-  const { data } = await apiClient.post("/ac", params);
-
-  const result = authorityDetailResponseSchema.parse(data);
-
-  return result;
+  const { data } = await apiClient.post<unknown>("/ac", params);
+  return authorityDetailResponseSchema.parse(data);
 }

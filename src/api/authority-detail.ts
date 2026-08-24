@@ -13,11 +13,9 @@ export type AuthorityDetailResponse = z.infer<
 
 // 전거 데이터 상세 정보 조회
 export async function fetchAuthorityDetail(reckey: string) {
-  const { data } = await apiClient.get<AuthorityDetailResponse>(
+  const { data } = await apiClient.get<unknown>(
     `/ac/${reckey}`,
   );
 
-  const result = authorityDetailResponseSchema.parse(data);
-
-  return result;
+  return authorityDetailResponseSchema.parse(data);
 }

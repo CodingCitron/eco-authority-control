@@ -10,9 +10,6 @@ export const authorityDeleteResponseSchema = z.object({
 });
 
 export async function deleteAuthorityRecord(reckey: string) {
-  const { data } = await apiClient.delete(`/ac/${reckey}`);
-
-  const result = authorityDeleteResponseSchema.parse(data);
-
-  return result;
+  const { data } = await apiClient.delete<unknown>(`/ac/${reckey}`);
+  return authorityDeleteResponseSchema.parse(data);
 }

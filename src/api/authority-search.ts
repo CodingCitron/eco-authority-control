@@ -30,11 +30,9 @@ export type AuthoritySearchResponse = z.infer<
 export async function fetchAuthoritySearch(
   params: AuthoritySearchQueryParams,
 ): Promise<AuthoritySearchResponse> {
-  const { data } = await apiClient.get<AuthoritySearchResponse>("/ac/search", {
+  const { data } = await apiClient.get<unknown>("/ac/search", {
     params,
   });
 
-  const result = authoritySearchResponseSchema.parse(data);
-
-  return result;
+  return authoritySearchResponseSchema.parse(data);;
 }

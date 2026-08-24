@@ -21,11 +21,9 @@ export const authorityHistoryResponseSchema = z.object({
 export default async function fetchAuthorityHistory(
   params: AuthorityHistoryQueryParams,
 ) {
-  const { data } = await apiClient.get(`/ac/${params.recKey}/history`, {
+  const { data } = await apiClient.get<unknown>(`/ac/${params.recKey}/history`, {
     params,
   });
 
-  const result = authorityHistoryResponseSchema.parse(data);
-
-  return result;
+  return authorityHistoryResponseSchema.parse(data);
 }

@@ -13,8 +13,8 @@ export type GenerateControlNumberResponse = z.infer<
 
 export async function fetchGenerateAuthorityControlNumber(
   acType: AuthoritySearchType,
-) {
-  const { data } = await apiClient.get<GenerateControlNumberResponse>(
+): Promise<GenerateControlNumberResponse> {
+  const { data } = await apiClient.get<unknown>(
     `/ac/control-numbers/next`,
     {
       params: {
@@ -23,7 +23,5 @@ export async function fetchGenerateAuthorityControlNumber(
     },
   );
 
-  const result = generateControlNumberResponseSchema.parse(data);
-
-  return result;
+  return generateControlNumberResponseSchema.parse(data);
 }
