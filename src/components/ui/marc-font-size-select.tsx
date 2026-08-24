@@ -1,7 +1,8 @@
 import type { ComponentPropsWithoutRef } from "react";
 import { Form } from "react-bootstrap";
 
-export const fontSizeList = ["16", "18", "20", "22", "24"];
+export const fontSizeList = ["14", "16", "18", "20", "22", "24"];
+export const defaultFontSize = fontSizeList[1];
 
 interface MarcFontSizeSelectProps extends ComponentPropsWithoutRef<
   typeof Form.Select

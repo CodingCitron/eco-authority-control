@@ -7,7 +7,7 @@ import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 import BaseModal from "@/components/ui/base-modal";
 import MarcFontSizeSelect, {
-  fontSizeList,
+  defaultFontSize,
 } from "@/components/ui/marc-font-size-select";
 import MarcRecordPreview from "@/components/ui/record-preview";
 import { useMutation } from "@tanstack/react-query";
@@ -73,8 +73,8 @@ export function AuthoritySplitModalBody({
   show: boolean;
   onHide: () => void;
 }) {
-  const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
-  const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
+  const [masterFontSize, setMasterFontSize] = useState(defaultFontSize);
+  const [targetFontSize, setTargetFontSize] = useState(defaultFontSize);
 
   const requestedAcTypeRef = useRef<AuthoritySearchType | null>(null);
 

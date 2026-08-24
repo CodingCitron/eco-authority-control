@@ -9,7 +9,7 @@ import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 import MarcFontSizeSelect, {
-  fontSizeList,
+  defaultFontSize,
 } from "@/components/ui/marc-font-size-select";
 import BaseModal from "@/components/ui/base-modal";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
@@ -96,8 +96,8 @@ function AuthorityMergeModalBody({
 }: AuthorityMergeModalProps) {
   const [masterRecordKey, setMasterRecordKey] = useState<string>();
 
-  const [masterFontSize, setMasterFontSize] = useState(fontSizeList[0]);
-  const [targetFontSize, setTargetFontSize] = useState(fontSizeList[0]);
+  const [masterFontSize, setMasterFontSize] = useState(defaultFontSize);
+  const [targetFontSize, setTargetFontSize] = useState(defaultFontSize);
 
   const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 

@@ -1,9 +1,15 @@
 //  개인명 등록/수정
+import { useState } from "react";
 import { useSearchParams } from "react-router";
+import { useMutation } from "@tanstack/react-query";
 
-import { AuthorityFixedFieldEditButton } from "@/components/ui/authority-fixed-field-edit-modal";
+import { fetchAuthorityCreate } from "@/api/authority-create";
 
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
+import MarcFontSizeSelect, {
+  defaultFontSize,
+} from "@/components/ui/marc-font-size-select";
+import MarcEditor from "@/components/ui/marc-editor";
 
 export type AuthorityPersonalFormMode = "create" | "edit";
 
@@ -14,6 +20,8 @@ interface AuthorityPersonalFormPageProps {
 export default function AuthorityPersonalFormPage({
   mode,
 }: AuthorityPersonalFormPageProps) {
+  const [fontSize, setFontSize] = useState(defaultFontSize);
+
   const [searchParams] = useSearchParams();
   const isCreatePage = mode === "create";
 
@@ -30,7 +38,16 @@ export default function AuthorityPersonalFormPage({
     ? recordKeys.indexOf(currentRecordKey)
     : -1;
 
+  console.log(currentRecordKey);
+
   // const { data } = useAuthorityDetail()
+
+  // 전거 추가
+  const { mutate } = useMutation({
+    mutationFn: fetchAuthorityCreate,
+  });
+
+  // 전거 수정
 
   return (
     <main
@@ -47,18 +64,12 @@ export default function AuthorityPersonalFormPage({
           <label htmlFor="fontSizeSelect" className="visually-hidden">
             글자크기
           </label>
-          <select
-            className="form-select form-select-sm d-inline-block w-auto"
-            id="fontSizeSelect"
-          >
-            <option value="">글자크기</option>
-            <option value="14">14px</option>
-            <option value="16">16px</option>
-            <option value="18">18px</option>
-            <option value="20">20px</option>
-            <option value="22">22px</option>
-            <option value="24">24px</option>
-          </select>
+          <MarcFontSizeSelect
+            aria-label="주자료 글자크기"
+            value={fontSize}
+            onChange={setFontSize}
+            className="form-select-sm w-auto"
+          />
           <button className="btn btn-sm btn-outline-dark">
             한자 -{">"} 한글
           </button>
@@ -879,139 +890,7 @@ export default function AuthorityPersonalFormPage({
         </div>
 
         <div className="col-lg-5">
-          <div className="card shadow-sm h-100">
-            <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
-              <span>MARC 레코드 뷰</span>
-              <AuthorityFixedFieldEditButton />
-            </div>
-            <div className="card-body p-0">
-              <div
-                className="form-control marc-textarea marc-record-view h-100 border-0 rounded-0 font-monospace bg-light"
-                style={{ minHeight: "200px" }}
-              >
-                <div className="marc-line marc-line-control">
-                  <span className="marc-tag">001</span> KAC201206266
-                </div>
-                <div className="marc-line marc-line-control">
-                  <span className="marc-tag">005</span> 20200918145415
-                </div>
-                <div className="marc-line marc-line-control">
-                  <span className="marc-tag">008</span> 120224 b aznnnaabn a aaa{" "}
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-control">
-                  <span className="marc-tag">046</span>{" "}
-                  <span className="marc-sf">$f</span>1902
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">100</span> 1
-                  <span className="marc-sf">$a</span>김소월,
-                  <span className="marc-sf">$g</span>金素月,
-                  <span className="marc-sf">$d</span>1902-1934
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">370</span>{" "}
-                  <span className="marc-sf">$c</span>한국(국명)[韓國]{" "}
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">370</span>{" "}
-                  <span className="marc-sf">$a</span>평안북도 구성
-                  <span className="marc-sf">$b</span>평안북도 곽산
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">372</span>{" "}
-                  <span className="marc-sf">$a</span>한국 시[韓國時]{" "}
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">372</span>{" "}
-                  <span className="marc-sf">$a</span>문학(예술)[문학]{" "}
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">373</span>{" "}
-                  <span className="marc-sf">$a</span>동아일보 정주지국(설립자){" "}
-                  <span className="marc-sf">$s</span>1926
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">374</span>{" "}
-                  <span className="marc-sf">$a</span>작가(사람)[作家]{" "}
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">375</span>{" "}
-                  <span className="marc-sf">$a</span>남성
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">377</span>{" "}
-                  <span className="marc-sf">$i</span>한국어
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">400</span>{" "}
-                  <span className="marc-sf">$a</span>소월,{" "}
-                  <span className="marc-sf">$g</span>素月,{" "}
-                  <span className="marc-sf">$d</span>1902-1934
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">400</span>{" "}
-                  <span className="marc-sf">$a</span>김정식,{" "}
-                  <span className="marc-sf">$g</span>金廷湜,{" "}
-                  <span className="marc-sf">$d</span>1902-1934
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">400</span>{" "}
-                  <span className="marc-sf">$a</span>KIM,Sowol,{" "}
-                  <span className="marc-sf">$d</span>1902-1934
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">670</span>{" "}
-                  <span className="marc-sf">$a</span>
-                  진달래꽃,(Human&amp;Books),2011
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">670</span>{" "}
-                  <span className="marc-sf">$a</span>김소월 시집,(스타북스),2018
-                  <span className="marc-eof">%</span>
-                </div>
-                <div className="marc-line marc-line-data">
-                  <span className="marc-tag">678</span>{" "}
-                  <span className="marc-sf">$a</span>시인;
-                  <span className="marc-sf">$a</span>1920년 등단
-                  <span className="marc-eof">%</span>
-                </div>
-              </div>
-            </div>
-            <div className="card-footer bg-white d-flex justify-content-between">
-              <div>
-                <button className="btn btn-outline-secondary">이전</button>{" "}
-                <button className="btn btn-outline-secondary">다음</button>{" "}
-                <button
-                  type="button"
-                  className="btn btn-light-info ms-2"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalMarcSync"
-                >
-                  서지레코드 일관성 작업
-                </button>
-              </div>
-              <div>
-                <button className="btn btn-light-warning">중복조사</button>{" "}
-                <button className="btn btn-primary">저장</button>{" "}
-                <button className="btn btn-secondary">취소</button>
-              </div>
-            </div>
-          </div>
+          <MarcEditor />
         </div>
       </div>
     </main>

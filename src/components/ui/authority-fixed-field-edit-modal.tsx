@@ -5,6 +5,14 @@ import { Modal } from "react-bootstrap";
 
 import BaseModal from "./base-modal";
 
+const LEADER_INPUTS = [
+  {
+    name: "상태",
+    minLength: 0,
+    maxLength: 0,
+  },
+];
+
 export function AuthorityFixedFieldEditButton() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
