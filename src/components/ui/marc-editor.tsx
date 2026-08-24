@@ -1,13 +1,32 @@
+import { useState } from "react";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
+import { useMarcEditor } from "./marc-editor-context";
 
-export default function MarcEditor({ fontSize }: { fontSize: string }) {
+interface MarcEditorProps {
+  fontSize: string;
+}
+
+type EditorMode = "form" | "text";
+
+export default function MarcEditor({ fontSize }: MarcEditorProps) {
+  const [mode, setMode] = useState<EditorMode>("form");
+  const { leaderData, variableFields, setVariableFields } = useMarcEditor();
+
+  console.log(leaderData);
+
   return (
     <>
       <div className="card shadow-sm h-100">
         <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
           <span>MARC 레코드 뷰</span>
-          <div>
-            <button>토글</button>
+          <div className="d-flex gap-2">
+            <button
+              onClick={() => {
+                setMode((prev) => (prev === "form" ? "text" : "form"));
+              }}
+            >
+              {mode === "form" ? "편집:텍스트" : "편집:폼"}
+            </button>
             <AuthorityFixedFieldEditButton />
           </div>
         </div>
@@ -140,5 +159,17 @@ export default function MarcEditor({ fontSize }: { fontSize: string }) {
         </div>
       </div>
     </>
+  );
+}
+
+interface MarcRowProps {
+  mode: EditorMode;
+}
+
+function MarcRow({ mode }: MarcRowProps) {
+  return (
+    <div className="marc-line marc-line-control">
+      <span className="marc-tag">001</span> KAC201206266
+    </div>
   );
 }

@@ -10,12 +10,13 @@ export default function MarcEditorProvider({
 }: {
   children: ReactNode;
 }) {
-  const [leaderData, setLeaderData] = useState<LeaderData | undefined>(
-    undefined,
-  );
-  const [variableFields, setVariableFields] = useState<MarcField[] | undefined>(
-    undefined,
-  );
+  const [leaderData, setLeaderData] = useState<LeaderData>({
+    status: "",
+    type: "",
+    encodingLevel: "",
+    raw: "",
+  });
+  const [variableFields, setVariableFields] = useState<MarcField[]>([]);
 
   const value = {
     leaderData,
@@ -23,6 +24,8 @@ export default function MarcEditorProvider({
     setLeaderData,
     setVariableFields,
   };
+
+  // setVariableFields 이후, sorting되게 해야 함
 
   return (
     <MarcEditorContext.Provider value={value}>

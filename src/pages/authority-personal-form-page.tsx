@@ -39,8 +39,6 @@ export default function AuthorityPersonalFormPage({
     ? recordKeys.indexOf(currentRecordKey)
     : -1;
 
-  console.log(currentRecordKey);
-
   // const { data } = useAuthorityDetail()
 
   // 전거 추가

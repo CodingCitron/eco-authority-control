@@ -1,28 +1,108 @@
-// 고정 길이 편집 모달
+// 고정 길이 필드 편집 모달
 
 import { useState } from "react";
+import { useForm, type UseFormRegister } from "react-hook-form";
 import { Modal } from "react-bootstrap";
 
 import BaseModal from "./base-modal";
+import type { ControlField008, LeaderData } from "./marc-editor-context";
 
-const LEADER_INPUTS = [
-  {
-    name: "상태",
-    minLength: 0,
-    maxLength: 0,
-  },
+type FixedFieldFormValues = LeaderData & ControlField008;
+
+type FieldDefinition = {
+  name: Exclude<keyof FixedFieldFormValues, "raw">;
+  label: string;
+  defaultValue: string;
+};
+
+const LEADER_FIELDS: FieldDefinition[] = [
+  { name: "status", label: "상 태", defaultValue: "" },
+  { name: "type", label: "형 태", defaultValue: "" },
+  { name: "encodingLevel", label: "입력수준", defaultValue: "" },
 ];
+
+const BIBLIOGRAPHIC_FIELD_ROWS: FieldDefinition[][] = [
+  [
+    { name: "entryDate", label: "입력날짜", defaultValue: "" },
+    { name: "geoSubdivision", label: "지리구분", defaultValue: "" },
+    { name: "romanization", label: "로마자번자표", defaultValue: "" },
+    { name: "recordKind", label: "레코드 종류", defaultValue: "" },
+    { name: "catalogingForm", label: "목록기술형식", defaultValue: "" },
+    { name: "subjectHeading", label: "주제명표목표", defaultValue: "" },
+    { name: "seriesType", label: "총서유형", defaultValue: "" },
+  ],
+  [
+    { name: "seriesNumFlag", label: "총서번호 유무", defaultValue: "" },
+    { name: "mainHeadingUse", label: "표목사용(주표목)", defaultValue: "" },
+    { name: "subjAddedEntry", label: "주제부출표목", defaultValue: "" },
+    { name: "seriesAddedEntry", label: "총서부출표목", defaultValue: "" },
+    { name: "subjectSubtype", label: "주제세목유형", defaultValue: "" },
+    { name: "referenceEvaluation", label: "참조평가", defaultValue: "" },
+    { name: "recordUpdate", label: "레코드갱신", defaultValue: "" },
+  ],
+  [
+    { name: "nameType", label: "이름 유형", defaultValue: "" },
+    { name: "headingLevel", label: "채택표목수준", defaultValue: "" },
+    { name: "modifiedRecord", label: "수정레코드", defaultValue: "" },
+    { name: "catalogingAgency", label: "목록작성기관", defaultValue: "" },
+  ],
+];
+
+function createDefaultValues(): FixedFieldFormValues {
+  const defaultValues: FixedFieldFormValues = {
+    status: "",
+    type: "",
+    encodingLevel: "",
+    entryDate: "",
+  };
+
+  [...LEADER_FIELDS, ...BIBLIOGRAPHIC_FIELD_ROWS.flat()].forEach(
+    ({ name, defaultValue }) => {
+      defaultValues[name] = defaultValue;
+    },
+  );
+
+  return defaultValues;
+}
+
+const DEFAULT_VALUES = createDefaultValues();
+
+function FixedFieldInput({
+  field,
+  register,
+  className = "col",
+}: {
+  field: FieldDefinition;
+  register: UseFormRegister<FixedFieldFormValues>;
+  className?: string;
+}) {
+  const id = `f008_${field.name}`;
+
+  return (
+    <div className={className}>
+      <label className="form-label" htmlFor={id}>
+        {field.label}
+      </label>
+      <input
+        type="text"
+        className="form-control"
+        id={id}
+        {...register(field.name)}
+      />
+    </div>
+  );
+}
 
 export function AuthorityFixedFieldEditButton() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
-  const handleClick = () => {
-    setModalIsOpen(true);
-  };
-
   return (
     <>
-      <button className="btn btn-sm btn-light" onClick={handleClick}>
+      <button
+        type="button"
+        className="btn btn-sm btn-light"
+        onClick={() => setModalIsOpen(true)}
+      >
         고정길이편집
       </button>
       <AuthorityFixedFieldEditModal
@@ -41,21 +121,29 @@ export default function AuthorityFixedFieldEditModal({
   onHide: () => void;
 }) {
   return (
-    <>
-      <BaseModal show={show} onHide={onHide}>
-        <AutohrityFixedFieldEditModalBody onHide={onHide} />
-      </BaseModal>
-    </>
+    <BaseModal show={show} onHide={onHide}>
+      <AuthorityFixedFieldEditModalBody onHide={onHide} />
+    </BaseModal>
   );
 }
 
-export function AutohrityFixedFieldEditModalBody({
+export function AuthorityFixedFieldEditModalBody({
   onHide,
 }: {
   onHide: () => void;
 }) {
+  const { handleSubmit, register } = useForm<FixedFieldFormValues>({
+    defaultValues: DEFAULT_VALUES,
+  });
+
+  const handleConfirm = (values: FixedFieldFormValues) => {
+    // 저장 API가 연결되면 values를 전달한다.
+    void values;
+    onHide();
+  };
+
   return (
-    <>
+    <form onSubmit={handleSubmit(handleConfirm)}>
       <Modal.Header
         closeButton
         closeVariant="white"
@@ -69,262 +157,50 @@ export function AutohrityFixedFieldEditModalBody({
         <div className="box-group border rounded mb-4">
           <div className="bg-light px-3 py-2 fw-bold border-bottom">리더</div>
           <div className="row g-3 p-3">
-            <div className="col-md-4">
-              <label className="form-label" htmlFor="f008_status">
-                상 태
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_status"
-                value="n"
+            {LEADER_FIELDS.map((field) => (
+              <FixedFieldInput
+                className="col-md-4"
+                field={field}
+                key={field.name}
+                register={register}
               />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label" htmlFor="f008_type">
-                형 태
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_type"
-                value="z"
-              />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label" htmlFor="f008_level">
-                입력수준
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_level"
-                value="a"
-              />
-            </div>
+            ))}
           </div>
         </div>
         <div className="box-group border rounded">
           <div className="px-3 py-2 fw-bold border-bottom">
             부호화정보필드(008)
           </div>
-          <div className="row g-3 p-3">
-            <div className="col">
-              <label className="form-label" htmlFor="f008_date">
-                입력날짜
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_date"
-                value="120224"
-              />
+          {BIBLIOGRAPHIC_FIELD_ROWS.map((fields, index) => (
+            <div
+              className={`row g-3 p-3${index > 0 ? " pt-0" : ""}`}
+              key={index}
+            >
+              {fields.map((field) => (
+                <FixedFieldInput
+                  field={field}
+                  register={register}
+                  key={field.name}
+                />
+              ))}
+              {Array.from({ length: 7 - fields.length }, (_, emptyIndex) => (
+                <div className="col" key={`empty-${emptyIndex}`} />
+              ))}
             </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_geo">
-                지리구분
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_geo"
-                value=""
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_roman">
-                로마자번자표
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_roman"
-                value="a"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_rectype">
-                레코드 종류
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_rectype"
-                value="z"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_catform">
-                목록기술형식
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_catform"
-                value="n"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_subjthdg">
-                주제명표목표
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_subjthdg"
-                value="n"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_sertype">
-                총서유형
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_sertype"
-                value="n"
-              />
-            </div>
-          </div>
-          <div className="row g-3 p-3 pt-0">
-            <div className="col">
-              <label className="form-label" htmlFor="f008_sernum">
-                총서번호유무
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_sernum"
-                value="a"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_use">
-                표목사용(주표목)
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_use"
-                value="a"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_subjadd">
-                주제부출표목
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_subjadd"
-                value="b"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_seradd">
-                총서부출표목
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_seradd"
-                value="n"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_subdiv">
-                주제세목유형
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_subdiv"
-                value=""
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_refeval">
-                참조평가
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_refeval"
-                value="a"
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_recupd">
-                레코드갱신
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_recupd"
-                value="a"
-              />
-            </div>
-          </div>
-          <div className="row g-3 p-3 pt-0">
-            <div className="col">
-              <label className="form-label" htmlFor="f008_nametype">
-                동명이인
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_nametype"
-                value=""
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_hdguse">
-                채택표목수준
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_hdguse"
-                value=""
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_modrec">
-                수정레코드
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_modrec"
-                value=""
-              />
-            </div>
-            <div className="col">
-              <label className="form-label" htmlFor="f008_catorg">
-                목록작성기관
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="f008_catorg"
-                value=""
-              />
-            </div>
-            <div className="col"></div>
-            <div className="col"></div>
-            <div className="col"></div>
-          </div>
+          ))}
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <button type="button" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary">
           확인
         </button>
-        <button type="button" className="btn btn-secondary">
+        <button type="button" className="btn btn-secondary" onClick={onHide}>
           닫기
         </button>
       </Modal.Footer>
-    </>
+    </form>
   );
 }
+
+// 기존 오타가 포함된 named export를 사용하는 곳과의 호환성을 유지
+export { AuthorityFixedFieldEditModalBody as AutohrityFixedFieldEditModalBody };
