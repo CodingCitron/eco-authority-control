@@ -5,7 +5,13 @@ import { useForm, type UseFormRegister } from "react-hook-form";
 import { Modal } from "react-bootstrap";
 
 import BaseModal from "./base-modal";
-import type { ControlField008, LeaderData } from "./marc-editor-context";
+import {
+  useMarcEditor,
+  type ControlField008,
+  type LeaderData,
+} from "./marc-editor-context";
+
+import { getCodeSet } from "marc-eco";
 
 type FixedFieldFormValues = LeaderData & ControlField008;
 
@@ -13,38 +19,129 @@ type FieldDefinition = {
   name: Exclude<keyof FixedFieldFormValues, "raw">;
   label: string;
   defaultValue: string;
+  codeSet: string;
 };
 
 const LEADER_FIELDS: FieldDefinition[] = [
-  { name: "status", label: "상 태", defaultValue: "" },
-  { name: "type", label: "형 태", defaultValue: "" },
-  { name: "encodingLevel", label: "입력수준", defaultValue: "" },
+  {
+    name: "status",
+    label: "상 태",
+    defaultValue: "",
+    codeSet: "LEADER_STATUS",
+  },
+  { name: "type", label: "형 태", defaultValue: "", codeSet: "LEADER_TYPE" },
+  {
+    name: "encodingLevel",
+    label: "입력수준",
+    defaultValue: "",
+    codeSet: "LEADER_INPUT_LEVEL",
+  },
 ];
 
 const BIBLIOGRAPHIC_FIELD_ROWS: FieldDefinition[][] = [
   [
-    { name: "entryDate", label: "입력날짜", defaultValue: "" },
-    { name: "geoSubdivision", label: "지리구분", defaultValue: "" },
-    { name: "romanization", label: "로마자번자표", defaultValue: "" },
-    { name: "recordKind", label: "레코드 종류", defaultValue: "" },
-    { name: "catalogingForm", label: "목록기술형식", defaultValue: "" },
-    { name: "subjectHeading", label: "주제명표목표", defaultValue: "" },
-    { name: "seriesType", label: "총서유형", defaultValue: "" },
+    { name: "entryDate", label: "입력날짜", defaultValue: "", codeSet: "" },
+    {
+      name: "geoSubdivision",
+      label: "지리구분",
+      defaultValue: "",
+      codeSet: "FIX_008_06",
+    },
+    {
+      name: "romanization",
+      label: "로마자번자표",
+      defaultValue: "",
+      codeSet: "FIX_008_07",
+    },
+    {
+      name: "recordKind",
+      label: "레코드 종류",
+      defaultValue: "",
+      codeSet: "FIX_008_09",
+    },
+    {
+      name: "catalogingForm",
+      label: "목록기술형식",
+      defaultValue: "",
+      codeSet: "FIX_008_10",
+    },
+    {
+      name: "subjectHeading",
+      label: "주제명표목표",
+      defaultValue: "",
+      codeSet: "FIX_008_11",
+    },
+    {
+      name: "seriesType",
+      label: "총서유형",
+      defaultValue: "",
+      codeSet: "FIX_008_12",
+    },
   ],
   [
-    { name: "seriesNumFlag", label: "총서번호 유무", defaultValue: "" },
-    { name: "mainHeadingUse", label: "표목사용(주표목)", defaultValue: "" },
-    { name: "subjAddedEntry", label: "주제부출표목", defaultValue: "" },
-    { name: "seriesAddedEntry", label: "총서부출표목", defaultValue: "" },
-    { name: "subjectSubtype", label: "주제세목유형", defaultValue: "" },
-    { name: "referenceEvaluation", label: "참조평가", defaultValue: "" },
-    { name: "recordUpdate", label: "레코드갱신", defaultValue: "" },
+    {
+      name: "seriesNumFlag",
+      label: "총서번호 유무",
+      defaultValue: "",
+      codeSet: "FIX_008_13",
+    },
+    {
+      name: "mainHeadingUse",
+      label: "표목사용–기본표목/부출표목",
+      defaultValue: "",
+      codeSet: "FIX_008_14",
+    },
+    {
+      name: "subjAddedEntry",
+      label: "표목사용–주제명부출표목",
+      defaultValue: "",
+      codeSet: "FIX_008_15",
+    },
+    {
+      name: "seriesAddedEntry",
+      label: "표목사용–총서부출표목",
+      defaultValue: "",
+      codeSet: "FIX_008_16",
+    },
+    {
+      name: "subjectSubtype",
+      label: "주제세목유형",
+      defaultValue: "",
+      codeSet: "FIX_008_17",
+    },
+    {
+      name: "referenceEvaluation",
+      label: "참조평가",
+      defaultValue: "",
+      codeSet: "FIX_008_29",
+    },
+    {
+      name: "recordUpdate",
+      label: "레코드갱신",
+      defaultValue: "",
+      codeSet: "FIX_008_31",
+    },
   ],
   [
-    { name: "nameType", label: "이름 유형", defaultValue: "" },
-    { name: "headingLevel", label: "채택표목수준", defaultValue: "" },
-    { name: "modifiedRecord", label: "수정레코드", defaultValue: "" },
-    { name: "catalogingAgency", label: "목록작성기관", defaultValue: "" },
+    { name: "nameType", label: "이름 유형", defaultValue: "", codeSet: "" },
+    {
+      name: "headingLevel",
+      label: "채택표목수준",
+      defaultValue: "",
+      codeSet: "FIX_008_33",
+    },
+    {
+      name: "modifiedRecord",
+      label: "수정레코드",
+      defaultValue: "",
+      codeSet: "FIX_008_38",
+    },
+    {
+      name: "catalogingAgency",
+      label: "목록작성기관",
+      defaultValue: "",
+      codeSet: "FIX_008_39",
+    },
   ],
 ];
 
@@ -132,6 +229,11 @@ export function AuthorityFixedFieldEditModalBody({
 }: {
   onHide: () => void;
 }) {
+  const { leaderData, variableFields } = useMarcEditor();
+
+  console.log(leaderData);
+  console.log(variableFields);
+
   const { handleSubmit, register } = useForm<FixedFieldFormValues>({
     defaultValues: DEFAULT_VALUES,
   });

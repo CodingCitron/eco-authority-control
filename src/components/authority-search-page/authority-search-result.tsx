@@ -100,7 +100,6 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
         <AuthorityDeleteButton
           reckey={row.recKey}
           controlNumber={row.acControlNo}
-          type="button"
           className="btn btn-sm btn-light-danger py-0"
         >
           삭제

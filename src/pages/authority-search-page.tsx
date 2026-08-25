@@ -44,7 +44,11 @@ export default function SearchPage() {
                 {/* 뛰어쓰기가 존재해야 브라우저에서 버튼이 구분됨 */}
                 <AuthoritySelectionControl /> <AuthorityMergeButton />{" "}
                 <AuthoritySplitButton /> <AuthorityHistoryButton />{" "}
-                <AuthorityControlButton /> <AuthorityDeleteButton />
+                <AuthorityControlButton />{" "}
+                <AuthorityDeleteButton
+                  showIcon
+                  className="btn btn-light-danger btn-sm"
+                />
               </div>
               <div>
                 <Link
