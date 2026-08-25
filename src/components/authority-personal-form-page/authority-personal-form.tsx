@@ -4,9 +4,12 @@ import {
   type FieldPathByValue,
   type UseFormRegister,
 } from "react-hook-form";
+import { useMarcEditor } from "@/components/ui/marc-editor-context";
 
 import {
+  addPersonalFormValuesToMarcFields,
   createEmptyPersonalAuthorityFormValues,
+  type PersonalMarcAddTarget,
   type PersonalAuthorityFormValues,
 } from "./personal-form.mapper";
 
@@ -22,16 +25,25 @@ export default function AuthorityPersonalForm({
   initialValues,
   onSubmit,
 }: AuthorityPersonalFormProps) {
-  const { register, reset, handleSubmit } = useForm<PersonalAuthorityFormValues>(
-    {
+  const { register, reset, handleSubmit, getValues } =
+    useForm<PersonalAuthorityFormValues>({
       defaultValues:
         initialValues ?? createEmptyPersonalAuthorityFormValues(),
-    },
-  );
+    });
+  const { setVariableFields } = useMarcEditor();
+
+  const addToMarcRecord = (target: PersonalMarcAddTarget) => {
+    const values = getValues();
+    setVariableFields((fields) =>
+      addPersonalFormValuesToMarcFields(fields, target, values),
+    );
+  };
 
   // 상세 조회는 비동기로 도착하므로 수정 대상이 바뀔 때 폼 전체를 갱신한다.
   useEffect(() => {
-    reset(initialValues ?? createEmptyPersonalAuthorityFormValues());
+    if (initialValues) {
+      reset(initialValues);
+    }
   }, [initialValues, reset]);
 
   return (
@@ -131,6 +143,10 @@ export default function AuthorityPersonalForm({
                     />
                   </div>
                 </div>
+                <AddButton
+                  ariaLabel="채택표목 추가"
+                  onClick={() => addToMarcRecord("heading")}
+                />
               </div>
             </div>
 
@@ -181,6 +197,10 @@ export default function AuthorityPersonalForm({
                     </div>
                   </div>
                 </div>
+                <AddButton
+                  ariaLabel="생몰년 추가"
+                  onClick={() => addToMarcRecord("birthDeathDate")}
+                />
               </div>
             </div>
 
@@ -191,6 +211,8 @@ export default function AuthorityPersonalForm({
                   label="참조표목(400)"
                   name="referenceHeading"
                   register={register}
+                  addTarget="referenceHeading"
+                  onAdd={addToMarcRecord}
                   bold
                 />
                 <SimpleInputRow
@@ -198,12 +220,16 @@ export default function AuthorityPersonalForm({
                   label="한자명"
                   name="referenceHanja"
                   register={register}
+                  addTarget="referenceHanja"
+                  onAdd={addToMarcRecord}
                 />
                 <SimpleInputRow
                   id="p-ref400roman"
                   label="원어명"
                   name="referenceOriginalName"
                   register={register}
+                  addTarget="referenceOriginalName"
+                  onAdd={addToMarcRecord}
                   last
                 />
               </div>
@@ -257,7 +283,10 @@ export default function AuthorityPersonalForm({
                     toName="placeDateTo"
                     register={register}
                   />
-                  <AddButton />
+                  <AddButton
+                    ariaLabel="관련장소 추가"
+                    onClick={() => addToMarcRecord("place")}
+                  />
                 </div>
 
                 <div className="row g-2 align-items-center">
@@ -300,7 +329,10 @@ export default function AuthorityPersonalForm({
                       {...register("address")}
                     />
                   </div>
-                  <AddButton />
+                  <AddButton
+                    ariaLabel="주소 추가"
+                    onClick={() => addToMarcRecord("address")}
+                  />
                 </div>
               </div>
             </div>
@@ -314,6 +346,8 @@ export default function AuthorityPersonalForm({
                   fromName="activityFieldDateFrom"
                   toName="activityFieldDateTo"
                   register={register}
+                  addTarget="activityField"
+                  onAdd={addToMarcRecord}
                 />
                 <RelatedDateRow
                   idPrefix="p-org373"
@@ -322,6 +356,8 @@ export default function AuthorityPersonalForm({
                   fromName="organizationDateFrom"
                   toName="organizationDateTo"
                   register={register}
+                  addTarget="organization"
+                  onAdd={addToMarcRecord}
                 />
                 <RelatedDateRow
                   idPrefix="p-job374"
@@ -330,6 +366,8 @@ export default function AuthorityPersonalForm({
                   fromName="occupationDateFrom"
                   toName="occupationDateTo"
                   register={register}
+                  addTarget="occupation"
+                  onAdd={addToMarcRecord}
                 />
 
                 <div className="row g-2 align-items-center mb-2">
@@ -366,6 +404,8 @@ export default function AuthorityPersonalForm({
                   label="관련언어(377)"
                   name="language"
                   register={register}
+                  addTarget="language"
+                  onAdd={addToMarcRecord}
                   bold
                 />
 
@@ -418,6 +458,8 @@ export default function AuthorityPersonalForm({
                   label="정보원(670)"
                   name="source"
                   register={register}
+                  addTarget="source"
+                  onAdd={addToMarcRecord}
                   bold
                   last
                 />
@@ -489,6 +531,8 @@ interface SimpleInputRowProps extends RegisteredFieldProps {
   last?: boolean;
   placeholder?: string;
   showAdd?: boolean;
+  addTarget?: PersonalMarcAddTarget;
+  onAdd?: (target: PersonalMarcAddTarget) => void;
 }
 
 function SimpleInputRow({
@@ -500,6 +544,8 @@ function SimpleInputRow({
   last = false,
   placeholder,
   showAdd = true,
+  addTarget,
+  onAdd,
 }: SimpleInputRowProps) {
   return (
     <div className={`row g-2 align-items-center${last ? "" : " mb-2"}`}>
@@ -520,7 +566,12 @@ function SimpleInputRow({
           {...register(name)}
         />
       </div>
-      {showAdd && <AddButton />}
+      {showAdd && addTarget && onAdd && (
+        <AddButton
+          ariaLabel={`${label} 추가`}
+          onClick={() => onAdd(addTarget)}
+        />
+      )}
     </div>
   );
 }
@@ -569,6 +620,8 @@ function DateRangeInputs({
 
 interface RelatedDateRowProps extends DateRangeInputsProps {
   valueName: TextFieldName;
+  addTarget: PersonalMarcAddTarget;
+  onAdd: (target: PersonalMarcAddTarget) => void;
 }
 
 function RelatedDateRow({
@@ -578,6 +631,8 @@ function RelatedDateRow({
   fromName,
   toName,
   register,
+  addTarget,
+  onAdd,
 }: RelatedDateRowProps) {
   return (
     <div className="row g-2 align-items-center mb-2">
@@ -601,15 +656,29 @@ function RelatedDateRow({
         toName={toName}
         register={register}
       />
-      <AddButton />
+      <AddButton
+        ariaLabel={`${label} 추가`}
+        onClick={() => onAdd(addTarget)}
+      />
     </div>
   );
 }
 
-function AddButton() {
+function AddButton({
+  ariaLabel,
+  onClick,
+}: {
+  ariaLabel: string;
+  onClick: () => void;
+}) {
   return (
     <div className="col-auto">
-      <button type="button" className="btn btn-sm btn-outline-primary">
+      <button
+        type="button"
+        className="btn btn-sm btn-outline-primary"
+        aria-label={ariaLabel}
+        onClick={onClick}
+      >
         추가
       </button>
     </div>

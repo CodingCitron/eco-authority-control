@@ -10,6 +10,7 @@ import { MarcError, parseLine } from "marc-eco";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 import {
   formatLeaderData,
+  sortMarcFields,
   useMarcEditor,
   type LeaderData,
   type MarcField,
@@ -27,8 +28,8 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
   const { leaderData, variableFields, setVariableFields } = useMarcEditor();
 
   const addVariableField = () => {
-    setVariableFields([
-      ...variableFields,
+    setVariableFields((currentFields) => [
+      ...currentFields,
       {
         type: "data",
         tag: "",
@@ -40,9 +41,9 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
   };
 
   const updateVariableField = (index: number, nextField: MarcField) => {
-    setVariableFields(
+    setVariableFields((currentFields) =>
       sortMarcFields(
-        variableFields.map((field, fieldIndex) =>
+        currentFields.map((field, fieldIndex) =>
           fieldIndex === index ? nextField : field,
         ),
       ),
@@ -50,8 +51,8 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
   };
 
   const removeVariableField = (index: number) => {
-    setVariableFields(
-      variableFields.filter((_, fieldIndex) => fieldIndex !== index),
+    setVariableFields((currentFields) =>
+      currentFields.filter((_, fieldIndex) => fieldIndex !== index),
     );
   };
 
@@ -406,20 +407,6 @@ function getMarcRowErrorMessage(error: unknown) {
     default:
       return "MARC 행 형식이 올바르지 않습니다.";
   }
-}
-
-/** 수정이 끝난 필드를 태그 순서로 정렬하며 빈 태그는 새 입력을 위해 마지막에 둔다. */
-function sortMarcFields(fields: MarcField[]) {
-  return [...fields].sort((left, right) => {
-    if (!left.tag) {
-      return right.tag ? 1 : 0;
-    }
-    if (!right.tag) {
-      return -1;
-    }
-
-    return left.tag.localeCompare(right.tag);
-  });
 }
 
 function buildMarcRecord(

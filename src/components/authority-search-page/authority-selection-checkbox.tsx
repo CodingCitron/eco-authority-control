@@ -13,8 +13,7 @@ export default function AuthoritySelectionCheckbox({
 }) {
   const isSelected = useContextSelector(
     SearchPageContext,
-    (context) =>
-      context?.selectedRecordKeys.includes(recordKey) ?? false,
+    (context) => context?.selectedRecordKeys.includes(recordKey) ?? false,
   );
   const toggleSelectedRecordKey = useContextSelector(
     SearchPageContext,

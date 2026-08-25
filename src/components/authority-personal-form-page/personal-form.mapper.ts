@@ -1,4 +1,10 @@
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
+import {
+  sortMarcFields,
+  type MarcDataField,
+  type MarcField,
+  type SubField,
+} from "@/components/ui/marc-editor-context";
 
 export type PersonalGender = "" | "unknown" | "male" | "female";
 
@@ -203,4 +209,311 @@ export function mapAuthorityDetailToPersonalFormValues(
     updatedBy: detail.lastWorker,
     updatedAt: detail.lastUpdateDate,
   };
+}
+
+export type PersonalMarcAddTarget =
+  | "heading"
+  | "birthDeathDate"
+  | "referenceHeading"
+  | "referenceHanja"
+  | "referenceOriginalName"
+  | "place"
+  | "address"
+  | "activityField"
+  | "organization"
+  | "occupation"
+  | "language"
+  | "source";
+
+const PLACE_SUBFIELD_CODE: Readonly<Record<string, string>> = {
+  birth: "a",
+  death: "b",
+  residence: "e",
+  activity: "f",
+};
+
+/** 왼쪽 개인명 폼의 한 항목을 오른쪽 MARC 레코드에 반영한다. */
+export function addPersonalFormValuesToMarcFields(
+  fields: MarcField[],
+  target: PersonalMarcAddTarget,
+  values: PersonalAuthorityFormValues,
+) {
+  switch (target) {
+    case "heading":
+      return updatePersonalHeading(fields, [
+        toSubfield("a", values.heading),
+        toSubfield("g", values.hanjaName),
+      ]);
+    case "birthDeathDate": {
+      const date = formatBirthDeathDate(values.birthDate, values.deathDate);
+      return date
+        ? updatePersonalHeading(fields, [{ code: "d", value: date }])
+        : fields;
+    }
+    case "referenceHeading":
+      return appendDataField(
+        fields,
+        createDataField(
+          "400",
+          [
+            toSubfield("a", values.referenceHeading),
+            toSubfield("g", values.referenceHanja),
+          ],
+          "1",
+        ),
+      );
+    case "referenceHanja":
+      return updateReferenceHanja(fields, values);
+    case "referenceOriginalName":
+      return appendDataField(
+        fields,
+        createDataField("400", [
+          toSubfield("a", values.referenceOriginalName),
+        ], "1"),
+      );
+    case "place":
+      return appendDataField(
+        fields,
+        createDataField("370", [
+          toSubfield(PLACE_SUBFIELD_CODE[values.placeType], values.place),
+          toSubfield("s", values.placeDateFrom),
+          toSubfield("t", values.placeDateTo),
+        ]),
+      );
+    case "address":
+      return appendDataField(
+        fields,
+        createDataField("371", [
+          toSubfield(values.addressType, values.address),
+        ]),
+      );
+    case "activityField":
+      return appendRelatedDateField(
+        fields,
+        "372",
+        values.activityField,
+        values.activityFieldDateFrom,
+        values.activityFieldDateTo,
+      );
+    case "organization":
+      return appendRelatedDateField(
+        fields,
+        "373",
+        values.organization,
+        values.organizationDateFrom,
+        values.organizationDateTo,
+      );
+    case "occupation":
+      return appendRelatedDateField(
+        fields,
+        "374",
+        values.occupation,
+        values.occupationDateFrom,
+        values.occupationDateTo,
+      );
+    case "language":
+      return appendDataField(
+        fields,
+        createDataField("377", [toSubfield("i", values.language)]),
+      );
+    case "source":
+      return appendDataField(
+        fields,
+        createDataField("670", [toSubfield("a", values.source)]),
+      );
+  }
+}
+
+function updatePersonalHeading(
+  fields: MarcField[],
+  replacements: Array<SubField | undefined>,
+) {
+  const nextSubfields = replacements.filter(
+    (subfield): subfield is SubField => Boolean(subfield),
+  );
+  if (nextSubfields.length === 0) {
+    return fields;
+  }
+
+  const fieldIndex = fields.findIndex(
+    (field) => field.type === "data" && field.tag === "100",
+  );
+  const currentField = fieldIndex >= 0 ? fields[fieldIndex] : undefined;
+  const currentSubfields =
+    currentField?.type === "data" ? currentField.subfields : [];
+  const replacedCodes = new Set(nextSubfields.map(({ code }) => code));
+  const mergedSubfields = orderPersonalNameSubfields([
+    ...currentSubfields.filter(({ code }) => !replacedCodes.has(code)),
+    ...nextSubfields,
+  ]);
+  const nextField: MarcDataField = {
+    type: "data",
+    tag: "100",
+    indicator1:
+      currentField?.type === "data" ? currentField.indicator1 : "1",
+    indicator2:
+      currentField?.type === "data" ? currentField.indicator2 : " ",
+    subfields: mergedSubfields,
+  };
+
+  if (fieldIndex < 0) {
+    return sortMarcFields([...fields, nextField]);
+  }
+
+  return sortMarcFields(
+    fields.map((field, index) => (index === fieldIndex ? nextField : field)),
+  );
+}
+
+function updateReferenceHanja(
+  fields: MarcField[],
+  values: PersonalAuthorityFormValues,
+) {
+  const hanjaName = values.referenceHanja.trim();
+  if (!hanjaName) {
+    return fields;
+  }
+
+  const referenceHeading = values.referenceHeading.trim();
+  const fieldIndex = fields.findIndex(
+    (field) =>
+      field.type === "data" &&
+      field.tag === "400" &&
+      (!referenceHeading ||
+        field.subfields.some(
+          ({ code, value }) => code === "a" && value === referenceHeading,
+        )),
+  );
+
+  if (fieldIndex < 0) {
+    return referenceHeading
+      ? appendDataField(
+          fields,
+          createDataField(
+            "400",
+            [
+              { code: "a", value: referenceHeading },
+              { code: "g", value: hanjaName },
+            ],
+            "1",
+          ),
+        )
+      : fields;
+  }
+
+  const currentField = fields[fieldIndex];
+  if (currentField.type !== "data") {
+    return fields;
+  }
+
+  const nextField: MarcDataField = {
+    ...currentField,
+    subfields: [
+      ...currentField.subfields.filter(({ code }) => code !== "g"),
+      { code: "g", value: hanjaName },
+    ],
+  };
+
+  return sortMarcFields(
+    fields.map((field, index) => (index === fieldIndex ? nextField : field)),
+  );
+}
+
+function appendRelatedDateField(
+  fields: MarcField[],
+  tag: string,
+  value: string,
+  dateFrom: string,
+  dateTo: string,
+) {
+  return appendDataField(
+    fields,
+    createDataField(tag, [
+      toSubfield("a", value),
+      toSubfield("s", dateFrom),
+      toSubfield("t", dateTo),
+    ]),
+  );
+}
+
+function appendDataField(
+  fields: MarcField[],
+  nextField: MarcDataField | undefined,
+) {
+  if (!nextField || fields.some((field) => isSameDataField(field, nextField))) {
+    return fields;
+  }
+
+  return sortMarcFields([...fields, nextField]);
+}
+
+function createDataField(
+  tag: string,
+  subfields: Array<SubField | undefined>,
+  indicator1 = " ",
+): MarcDataField | undefined {
+  const normalizedSubfields = subfields.filter(
+    (subfield): subfield is SubField => Boolean(subfield),
+  );
+  if (normalizedSubfields.length === 0) {
+    return undefined;
+  }
+
+  return {
+    type: "data",
+    tag,
+    indicator1,
+    indicator2: " ",
+    subfields: normalizedSubfields,
+  };
+}
+
+function toSubfield(code: string | undefined, value: string) {
+  const normalizedCode = code?.trim();
+  const normalizedValue = value.trim();
+  return normalizedCode && normalizedValue
+    ? { code: normalizedCode, value: normalizedValue }
+    : undefined;
+}
+
+function formatBirthDeathDate(birthDate: string, deathDate: string) {
+  const normalizedBirthDate = birthDate.trim();
+  const normalizedDeathDate = deathDate.trim();
+
+  if (normalizedBirthDate && normalizedDeathDate) {
+    return `${normalizedBirthDate}-${normalizedDeathDate}`;
+  }
+  if (normalizedDeathDate) {
+    return `-${normalizedDeathDate}`;
+  }
+  return normalizedBirthDate;
+}
+
+function orderPersonalNameSubfields(subfields: SubField[]) {
+  const order = ["a", "g", "d"];
+  return subfields
+    .map((subfield, index) => ({ subfield, index }))
+    .sort((left, right) => {
+      const leftOrder = order.indexOf(left.subfield.code);
+      const rightOrder = order.indexOf(right.subfield.code);
+      const normalizedLeftOrder = leftOrder < 0 ? order.length : leftOrder;
+      const normalizedRightOrder = rightOrder < 0 ? order.length : rightOrder;
+      return normalizedLeftOrder - normalizedRightOrder || left.index - right.index;
+    })
+    .map(({ subfield }) => subfield);
+}
+
+function isSameDataField(field: MarcField, nextField: MarcDataField) {
+  return (
+    field.type === "data" &&
+    field.tag === nextField.tag &&
+    field.indicator1 === nextField.indicator1 &&
+    field.indicator2 === nextField.indicator2 &&
+    field.subfields.length === nextField.subfields.length &&
+    field.subfields.every(
+      (subfield, index) =>
+        subfield.code === nextField.subfields[index].code &&
+        subfield.value === nextField.subfields[index].value,
+    )
+  );
 }

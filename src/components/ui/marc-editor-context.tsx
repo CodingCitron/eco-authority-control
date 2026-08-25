@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from "react";
 import { createContext, useContextSelector } from "use-context-selector";
 import {
   getFieldRule,
@@ -220,7 +221,7 @@ export interface MarcData {
   leaderData?: LeaderData;
   variableFields?: MarcField[];
   setLeaderData: (leaderData: LeaderData) => void;
-  setVariableFields: (variableFields: MarcField[]) => void;
+  setVariableFields: Dispatch<SetStateAction<MarcField[]>>;
 }
 
 export interface MarcControlField {
@@ -230,6 +231,20 @@ export interface MarcControlField {
 }
 
 export type MarcField = MarcControlField | MarcDataField;
+
+/** MARC 필드를 태그 오름차순으로 정렬하며, 직접 추가할 빈 행은 마지막에 둔다. */
+export function sortMarcFields(fields: MarcField[]) {
+  return [...fields].sort((left, right) => {
+    if (!left.tag) {
+      return right.tag ? 1 : 0;
+    }
+    if (!right.tag) {
+      return -1;
+    }
+
+    return left.tag.localeCompare(right.tag);
+  });
+}
 
 export const MarcEditorContext = createContext<MarcData | null>(null);
 
