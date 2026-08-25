@@ -11,12 +11,13 @@ type EditorMode = "form" | "text";
 
 export default function MarcEditor({ fontSize }: MarcEditorProps) {
   const [mode, setMode] = useState<EditorMode>("form");
-  const { leaderData, variableFields, setVariableFields } = useMarcEditor();
+  const { variableFields, setVariableFields } = useMarcEditor();
 
   const addVariableField = () => {
     setVariableFields([
       ...variableFields,
       {
+        type: "data",
         tag: "",
         indicator1: "",
         indicator2: "",
@@ -53,15 +54,24 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
             style={{ minHeight: "200px", fontSize }}
           >
             {variableFields.map((field, index) => (
-              <MarcRow
-                ind1={field.indicator1}
-                ind2={field.indicator2}
-                key={`${field.tag}-${index}`}
-                mode={mode}
-                onRemove={() => removeVariableField(index)}
-                subfields={field.subfields}
-                tag={field.tag}
-              />
+              field.type === "control" ? (
+                <MarcControlRow
+                  key={`control-${field.tag}-${index}`}
+                  onRemove={() => removeVariableField(index)}
+                  tag={field.tag}
+                  value={field.value}
+                />
+              ) : (
+                <MarcRow
+                  ind1={field.indicator1}
+                  ind2={field.indicator2}
+                  key={`data-${field.tag}-${index}`}
+                  mode={mode}
+                  onRemove={() => removeVariableField(index)}
+                  subfields={field.subfields}
+                  tag={field.tag}
+                />
+              )
             ))}
             <button
               type="button"
@@ -93,6 +103,32 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
         </div>
       </div>
     </>
+  );
+}
+
+function MarcControlRow({
+  onRemove,
+  tag,
+  value,
+}: {
+  onRemove: () => void;
+  tag: string;
+  value: string;
+}) {
+  return (
+    <div className="marc-line marc-line-control d-flex align-items-center">
+      <span className="marc-tag">{tag}</span>
+      <span style={{ whiteSpace: "pre" }}>{value}</span>
+      <span className="marc-eof">%</span>
+      <button
+        type="button"
+        className="btn btn-sm p-0 ms-auto"
+        aria-label={`${tag} 행 삭제`}
+        onClick={onRemove}
+      >
+        <i className="bi bi-dash-circle fs-5"></i>
+      </button>
+    </div>
   );
 }
 

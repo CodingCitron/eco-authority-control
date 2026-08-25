@@ -7,8 +7,11 @@ import {
 
 export default function MarcEditorProvider({
   children,
+  initialFields,
 }: {
   children: ReactNode;
+  /** 상세 조회로 불러온 제어필드와 데이터필드 */
+  initialFields?: MarcField[];
 }) {
   const [leaderData, setLeaderData] = useState<LeaderData>({
     status: "",
@@ -16,7 +19,9 @@ export default function MarcEditorProvider({
     encodingLevel: "",
     raw: "",
   });
-  const [variableFields, setVariableFields] = useState<MarcField[]>([]);
+  const [variableFields, setVariableFields] = useState<MarcField[]>(
+    initialFields ?? [],
+  );
 
   const value = {
     leaderData,

@@ -6,9 +6,13 @@ import { Modal } from "react-bootstrap";
 
 import BaseModal from "./base-modal";
 import {
+  EMPTY_CONTROL_FIELD_008,
+  formatControlField008,
+  parseControlField008,
   useMarcEditor,
   type ControlField008,
   type LeaderData,
+  type MarcControlField,
 } from "./marc-editor-context";
 
 import { getCodeSet } from "marc-eco";
@@ -16,7 +20,7 @@ import { getCodeSet } from "marc-eco";
 type FixedFieldFormValues = LeaderData & ControlField008;
 
 type FieldDefinition = {
-  name: Exclude<keyof FixedFieldFormValues, "raw">;
+  name: Exclude<keyof FixedFieldFormValues, "raw" | "sourceValue">;
   label: string;
   defaultValue: string;
   codeSet: string;
@@ -123,7 +127,12 @@ const BIBLIOGRAPHIC_FIELD_ROWS: FieldDefinition[][] = [
     },
   ],
   [
-    { name: "nameType", label: "이름 유형", defaultValue: "", codeSet: "" },
+    {
+      name: "nameType",
+      label: "이름 유형",
+      defaultValue: "",
+      codeSet: "FIX_008_32",
+    },
     {
       name: "headingLevel",
       label: "채택표목수준",
@@ -163,6 +172,15 @@ function createDefaultValues(): FixedFieldFormValues {
 }
 
 const DEFAULT_VALUES = createDefaultValues();
+
+function hasControlField008Input(data: ControlField008) {
+  return Object.entries(data).some(
+    ([name, value]) =>
+      name !== "sourceValue" &&
+      typeof value === "string" &&
+      value.length > 0,
+  );
+}
 
 function FixedFieldInput({
   field,
@@ -386,20 +404,73 @@ export function AuthorityFixedFieldEditModalBody({
 }: {
   onHide: () => void;
 }) {
-  const { leaderData, variableFields } = useMarcEditor();
-
-  console.log(leaderData);
-  console.log(variableFields);
+  const { leaderData, setLeaderData, setVariableFields, variableFields } =
+    useMarcEditor();
+  const field008 = variableFields.find(
+    (field): field is MarcControlField =>
+      field.type === "control" && field.tag === "008",
+  );
+  const controlField008 = field008
+    ? parseControlField008(field008.value)
+    : EMPTY_CONTROL_FIELD_008;
 
   const { control, handleSubmit } = useForm<FixedFieldFormValues>({
-    defaultValues: DEFAULT_VALUES,
+    defaultValues: {
+      ...DEFAULT_VALUES,
+      ...controlField008,
+      ...leaderData,
+    },
   });
 
   const handleConfirm = (values: FixedFieldFormValues) => {
-    // 저장 API가 연결되면 values를 전달한다.
-    void values;
+    const { status, type, encodingLevel, raw, ...nextControlField008 } =
+      values;
+    const nextField008: MarcControlField = {
+      type: "control",
+      tag: "008",
+      value: formatControlField008({
+        ...nextControlField008,
+        sourceValue: controlField008.sourceValue,
+      }),
+    };
+    const field008Index = variableFields.findIndex(
+      (field) => field.type === "control" && field.tag === "008",
+    );
 
-    console.log(values);
+    setLeaderData({
+      status,
+      type,
+      encodingLevel,
+      raw: raw ?? leaderData.raw,
+    });
+
+    // 기존 008도 없고 입력값도 없다면 Leader만 갱신한다.
+    if (
+      field008Index < 0 &&
+      !hasControlField008Input(nextControlField008)
+    ) {
+      onHide();
+      return;
+    }
+
+    if (field008Index >= 0) {
+      setVariableFields(
+        variableFields.map((field, index) =>
+          index === field008Index ? nextField008 : field,
+        ),
+      );
+    } else {
+      const nextFields = [...variableFields];
+      const firstDataFieldIndex = nextFields.findIndex(
+        (field) => field.type === "data",
+      );
+      nextFields.splice(
+        firstDataFieldIndex >= 0 ? firstDataFieldIndex : nextFields.length,
+        0,
+        nextField008,
+      );
+      setVariableFields(nextFields);
+    }
     onHide();
   };
 

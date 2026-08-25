@@ -11,6 +11,7 @@ import MarcFontSizeSelect, {
 } from "@/components/ui/marc-font-size-select";
 import MarcEditor from "@/components/ui/marc-editor";
 import MarcEditorProvider from "@/components/ui/marc-editor-provider";
+import type { MarcField } from "@/components/ui/marc-editor-context";
 
 export type AuthorityPersonalFormMode = "create" | "edit";
 
@@ -39,7 +40,23 @@ export default function AuthorityPersonalFormPage({
     ? recordKeys.indexOf(currentRecordKey)
     : -1;
 
-  // const { data } = useAuthorityDetail()
+  const { data: authorityDetail } = useAuthorityDetail(currentRecordKey ?? "");
+  const initialMarcFields: MarcField[] | undefined = authorityDetail
+    ? [
+        ...authorityDetail.data.record.control_fields.map((field) => ({
+          type: "control" as const,
+          tag: field.tag,
+          value: field.value,
+        })),
+        ...authorityDetail.data.record.data_fields.map((field) => ({
+          type: "data" as const,
+          tag: field.tag,
+          indicator1: field.ind1,
+          indicator2: field.ind2,
+          subfields: field.subfields,
+        })),
+      ]
+    : undefined;
 
   // 전거 추가
   const { mutate } = useMutation({
@@ -49,7 +66,10 @@ export default function AuthorityPersonalFormPage({
   // 전거 수정
 
   return (
-    <MarcEditorProvider>
+    <MarcEditorProvider
+      initialFields={initialMarcFields}
+      key={`${authorityDetail ? "record" : "loading"}-${currentRecordKey ?? "create"}`}
+    >
       <main
         id="main-content"
         className="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4 pb-5 min-vh-100"
