@@ -7,11 +7,13 @@ import {
 } from "react";
 import { MarcError, parseLine } from "marc-eco";
 
+import type { AuthorityCreateQueryParams } from "@/api/authority-create";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 import {
   formatLeaderData,
   sortMarcFields,
   useMarcEditor,
+  type AuthorityCreateMetadata,
   type LeaderData,
   type MarcField,
   type SubField,
@@ -25,7 +27,12 @@ type EditorMode = "form" | "text";
 
 export default function MarcEditor({ fontSize }: MarcEditorProps) {
   const [mode, setMode] = useState<EditorMode>("form");
-  const { leaderData, variableFields, setVariableFields } = useMarcEditor();
+  const {
+    leaderData,
+    variableFields,
+    authorityCreateMetadata,
+    setVariableFields,
+  } = useMarcEditor();
 
   const addVariableField = () => {
     setVariableFields((currentFields) => [
@@ -58,7 +65,8 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
 
   const handleSave = () => {
     const record = buildMarcRecord(leaderData, variableFields);
-    console.log("MARC 레코드 최종 데이터", record);
+    const params = buildAuthorityCreateParams(authorityCreateMetadata, record);
+    console.log("전거 생성 최종 데이터", params);
   };
 
   return (
@@ -432,5 +440,31 @@ function buildMarcRecord(
           ]
         : [],
     ),
+  };
+}
+
+type AuthorityCreateDraftParams = Pick<AuthorityCreateQueryParams, "record"> &
+  Partial<
+    Pick<
+      AuthorityCreateQueryParams,
+      "acType" | "acRegionCode" | "firstInputDate" | "firstWorker"
+    >
+  >;
+
+/** 값이 입력된 생성 메타데이터만 MARC 레코드와 함께 저장 객체에 포함한다. */
+function buildAuthorityCreateParams(
+  metadata: AuthorityCreateMetadata,
+  record: AuthorityCreateQueryParams["record"],
+): AuthorityCreateDraftParams {
+  return {
+    ...(metadata.acType && { acType: metadata.acType }),
+    ...(metadata.acRegionCode && {
+      acRegionCode: metadata.acRegionCode,
+    }),
+    ...(metadata.firstInputDate && {
+      firstInputDate: metadata.firstInputDate,
+    }),
+    ...(metadata.firstWorker && { firstWorker: metadata.firstWorker }),
+    record,
   };
 }

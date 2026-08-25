@@ -5,6 +5,7 @@ import {
   type ControlFieldRule,
   type PositionRule,
 } from "marc-eco";
+import type { AuthoritySearchType } from "@/types/authority-search.types";
 
 export interface LeaderData {
   status: string; // 05
@@ -220,8 +221,20 @@ export interface MarcDataField {
 export interface MarcData {
   leaderData?: LeaderData;
   variableFields?: MarcField[];
+  authorityCreateMetadata: AuthorityCreateMetadata;
   setLeaderData: (leaderData: LeaderData) => void;
   setVariableFields: Dispatch<SetStateAction<MarcField[]>>;
+  setAuthorityCreateMetadata: Dispatch<
+    SetStateAction<AuthorityCreateMetadata>
+  >;
+}
+
+/** MARC 레코드와 함께 전거 생성 API에 전달할 화면 입력값이다. */
+export interface AuthorityCreateMetadata {
+  acType?: AuthoritySearchType;
+  acRegionCode?: string;
+  firstInputDate?: string;
+  firstWorker?: string;
 }
 
 export interface MarcControlField {
@@ -265,12 +278,22 @@ export function useMarcEditor() {
     MarcEditorContext,
     (context) => context?.setVariableFields,
   );
+  const authorityCreateMetadata = useContextSelector(
+    MarcEditorContext,
+    (context) => context?.authorityCreateMetadata,
+  );
+  const setAuthorityCreateMetadata = useContextSelector(
+    MarcEditorContext,
+    (context) => context?.setAuthorityCreateMetadata,
+  );
 
   if (
     !leaderData ||
     !variableFields ||
     !setLeaderData ||
-    !setVariableFields
+    !setVariableFields ||
+    !authorityCreateMetadata ||
+    !setAuthorityCreateMetadata
   ) {
     throw new Error(
       "useMarcEditor는 MarcEditorProvider 내부에서 사용해야 합니다.",
@@ -280,7 +303,9 @@ export function useMarcEditor() {
   return {
     leaderData,
     variableFields,
+    authorityCreateMetadata,
     setLeaderData,
     setVariableFields,
+    setAuthorityCreateMetadata,
   };
 }

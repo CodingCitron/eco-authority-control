@@ -5,8 +5,42 @@ import type { MarcField } from "@/components/ui/marc-editor-context";
 import {
   addPersonalFormValuesToMarcFields,
   createEmptyPersonalAuthorityFormValues,
+  mapPersonalFormValuesToAuthorityCreateMetadata,
   type PersonalMarcAddTarget,
 } from "./personal-form.mapper";
+
+describe("mapPersonalFormValuesToAuthorityCreateMetadata", () => {
+  it("신규 개인명 입력 폼은 개인명 전거를 기본 선택한다", () => {
+    expect(createEmptyPersonalAuthorityFormValues().authorityType).toBe("100");
+  });
+
+  it("입력된 공통 항목만 전거 생성 메타데이터로 변환한다", () => {
+    expect(
+      mapPersonalFormValuesToAuthorityCreateMetadata({
+        authorityType: "100",
+        region: " 1 ",
+        createdAt: "2026-08-25T10:00:00",
+        createdBy: "tester",
+      }),
+    ).toEqual({
+      acType: "0",
+      acRegionCode: "1",
+      firstInputDate: "2026-08-25T10:00:00",
+      firstWorker: "tester",
+    });
+  });
+
+  it("입력되지 않은 항목은 생성 메타데이터에서 제외한다", () => {
+    expect(
+      mapPersonalFormValuesToAuthorityCreateMetadata({
+        authorityType: "",
+        region: "",
+        createdAt: "",
+        createdBy: "",
+      }),
+    ).toEqual({});
+  });
+});
 
 describe("addPersonalFormValuesToMarcFields", () => {
   it("개인명 폼 값을 태그 순서의 MARC 필드로 추가한다", () => {

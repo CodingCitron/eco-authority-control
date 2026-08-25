@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import MarcEditor from "./marc-editor";
 import {
   parseLeaderData,
+  type AuthorityCreateMetadata,
   type MarcField,
 } from "./marc-editor-context";
 import MarcEditorProvider from "./marc-editor-provider";
@@ -27,11 +28,14 @@ const initialFields: MarcField[] = [
   },
 ];
 
-function renderEditor() {
+function renderEditor(
+  initialAuthorityCreateMetadata?: AuthorityCreateMetadata,
+) {
   return render(
     <MarcEditorProvider
       initialFields={initialFields}
       initialLeader={parseLeaderData("00000nz  a2200000n  4500")}
+      initialAuthorityCreateMetadata={initialAuthorityCreateMetadata}
     >
       <MarcEditor fontSize="16px" />
     </MarcEditorProvider>,
@@ -122,23 +126,34 @@ describe("MarcEditor", () => {
   it("저장 버튼을 누르면 context의 최종 MARC 레코드를 출력한다", async () => {
     const user = userEvent.setup();
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    renderEditor();
+    renderEditor({
+      acType: "0",
+      acRegionCode: "1",
+      firstInputDate: "2026-08-25T10:00:00",
+      firstWorker: "tester",
+    });
 
     await user.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(consoleSpy).toHaveBeenCalledWith("MARC 레코드 최종 데이터", {
-      leader: "00000nz  a2200000n  4500",
-      control_fields: initialFields
-        .filter((field) => field.type === "control")
-        .map(({ tag, value }) => ({ tag, value })),
-      data_fields: initialFields
-        .filter((field) => field.type === "data")
-        .map(({ tag, indicator1, indicator2, subfields }) => ({
-          tag,
-          ind1: indicator1,
-          ind2: indicator2,
-          subfields,
-        })),
+    expect(consoleSpy).toHaveBeenCalledWith("전거 생성 최종 데이터", {
+      acType: "0",
+      acRegionCode: "1",
+      firstInputDate: "2026-08-25T10:00:00",
+      firstWorker: "tester",
+      record: {
+        leader: "00000nz  a2200000n  4500",
+        control_fields: initialFields
+          .filter((field) => field.type === "control")
+          .map(({ tag, value }) => ({ tag, value })),
+        data_fields: initialFields
+          .filter((field) => field.type === "data")
+          .map(({ tag, indicator1, indicator2, subfields }) => ({
+            tag,
+            ind1: indicator1,
+            ind2: indicator2,
+            subfields,
+          })),
+      },
     });
   });
 });

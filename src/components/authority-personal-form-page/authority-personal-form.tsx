@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import {
   useForm,
+  useWatch,
   type FieldPathByValue,
   type UseFormRegister,
 } from "react-hook-form";
@@ -9,6 +10,7 @@ import { useMarcEditor } from "@/components/ui/marc-editor-context";
 import {
   addPersonalFormValuesToMarcFields,
   createEmptyPersonalAuthorityFormValues,
+  mapPersonalFormValuesToAuthorityCreateMetadata,
   type PersonalMarcAddTarget,
   type PersonalAuthorityFormValues,
 } from "./personal-form.mapper";
@@ -25,12 +27,15 @@ export default function AuthorityPersonalForm({
   initialValues,
   onSubmit,
 }: AuthorityPersonalFormProps) {
-  const { register, reset, handleSubmit, getValues } =
+  const { register, reset, handleSubmit, getValues, control } =
     useForm<PersonalAuthorityFormValues>({
-      defaultValues:
-        initialValues ?? createEmptyPersonalAuthorityFormValues(),
+      defaultValues: initialValues ?? createEmptyPersonalAuthorityFormValues(),
     });
-  const { setVariableFields } = useMarcEditor();
+  const { setVariableFields, setAuthorityCreateMetadata } = useMarcEditor();
+  const [authorityType, region, createdAt, createdBy] = useWatch({
+    control,
+    name: ["authorityType", "region", "createdAt", "createdBy"],
+  });
 
   const addToMarcRecord = (target: PersonalMarcAddTarget) => {
     const values = getValues();
@@ -45,6 +50,18 @@ export default function AuthorityPersonalForm({
       reset(initialValues);
     }
   }, [initialValues, reset]);
+
+  // 에디터의 저장 버튼에서도 왼쪽 입력 폼의 API 메타데이터를 사용할 수 있게 한다.
+  useEffect(() => {
+    setAuthorityCreateMetadata(
+      mapPersonalFormValuesToAuthorityCreateMetadata({
+        authorityType,
+        region,
+        createdAt,
+        createdBy,
+      }),
+    );
+  }, [authorityType, createdAt, createdBy, region, setAuthorityCreateMetadata]);
 
   return (
     <div className="col-lg-7">
@@ -247,10 +264,7 @@ export default function AuthorityPersonalForm({
                     </label>
                   </div>
                   <div className="col-md-2">
-                    <label
-                      className="visually-hidden"
-                      htmlFor="p-placeType370"
-                    >
+                    <label className="visually-hidden" htmlFor="p-placeType370">
                       관련장소(370) 유형
                     </label>
                     <select
@@ -299,10 +313,7 @@ export default function AuthorityPersonalForm({
                     </label>
                   </div>
                   <div className="col-md-2">
-                    <label
-                      className="visually-hidden"
-                      htmlFor="p-addrType371"
-                    >
+                    <label className="visually-hidden" htmlFor="p-addrType371">
                       주소(371) 유형
                     </label>
                     <select
@@ -656,10 +667,7 @@ function RelatedDateRow({
         toName={toName}
         register={register}
       />
-      <AddButton
-        ariaLabel={`${label} 추가`}
-        onClick={() => onAdd(addTarget)}
-      />
+      <AddButton ariaLabel={`${label} 추가`} onClick={() => onAdd(addTarget)} />
     </div>
   );
 }
@@ -690,10 +698,7 @@ function AuditFields({ register }: RegisteredFieldProps) {
     <div className="col-12">
       <div className="row g-2 align-items-center">
         <div className="col-md-3">
-          <label
-            className="form-label mb-0 fw-bold"
-            htmlFor="p-createdBy"
-          >
+          <label className="form-label mb-0 fw-bold" htmlFor="p-createdBy">
             최초입력자
           </label>
         </div>
@@ -707,10 +712,7 @@ function AuditFields({ register }: RegisteredFieldProps) {
           />
         </div>
         <div className="col-md-3">
-          <label
-            className="form-label mb-0 fw-bold"
-            htmlFor="p-createdAt"
-          >
+          <label className="form-label mb-0 fw-bold" htmlFor="p-createdAt">
             최초입력일
           </label>
         </div>
@@ -726,10 +728,7 @@ function AuditFields({ register }: RegisteredFieldProps) {
       </div>
       <div className="row g-2 align-items-center mt-1">
         <div className="col-md-3">
-          <label
-            className="form-label mb-0 fw-bold"
-            htmlFor="p-updatedBy"
-          >
+          <label className="form-label mb-0 fw-bold" htmlFor="p-updatedBy">
             마지막수정자
           </label>
         </div>
@@ -743,10 +742,7 @@ function AuditFields({ register }: RegisteredFieldProps) {
           />
         </div>
         <div className="col-md-3">
-          <label
-            className="form-label mb-0 fw-bold"
-            htmlFor="p-updatedAt"
-          >
+          <label className="form-label mb-0 fw-bold" htmlFor="p-updatedAt">
             마지막수정일
           </label>
         </div>

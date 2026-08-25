@@ -1,10 +1,12 @@
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 import {
   sortMarcFields,
+  type AuthorityCreateMetadata,
   type MarcDataField,
   type MarcField,
   type SubField,
 } from "@/components/ui/marc-editor-context";
+import { isAuthoritySearchType } from "@/types/authority-search.types";
 
 export type PersonalGender = "" | "unknown" | "male" | "female";
 
@@ -52,7 +54,8 @@ export interface PersonalAuthorityFormValues {
 /** 등록 화면은 예시 데이터 없이 모든 입력값을 비워서 시작한다. */
 export function createEmptyPersonalAuthorityFormValues(): PersonalAuthorityFormValues {
   return {
-    authorityType: "",
+    // 개인명 전용 화면이므로 신규 입력도 개인명(100)을 기본 선택한다.
+    authorityType: "100",
     region: "",
     heading: "",
     hanjaName: "",
@@ -92,6 +95,36 @@ export function createEmptyPersonalAuthorityFormValues(): PersonalAuthorityFormV
   };
 }
 
+const authorityTagTypeMap = {
+  "100": "0",
+  "110": "1",
+  "150": "4",
+  "151": "5",
+} as const;
+
+/** 개인명 입력 폼의 공통 항목을 전거 생성 API 메타데이터로 변환한다. */
+export function mapPersonalFormValuesToAuthorityCreateMetadata(
+  values: Pick<
+    PersonalAuthorityFormValues,
+    "authorityType" | "region" | "createdAt" | "createdBy"
+  >,
+): AuthorityCreateMetadata {
+  const authorityType = values.authorityType.trim();
+  const acType =
+    authorityTagTypeMap[authorityType as keyof typeof authorityTagTypeMap] ??
+    (isAuthoritySearchType(authorityType) ? authorityType : undefined);
+  const acRegionCode = values.region.trim();
+  const firstInputDate = values.createdAt.trim();
+  const firstWorker = values.createdBy.trim();
+
+  return {
+    ...(acType && { acType }),
+    ...(acRegionCode && { acRegionCode }),
+    ...(firstInputDate && { firstInputDate }),
+    ...(firstWorker && { firstWorker }),
+  };
+}
+
 type DataField = AuthorityDetailData["record"]["data_fields"][number];
 
 function getFields(detail: AuthorityDetailData, tag: string) {
@@ -103,7 +136,9 @@ function getField(detail: AuthorityDetailData, tag: string) {
 }
 
 function getSubfield(field: DataField | undefined, code: string) {
-  return field?.subfields.find((subfield) => subfield.code === code)?.value ?? "";
+  return (
+    field?.subfields.find((subfield) => subfield.code === code)?.value ?? ""
+  );
 }
 
 function splitBirthDeathDate(value: string) {
@@ -202,8 +237,7 @@ export function mapAuthorityDetailToPersonalFormValues(
       getSubfield(getField(detail, "377"), "a"),
     education: getSubfield(getField(detail, "667"), "a"),
     biography: getSubfield(getField(detail, "678"), "a"),
-    source:
-      getSubfield(getField(detail, "670"), "a") || detail.sourceDataFound,
+    source: getSubfield(getField(detail, "670"), "a") || detail.sourceDataFound,
     createdBy: detail.firstWorker,
     createdAt: detail.firstInputDate,
     updatedBy: detail.lastWorker,
@@ -267,9 +301,11 @@ export function addPersonalFormValuesToMarcFields(
     case "referenceOriginalName":
       return appendDataField(
         fields,
-        createDataField("400", [
-          toSubfield("a", values.referenceOriginalName),
-        ], "1"),
+        createDataField(
+          "400",
+          [toSubfield("a", values.referenceOriginalName)],
+          "1",
+        ),
       );
     case "place":
       return appendDataField(
@@ -328,8 +364,8 @@ function updatePersonalHeading(
   fields: MarcField[],
   replacements: Array<SubField | undefined>,
 ) {
-  const nextSubfields = replacements.filter(
-    (subfield): subfield is SubField => Boolean(subfield),
+  const nextSubfields = replacements.filter((subfield): subfield is SubField =>
+    Boolean(subfield),
   );
   if (nextSubfields.length === 0) {
     return fields;
@@ -349,10 +385,8 @@ function updatePersonalHeading(
   const nextField: MarcDataField = {
     type: "data",
     tag: "100",
-    indicator1:
-      currentField?.type === "data" ? currentField.indicator1 : "1",
-    indicator2:
-      currentField?.type === "data" ? currentField.indicator2 : " ",
+    indicator1: currentField?.type === "data" ? currentField.indicator1 : "1",
+    indicator2: currentField?.type === "data" ? currentField.indicator2 : " ",
     subfields: mergedSubfields,
   };
 
@@ -498,7 +532,9 @@ function orderPersonalNameSubfields(subfields: SubField[]) {
       const rightOrder = order.indexOf(right.subfield.code);
       const normalizedLeftOrder = leftOrder < 0 ? order.length : leftOrder;
       const normalizedRightOrder = rightOrder < 0 ? order.length : rightOrder;
-      return normalizedLeftOrder - normalizedRightOrder || left.index - right.index;
+      return (
+        normalizedLeftOrder - normalizedRightOrder || left.index - right.index
+      );
     })
     .map(({ subfield }) => subfield);
 }

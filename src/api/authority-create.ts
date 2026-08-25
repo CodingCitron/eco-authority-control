@@ -11,14 +11,14 @@ import { authorityDetailResponseSchema } from "./authority-detail";
 export interface AuthorityCreateQueryParams {
   acType: AuthoritySearchType;
   acRegionCode: string;
-  activityField: string;
-  hanjaName?: string;
-  headingName?: string;
-  birthDeathDate?: string;
+  // activityField: string;
+  // hanjaName?: string;
+  // headingName?: string;
+  // birthDeathDate?: string;
   firstInputDate?: string;
   firstWorker?: string;
-  lastUpdateDate?: string;
-  lastWorker?: string;
+  // lastUpdateDate?: string;
+  // lastWorker?: string;
   record: {
     leader: string;
     control_fields: AuthorityControlField[];
