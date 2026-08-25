@@ -4,7 +4,8 @@ import { nextGridSort, sortGridRows, type GridSort } from "@/utils/grid-sort";
 export interface TableColumn<T> {
   header: ReactNode;
   cell: (row: T) => ReactNode;
-  sortValue?: (row: T) => string | number;
+  /** API의 선택 필드가 비어 있으면 Table에서 빈 문자열로 정렬한다. */
+  sortValue?: (row: T) => string | number | null | undefined;
   className?: string;
 }
 

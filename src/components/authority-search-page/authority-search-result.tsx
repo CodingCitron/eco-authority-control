@@ -31,7 +31,7 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
     cell: (row) => (
       <AuthoritySelectionCheckbox
         recordKey={row.recKey}
-        heading={row?.headingName || ""}
+        heading={row.headingName}
         inputId={`check-${row.recKey}`}
       />
     ),
@@ -116,7 +116,7 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
     cell: (row) => (
       <AuthoritySelectionCheckbox
         recordKey={row.recKey}
-        heading={row?.headingName || ""}
+        heading={row.headingName}
         inputId={`check-corp-${row.recKey}`}
       />
     ),
@@ -202,7 +202,7 @@ export const geographyColumns: TableColumn<GeographyRow>[] = [
     cell: (row) => (
       <AuthoritySelectionCheckbox
         recordKey={row.recKey}
-        heading={row?.headingName || ""}
+        heading={row.headingName}
         inputId={`check-geo-${row.recKey}`}
       />
     ),
@@ -273,7 +273,7 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
     cell: (row) => (
       <AuthoritySelectionCheckbox
         recordKey={row.recKey}
-        heading={row?.headingName || ""}
+        heading={row.headingName}
         inputId={`check-subj-${row.recKey}`}
       />
     ),

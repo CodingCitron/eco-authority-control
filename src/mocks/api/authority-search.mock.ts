@@ -45,7 +45,7 @@ export const authoritySearchHandlers = [
 
       if (
         query.searchKeyword &&
-        !row.headingName.includes(query.searchKeyword)
+        !(row.headingName ?? "").includes(query.searchKeyword)
       ) {
         return false;
       }

@@ -98,38 +98,32 @@ export function AuthoritySplitModalBody({
   const isRecordFetchComplete = !isLoading && !isError;
 
   // 전거 제어 번호 가져오기
-  const {
-    mutate: generateControlNumber,
-    isPending: isGeneratingControlNumber,
-    isError: isGenerateError,
-  } = useMutation({
+  const { mutate: generateControlNumber } = useMutation({
     mutationFn: fetchGenerateAuthorityControlNumber,
     onSuccess: (data) => {
-      setTargetRecord(() => {
-        return {
-          ...detailData,
-          data: {
-            ...detailData.data,
-            acControlNo: data.data,
-            recKey: "",
-            record: {
-              ...detailData.data.record,
-              control_fields: detailData.data.record.control_fields.map(
-                (controlField) => {
-                  if (controlField.tag === "001") {
-                    return {
-                      ...controlField,
-                      value: data.data,
-                    };
-                  }
+      // 상세 조회가 끝나기 전에 모달이 닫히거나 대상이 바뀔 수 있다.
+      if (!detailData) {
+        requestedAcTypeRef.current = null;
+        return;
+      }
 
-                  return controlField;
-                },
-              ),
-              data_fields: [...detailData.data.record.data_fields],
-            },
+      const sourceDetail = detailData.data;
+      setTargetRecord({
+        data: {
+          ...sourceDetail,
+          acControlNo: data.data,
+          recKey: "",
+          record: {
+            ...sourceDetail.record,
+            control_fields: sourceDetail.record.control_fields.map(
+              (controlField) =>
+                controlField.tag === "001"
+                  ? { ...controlField, value: data.data }
+                  : controlField,
+            ),
+            data_fields: [...sourceDetail.record.data_fields],
           },
-        };
+        },
       });
     },
     onError: () => {

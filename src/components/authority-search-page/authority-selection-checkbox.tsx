@@ -8,7 +8,7 @@ export default function AuthoritySelectionCheckbox({
   inputId,
 }: {
   recordKey: string;
-  heading: string;
+  heading?: string | undefined | null;
   inputId: string;
 }) {
   const isSelected = useContextSelector(
