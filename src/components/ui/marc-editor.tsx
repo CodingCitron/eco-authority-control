@@ -18,6 +18,7 @@ import {
   type MarcField,
   type SubField,
 } from "./marc-editor-context";
+import { BibliographicRecordConsistencyButton } from "../authority-personal-form-page/bibliographic-record-consistency-modal";
 
 interface MarcEditorProps {
   fontSize: string;
@@ -97,9 +98,7 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
               field={field}
               key={`${field.type}-${field.tag}-${index}`}
               mode={mode}
-              onChange={(nextField) =>
-                updateVariableField(index, nextField)
-              }
+              onChange={(nextField) => updateVariableField(index, nextField)}
               onRemove={() => removeVariableField(index)}
             />
           ))}
@@ -117,14 +116,7 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
         <div>
           <button className="btn btn-outline-secondary">이전</button>{" "}
           <button className="btn btn-outline-secondary">다음</button>{" "}
-          <button
-            type="button"
-            className="btn btn-light-info ms-2"
-            data-bs-toggle="modal"
-            data-bs-target="#modalMarcSync"
-          >
-            서지레코드 일관성 작업
-          </button>
+          <BibliographicRecordConsistencyButton />
         </div>
         <div>
           <button className="btn btn-light-warning">중복조사</button>{" "}
@@ -417,16 +409,11 @@ function getMarcRowErrorMessage(error: unknown) {
   }
 }
 
-function buildMarcRecord(
-  leaderData: LeaderData,
-  fields: MarcField[],
-) {
+function buildMarcRecord(leaderData: LeaderData, fields: MarcField[]) {
   return {
     leader: formatLeaderData(leaderData),
     control_fields: fields.flatMap((field) =>
-      field.type === "control"
-        ? [{ tag: field.tag, value: field.value }]
-        : [],
+      field.type === "control" ? [{ tag: field.tag, value: field.value }] : [],
     ),
     data_fields: fields.flatMap((field) =>
       field.type === "data"
