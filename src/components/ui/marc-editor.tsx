@@ -9,7 +9,9 @@ import { MarcError, parseLine } from "marc-eco";
 
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 import {
+  formatLeaderData,
   useMarcEditor,
+  type LeaderData,
   type MarcField,
   type SubField,
 } from "./marc-editor-context";
@@ -22,7 +24,7 @@ type EditorMode = "form" | "text";
 
 export default function MarcEditor({ fontSize }: MarcEditorProps) {
   const [mode, setMode] = useState<EditorMode>("form");
-  const { variableFields, setVariableFields } = useMarcEditor();
+  const { leaderData, variableFields, setVariableFields } = useMarcEditor();
 
   const addVariableField = () => {
     setVariableFields([
@@ -39,8 +41,10 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
 
   const updateVariableField = (index: number, nextField: MarcField) => {
     setVariableFields(
-      variableFields.map((field, fieldIndex) =>
-        fieldIndex === index ? nextField : field,
+      sortMarcFields(
+        variableFields.map((field, fieldIndex) =>
+          fieldIndex === index ? nextField : field,
+        ),
       ),
     );
   };
@@ -49,6 +53,11 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
     setVariableFields(
       variableFields.filter((_, fieldIndex) => fieldIndex !== index),
     );
+  };
+
+  const handleSave = () => {
+    const record = buildMarcRecord(leaderData, variableFields);
+    console.log("MARC 레코드 최종 데이터", record);
   };
 
   return (
@@ -110,7 +119,13 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
         </div>
         <div>
           <button className="btn btn-light-warning">중복조사</button>{" "}
-          <button className="btn btn-primary">저장</button>{" "}
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSave}
+          >
+            저장
+          </button>{" "}
           <button className="btn btn-secondary">취소</button>
         </div>
       </div>
@@ -391,4 +406,44 @@ function getMarcRowErrorMessage(error: unknown) {
     default:
       return "MARC 행 형식이 올바르지 않습니다.";
   }
+}
+
+/** 수정이 끝난 필드를 태그 순서로 정렬하며 빈 태그는 새 입력을 위해 마지막에 둔다. */
+function sortMarcFields(fields: MarcField[]) {
+  return [...fields].sort((left, right) => {
+    if (!left.tag) {
+      return right.tag ? 1 : 0;
+    }
+    if (!right.tag) {
+      return -1;
+    }
+
+    return left.tag.localeCompare(right.tag);
+  });
+}
+
+function buildMarcRecord(
+  leaderData: LeaderData,
+  fields: MarcField[],
+) {
+  return {
+    leader: formatLeaderData(leaderData),
+    control_fields: fields.flatMap((field) =>
+      field.type === "control"
+        ? [{ tag: field.tag, value: field.value }]
+        : [],
+    ),
+    data_fields: fields.flatMap((field) =>
+      field.type === "data"
+        ? [
+            {
+              tag: field.tag,
+              ind1: field.indicator1,
+              ind2: field.indicator2,
+              subfields: field.subfields,
+            },
+          ]
+        : [],
+    ),
+  };
 }

@@ -12,6 +12,8 @@ export interface LeaderData {
   raw?: string;
 }
 
+const LEADER_LENGTH = 24;
+
 /** 24자리 Leader 문자열을 고정길이 모달에서 사용하는 형태로 변환한다. */
 export function parseLeaderData(raw: string): LeaderData {
   return {
@@ -20,6 +22,28 @@ export function parseLeaderData(raw: string): LeaderData {
     encodingLevel: raw[17] ?? "",
     raw,
   };
+}
+
+/** 저장할 때 모달에서 수정한 위치를 원본 Leader 문자열에 반영한다. */
+export function formatLeaderData(data: LeaderData) {
+  const hasValue = Boolean(
+    data.raw || data.status || data.type || data.encodingLevel,
+  );
+
+  if (!hasValue) {
+    return "";
+  }
+
+  const characters = (data.raw ?? "")
+    .padEnd(LEADER_LENGTH, " ")
+    .slice(0, LEADER_LENGTH)
+    .split("");
+
+  characters[5] = data.status || " ";
+  characters[6] = data.type || " ";
+  characters[17] = data.encodingLevel || " ";
+
+  return characters.join("");
 }
 
 export interface ControlField008 {

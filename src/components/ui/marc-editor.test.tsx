@@ -1,9 +1,12 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import MarcEditor from "./marc-editor";
-import type { MarcField } from "./marc-editor-context";
+import {
+  parseLeaderData,
+  type MarcField,
+} from "./marc-editor-context";
 import MarcEditorProvider from "./marc-editor-provider";
 
 const initialFields: MarcField[] = [
@@ -26,7 +29,10 @@ const initialFields: MarcField[] = [
 
 function renderEditor() {
   return render(
-    <MarcEditorProvider initialFields={initialFields}>
+    <MarcEditorProvider
+      initialFields={initialFields}
+      initialLeader={parseLeaderData("00000nz  a2200000n  4500")}
+    >
       <MarcEditor fontSize="16px" />
     </MarcEditorProvider>,
   );
@@ -40,7 +46,10 @@ function getRowByText(text: string) {
   return row;
 }
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe("MarcEditor", () => {
   it("제어필드와 데이터필드를 각각 폼 모드에서 수정한다", async () => {
@@ -88,5 +97,48 @@ describe("MarcEditor", () => {
     await user.keyboard("{Enter}");
 
     expect(within(dataRow).getByText("윤동주")).toBeVisible();
+  });
+
+  it("태그가 수정되면 전체 필드를 태그 오름차순으로 정렬한다", async () => {
+    const user = userEvent.setup();
+    const { container } = renderEditor();
+
+    const controlRow = getRowByText("AUTH0001");
+    await user.click(within(controlRow).getByText("001"));
+    const tagInput = within(controlRow).getByRole("textbox", {
+      name: "MARC 태그",
+    });
+    expect(tagInput).toHaveFocus();
+    await user.clear(tagInput);
+    await user.type(tagInput, "006");
+    await user.keyboard("{Enter}");
+
+    const tags = [...container.querySelectorAll(".marc-tag")].map(
+      (element) => element.textContent,
+    );
+    expect(tags).toEqual(["003", "005", "006", "008", "100"]);
+  });
+
+  it("저장 버튼을 누르면 context의 최종 MARC 레코드를 출력한다", async () => {
+    const user = userEvent.setup();
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    renderEditor();
+
+    await user.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(consoleSpy).toHaveBeenCalledWith("MARC 레코드 최종 데이터", {
+      leader: "00000nz  a2200000n  4500",
+      control_fields: initialFields
+        .filter((field) => field.type === "control")
+        .map(({ tag, value }) => ({ tag, value })),
+      data_fields: initialFields
+        .filter((field) => field.type === "data")
+        .map(({ tag, indicator1, indicator2, subfields }) => ({
+          tag,
+          ind1: indicator1,
+          ind2: indicator2,
+          subfields,
+        })),
+    });
   });
 });
