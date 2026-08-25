@@ -1,7 +1,7 @@
 // 고정 길이 필드 편집 모달
 
-import { useState } from "react";
-import { useForm, type UseFormRegister } from "react-hook-form";
+import { useRef, useState } from "react";
+import { useController, useForm, type Control } from "react-hook-form";
 import { Modal } from "react-bootstrap";
 
 import BaseModal from "./base-modal";
@@ -87,19 +87,19 @@ const BIBLIOGRAPHIC_FIELD_ROWS: FieldDefinition[][] = [
     },
     {
       name: "mainHeadingUse",
-      label: "표목사용–기본표목/부출표목",
+      label: "기본표목/부출표목",
       defaultValue: "",
       codeSet: "FIX_008_14",
     },
     {
       name: "subjAddedEntry",
-      label: "표목사용–주제명부출표목",
+      label: "주제명부출표목",
       defaultValue: "",
       codeSet: "FIX_008_15",
     },
     {
       name: "seriesAddedEntry",
-      label: "표목사용–총서부출표목",
+      label: "총서부출표목",
       defaultValue: "",
       codeSet: "FIX_008_16",
     },
@@ -166,26 +166,183 @@ const DEFAULT_VALUES = createDefaultValues();
 
 function FixedFieldInput({
   field,
-  register,
+  control,
   className = "col",
 }: {
   field: FieldDefinition;
-  register: UseFormRegister<FixedFieldFormValues>;
+  control: Control<FixedFieldFormValues>;
   className?: string;
 }) {
   const id = `f008_${field.name}`;
+  const listboxId = `${id}_listbox`;
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [filterText, setFilterText] = useState("");
+
+  // 입력값은 별도 로컬 상태로 복제하지 않고 react-hook-form을 단일 상태로 사용
+  const { field: inputField } = useController({
+    control,
+    name: field.name,
+  });
+
+  // 단일 코드값을 가진 코드셋만 추천 목록으로 사용
+  // 코드셋이 없거나 위치별 코드셋이면 아래의 일반 입력창으로 처리.
+  const codeSet = field.codeSet ? getCodeSet(field.codeSet) : undefined;
+  const options =
+    codeSet && "values" in codeSet ? Object.entries(codeSet.values) : [];
+
+  // 코드뿐 아니라 사용자에게 보이는 설명으로도 추천값을 검색
+  const normalizedFilter = filterText.trim().toLocaleLowerCase();
+  const filteredOptions = normalizedFilter
+    ? options.filter(
+        ([code, option]) =>
+          code.toLocaleLowerCase().includes(normalizedFilter) ||
+          option.label.toLocaleLowerCase().includes(normalizedFilter),
+      )
+    : options;
+
+  const selectOption = (code: string) => {
+    inputField.onChange(code);
+    setFilterText("");
+    setIsOpen(false);
+
+    // 목록을 선택한 뒤에도 연속 입력이 가능하도록 입력창에 포커스
+    inputRef.current?.focus();
+  };
+
+  const openOptions = () => {
+    if (options.length === 0) {
+      return;
+    }
+
+    setFilterText("");
+    setActiveIndex(0);
+    setIsOpen(true);
+  };
 
   return (
     <div className={className}>
       <label className="form-label" htmlFor={id}>
         {field.label}
       </label>
-      <input
-        type="text"
-        className="form-control"
-        id={id}
-        {...register(field.name)}
-      />
+      {options.length > 0 ? (
+        <div className="position-relative">
+          <div className="input-group">
+            <input
+              {...inputField}
+              aria-activedescendant={
+                isOpen && filteredOptions[activeIndex]
+                  ? `${listboxId}_${activeIndex}`
+                  : undefined
+              }
+              aria-autocomplete="list"
+              aria-controls={listboxId}
+              aria-expanded={isOpen}
+              autoComplete="off"
+              className="form-control"
+              id={id}
+              onBlur={() => {
+                inputField.onBlur();
+                setIsOpen(false);
+              }}
+              onChange={(event) => {
+                // 추천 목록에 없는 값도 허용하므로 입력값을 그대로 폼에 반영
+                inputField.onChange(event);
+                setFilterText(event.target.value);
+                setActiveIndex(0);
+                setIsOpen(true);
+              }}
+              onFocus={openOptions}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowDown" && filteredOptions.length > 0) {
+                  event.preventDefault();
+                  setIsOpen(true);
+                  setActiveIndex(
+                    (currentIndex) =>
+                      (currentIndex + 1) % filteredOptions.length,
+                  );
+                } else if (
+                  event.key === "ArrowUp" &&
+                  filteredOptions.length > 0
+                ) {
+                  event.preventDefault();
+                  setIsOpen(true);
+                  setActiveIndex(
+                    (currentIndex) =>
+                      (currentIndex - 1 + filteredOptions.length) %
+                      filteredOptions.length,
+                  );
+                } else if (
+                  event.key === "Enter" &&
+                  isOpen &&
+                  filteredOptions[activeIndex]
+                ) {
+                  event.preventDefault();
+                  selectOption(filteredOptions[activeIndex][0]);
+                } else if (event.key === "Escape") {
+                  event.preventDefault();
+                  setIsOpen(false);
+                }
+              }}
+              ref={(element) => {
+                inputField.ref(element);
+                inputRef.current = element;
+              }}
+              role="combobox"
+              type="text"
+            />
+            <button
+              aria-label={`${field.label} 선택 항목 보기`}
+              aria-expanded={isOpen}
+              className="btn btn-outline-secondary"
+              onClick={() => {
+                if (isOpen) {
+                  setIsOpen(false);
+                } else {
+                  openOptions();
+                  inputRef.current?.focus();
+                }
+              }}
+              onMouseDown={(event) => event.preventDefault()}
+              type="button"
+            >
+              <i className="bi bi-chevron-down" aria-hidden="true" />
+            </button>
+          </div>
+          {isOpen && filteredOptions.length > 0 && (
+            <div
+              className="dropdown-menu show w-100 py-1"
+              id={listboxId}
+              role="listbox"
+              style={{ maxHeight: "16rem", overflowY: "auto", zIndex: 1080 }}
+            >
+              {filteredOptions.map(([code, option], index) => (
+                <button
+                  aria-selected={activeIndex === index}
+                  className={`dropdown-item${activeIndex === index ? " active" : ""}`}
+                  id={`${listboxId}_${index}`}
+                  key={code}
+                  onClick={() => selectOption(code)}
+                  // 클릭 전에 input의 blur가 발생해 목록이 닫히는 것을 막는다.
+                  onMouseDown={(event) => event.preventDefault()}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  role="option"
+                  type="button"
+                >
+                  <span className="fw-semibold">
+                    {code === " " ? "공백" : code}
+                  </span>
+                  <span className="ms-2">{option.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        // 추천값이 없는 필드는 자유 입력 필드로 표시한다.
+        <input {...inputField} className="form-control" id={id} type="text" />
+      )}
     </div>
   );
 }
@@ -234,13 +391,15 @@ export function AuthorityFixedFieldEditModalBody({
   console.log(leaderData);
   console.log(variableFields);
 
-  const { handleSubmit, register } = useForm<FixedFieldFormValues>({
+  const { control, handleSubmit } = useForm<FixedFieldFormValues>({
     defaultValues: DEFAULT_VALUES,
   });
 
   const handleConfirm = (values: FixedFieldFormValues) => {
     // 저장 API가 연결되면 values를 전달한다.
     void values;
+
+    console.log(values);
     onHide();
   };
 
@@ -262,9 +421,9 @@ export function AuthorityFixedFieldEditModalBody({
             {LEADER_FIELDS.map((field) => (
               <FixedFieldInput
                 className="col-md-4"
+                control={control}
                 field={field}
                 key={field.name}
-                register={register}
               />
             ))}
           </div>
@@ -280,8 +439,8 @@ export function AuthorityFixedFieldEditModalBody({
             >
               {fields.map((field) => (
                 <FixedFieldInput
+                  control={control}
                   field={field}
-                  register={register}
                   key={field.name}
                 />
               ))}

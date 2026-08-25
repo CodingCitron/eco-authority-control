@@ -17,8 +17,9 @@ export const personalRows: PersonalRow[] = [
     sourceDataFound: "한국민족문화대백과사전",
     acControlNo: "KAC199900000001",
     firstWorker: "admin",
-    inputDate: "2026-08-12T08:40:09.517Z",
+    firstInputDate: "2026-08-12T08:40:09.517Z",
     lastWorker: "librarian01",
+    lastUpdateDate: "2026-08-12T08:40:09.517Z",
   },
   {
     recKey: "9276158304927165",
@@ -31,8 +32,9 @@ export const personalRows: PersonalRow[] = [
     sourceDataFound: "한국 현대문학 자료",
     acControlNo: "KAC199900000003",
     firstWorker: "admin",
-    inputDate: "2026-08-12T08:41:09.517Z",
+    firstInputDate: "2026-08-12T08:41:09.517Z",
     lastWorker: "librarian01",
+    lastUpdateDate: "2026-08-12T08:41:09.517Z",
   },
   ...Array.from({ length: 28 }, (_, index) => ({
     recKey: `9276158304928${String(index + 1).padStart(3, "0")}`,
@@ -45,8 +47,9 @@ export const personalRows: PersonalRow[] = [
     sourceDataFound: `개인명 참고자료 ${index + 3}`,
     acControlNo: `KAC19990000${String(index + 5).padStart(4, "0")}`,
     firstWorker: "admin",
-    inputDate: "2026-08-13T09:00:00.000Z",
+    firstInputDate: "2026-08-13T09:00:00.000Z",
     lastWorker: "librarian01",
+    lastUpdateDate: "2026-08-13T09:00:00.000Z",
   })),
 ];
 
@@ -63,8 +66,9 @@ export const corporationRows: CorporationRow[] = [
     sourceDataFound: "국립중앙도서관 홈페이지",
     acControlNo: "KAC199900000002",
     firstWorker: "admin",
-    inputDate: "2026-08-12T08:44:08.573Z",
+    firstInputDate: "2026-08-12T08:44:08.573Z",
     lastWorker: "librarian02",
+    lastUpdateDate: "2026-08-12T08:44:08.573Z",
   },
   {
     recKey: "927615830492715",
@@ -78,8 +82,9 @@ export const corporationRows: CorporationRow[] = [
     sourceDataFound: "한국도서관협회 자료",
     acControlNo: "KAC199900000004",
     firstWorker: "admin",
-    inputDate: "2026-08-12T08:44:28.573Z",
+    firstInputDate: "2026-08-12T08:44:28.573Z",
     lastWorker: "librarian02",
+    lastUpdateDate: "2026-08-12T08:44:28.573Z",
   },
   ...Array.from({ length: 28 }, (_, index) => ({
     recKey: `9276158304929${String(index + 1).padStart(3, "0")}`,
@@ -93,8 +98,9 @@ export const corporationRows: CorporationRow[] = [
     sourceDataFound: `기관명 참고자료 ${index + 3}`,
     acControlNo: `KAB19990000${String(index + 5).padStart(4, "0")}`,
     firstWorker: "admin",
-    inputDate: "2026-08-13T09:10:00.000Z",
+    firstInputDate: "2026-08-13T09:10:00.000Z",
     lastWorker: "librarian02",
+    lastUpdateDate: "2026-08-13T09:10:00.000Z",
   })),
 ];
 
@@ -107,8 +113,9 @@ export const geographyRows: GeographyRow[] = [
     sourceDataFound: "대한민국 행정구역 자료",
     acControlNo: "KAC200000000002",
     firstWorker: "admin",
-    inputDate: "2026-08-12T08:45:33.295Z",
+    firstInputDate: "2026-08-12T08:45:33.295Z",
     lastWorker: "librarian04",
+    lastUpdateDate: "2026-08-12T08:45:33.295Z",
   },
   {
     recKey: "9276158304927163",
@@ -118,8 +125,9 @@ export const geographyRows: GeographyRow[] = [
     sourceDataFound: "대한민국 지명 자료",
     acControlNo: "KAC200000000003",
     firstWorker: "admin",
-    inputDate: "2026-08-12T08:46:33.295Z",
+    firstInputDate: "2026-08-12T08:46:33.295Z",
     lastWorker: "librarian04",
+    lastUpdateDate: "2026-08-12T08:46:33.295Z",
   },
   ...Array.from({ length: 28 }, (_, index) => ({
     recKey: `9276158304930${String(index + 1).padStart(3, "0")}`,
@@ -129,8 +137,9 @@ export const geographyRows: GeographyRow[] = [
     sourceDataFound: `지명 참고자료 ${index + 3}`,
     acControlNo: `KAG20000000${String(index + 5).padStart(4, "0")}`,
     firstWorker: "admin",
-    inputDate: "2026-08-13T09:20:00.000Z",
+    firstInputDate: "2026-08-13T09:20:00.000Z",
     lastWorker: "librarian04",
+    lastUpdateDate: "2026-08-13T09:20:00.000Z",
   })),
 ];
 
@@ -143,8 +152,9 @@ export const subjectRows: SubjectRow[] = [
     sourceDataFound: "법률용어사전",
     acControlNo: "KAC200000000001",
     firstWorker: "admin",
-    inputDate: "2026-08-12T08:45:57.440Z",
+    firstInputDate: "2026-08-12T08:45:57.440Z",
     lastWorker: "librarian03",
+    lastUpdateDate: "2026-08-12T08:45:57.440Z",
   },
   {
     recKey: "9276158304927167",
@@ -154,8 +164,9 @@ export const subjectRows: SubjectRow[] = [
     sourceDataFound: "법률 주제명표목표",
     acControlNo: "KAC200000000004",
     firstWorker: "admin",
-    inputDate: "2026-08-12T08:46:57.440Z",
+    firstInputDate: "2026-08-12T08:46:57.440Z",
     lastWorker: "librarian03",
+    lastUpdateDate: "2026-08-12T08:46:57.440Z",
   },
   ...Array.from({ length: 28 }, (_, index) => ({
     recKey: `9276158304931${String(index + 1).padStart(3, "0")}`,
@@ -165,8 +176,9 @@ export const subjectRows: SubjectRow[] = [
     sourceDataFound: `주제명 참고자료 ${index + 3}`,
     acControlNo: `KSH20000000${String(index + 5).padStart(4, "0")}`,
     firstWorker: "admin",
-    inputDate: "2026-08-13T09:30:00.000Z",
+    firstInputDate: "2026-08-13T09:30:00.000Z",
     lastWorker: "librarian03",
+    lastUpdateDate: "2026-08-13T09:30:00.000Z",
   })),
 ];
 

@@ -17,5 +17,5 @@ export function ConfirmButton({ children }: { children: React.ReactNode }) {
 }
 
 function ConfirmModal({ show, onHide }: { show: boolean; onHide: () => void }) {
-  return;
+  return <></>;
 }
