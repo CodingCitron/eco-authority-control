@@ -176,9 +176,7 @@ const DEFAULT_VALUES = createDefaultValues();
 function hasControlField008Input(data: ControlField008) {
   return Object.entries(data).some(
     ([name, value]) =>
-      name !== "sourceValue" &&
-      typeof value === "string" &&
-      value.length > 0,
+      name !== "sourceValue" && typeof value === "string" && value.length > 0,
   );
 }
 
@@ -404,7 +402,7 @@ export function AuthorityFixedFieldEditModalBody({
 }: {
   onHide: () => void;
 }) {
-  const { leaderData, setLeaderData, setVariableFields, variableFields } =
+  const { leaderData, variableFields, setLeaderData, setVariableFields } =
     useMarcEditor();
   const field008 = variableFields.find(
     (field): field is MarcControlField =>
@@ -423,8 +421,7 @@ export function AuthorityFixedFieldEditModalBody({
   });
 
   const handleConfirm = (values: FixedFieldFormValues) => {
-    const { status, type, encodingLevel, raw, ...nextControlField008 } =
-      values;
+    const { status, type, encodingLevel, raw, ...nextControlField008 } = values;
     const nextField008: MarcControlField = {
       type: "control",
       tag: "008",
@@ -445,10 +442,7 @@ export function AuthorityFixedFieldEditModalBody({
     });
 
     // 기존 008도 없고 입력값도 없다면 Leader만 갱신한다.
-    if (
-      field008Index < 0 &&
-      !hasControlField008Input(nextControlField008)
-    ) {
+    if (field008Index < 0 && !hasControlField008Input(nextControlField008)) {
       onHide();
       return;
     }
