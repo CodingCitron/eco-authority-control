@@ -257,6 +257,8 @@ export type PersonalMarcAddTarget =
   | "organization"
   | "occupation"
   | "language"
+  | "education"
+  | "biography"
   | "source";
 
 const PLACE_SUBFIELD_CODE: Readonly<Record<string, string>> = {
@@ -351,6 +353,16 @@ export function addPersonalFormValuesToMarcFields(
       return appendDataField(
         fields,
         createDataField("377", [toSubfield("i", values.language)]),
+      );
+    case "education":
+      return appendDataField(
+        fields,
+        createDataField("667", [toSubfield("a", values.education)]),
+      );
+    case "biography":
+      return appendDataField(
+        fields,
+        createDataField("678", [toSubfield("a", values.biography)]),
       );
     case "source":
       return appendDataField(

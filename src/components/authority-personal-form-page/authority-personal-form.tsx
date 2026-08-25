@@ -452,17 +452,19 @@ export default function AuthorityPersonalForm({
                   label="학력(667)"
                   name="education"
                   register={register}
-                  placeholder="$a"
+                  // placeholder="$a"
+                  addTarget="education"
+                  onAdd={addToMarcRecord}
                   bold
-                  showAdd={false}
                 />
                 <SimpleInputRow
                   id="p-bio678"
                   label="전기(678)"
                   name="biography"
                   register={register}
+                  addTarget="biography"
+                  onAdd={addToMarcRecord}
                   bold
-                  showAdd={false}
                 />
                 <SimpleInputRow
                   id="p-source670"

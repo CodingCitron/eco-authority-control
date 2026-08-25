@@ -77,4 +77,29 @@ describe("AuthorityPersonalForm", () => {
       },
     });
   });
+
+  it("학력과 전기를 각각 667, 678 필드로 추가한다", async () => {
+    const user = userEvent.setup();
+    render(
+      <MarcEditorProvider>
+        <AuthorityPersonalForm />
+        <MarcEditor fontSize="16px" />
+      </MarcEditorProvider>,
+    );
+
+    await user.type(screen.getByLabelText("학력(667)"), "배재고등보통학교");
+    await user.click(screen.getByRole("button", { name: "학력(667) 추가" }));
+    await user.type(screen.getByLabelText("전기(678)"), "시인; 1920년 등단");
+    await user.click(screen.getByRole("button", { name: "전기(678) 추가" }));
+
+    const educationRow = screen
+      .getByText("배재고등보통학교")
+      .closest<HTMLElement>(".marc-line");
+    const biographyRow = screen
+      .getByText("시인; 1920년 등단")
+      .closest<HTMLElement>(".marc-line");
+
+    expect(within(educationRow!).getByText("667")).toBeVisible();
+    expect(within(biographyRow!).getByText("678")).toBeVisible();
+  });
 });

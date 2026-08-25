@@ -62,6 +62,8 @@ describe("addPersonalFormValuesToMarcFields", () => {
       organization: "동아일보 정주지국",
       occupation: "작가",
       language: "한국어",
+      education: "배재고등보통학교",
+      biography: "시인; 1920년 등단",
       source: "진달래꽃, 2011",
     };
     const targets: PersonalMarcAddTarget[] = [
@@ -77,6 +79,8 @@ describe("addPersonalFormValuesToMarcFields", () => {
       "organization",
       "occupation",
       "language",
+      "education",
+      "biography",
     ];
 
     const fields = targets.reduce<MarcField[]>(
@@ -95,7 +99,9 @@ describe("addPersonalFormValuesToMarcFields", () => {
       "377",
       "400",
       "400",
+      "667",
       "670",
+      "678",
     ]);
     expect(fields[0]).toMatchObject({
       tag: "100",
@@ -121,6 +127,12 @@ describe("addPersonalFormValuesToMarcFields", () => {
       },
       { subfields: [{ code: "a", value: "KIM, Sowol" }] },
     ]);
+    expect(fields.find(({ tag }) => tag === "667")).toMatchObject({
+      subfields: [{ code: "a", value: "배재고등보통학교" }],
+    });
+    expect(fields.find(({ tag }) => tag === "678")).toMatchObject({
+      subfields: [{ code: "a", value: "시인; 1920년 등단" }],
+    });
   });
 
   it("동일한 반복 필드는 중복으로 추가하지 않는다", () => {
