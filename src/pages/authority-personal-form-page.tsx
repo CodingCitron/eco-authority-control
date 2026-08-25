@@ -5,7 +5,10 @@ import { useSearchParams } from "react-router";
 import AuthorityPersonalForm from "@/components/authority-personal-form-page/authority-personal-form";
 import { mapAuthorityDetailToPersonalFormValues } from "@/components/authority-personal-form-page/personal-form.mapper";
 import MarcEditor from "@/components/ui/marc-editor";
-import type { MarcField } from "@/components/ui/marc-editor-context";
+import {
+  parseLeaderData,
+  type MarcField,
+} from "@/components/ui/marc-editor-context";
 import MarcEditorProvider from "@/components/ui/marc-editor-provider";
 import MarcFontSizeSelect, {
   defaultFontSize,
@@ -60,6 +63,14 @@ export default function AuthorityPersonalFormPage({
     ];
   }, [authorityDetail]);
 
+  const initialLeader = useMemo(
+    () =>
+      authorityDetail
+        ? parseLeaderData(authorityDetail.data.record.leader)
+        : undefined,
+    [authorityDetail],
+  );
+
   // 생성 화면은 undefined를 전달해 빈 폼을 사용하고, 수정 화면만 조회값을 매핑한다.
   const initialFormValues = useMemo(
     () =>
@@ -72,6 +83,7 @@ export default function AuthorityPersonalFormPage({
   return (
     <MarcEditorProvider
       initialFields={initialMarcFields}
+      initialLeader={initialLeader}
       key={`${authorityDetail ? "record" : "loading"}-${currentRecordKey ?? "create"}`}
     >
       <main

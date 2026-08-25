@@ -8,17 +8,22 @@ import {
 export default function MarcEditorProvider({
   children,
   initialFields,
+  initialLeader,
 }: {
   children: ReactNode;
   /** 상세 조회로 불러온 제어필드와 데이터필드 */
   initialFields?: MarcField[];
+  /** 상세 조회로 불러온 24자리 Leader */
+  initialLeader?: LeaderData;
 }) {
-  const [leaderData, setLeaderData] = useState<LeaderData>({
-    status: "",
-    type: "",
-    encodingLevel: "",
-    raw: "",
-  });
+  const [leaderData, setLeaderData] = useState<LeaderData>(
+    initialLeader ?? {
+      status: "",
+      type: "",
+      encodingLevel: "",
+      raw: "",
+    },
+  );
   const [variableFields, setVariableFields] = useState<MarcField[]>(
     initialFields ?? [],
   );

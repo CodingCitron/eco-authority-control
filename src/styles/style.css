@@ -293,6 +293,39 @@ body {
   font-weight: 700;
 }
 
+/* MARC 행은 평소 표시 형태를 유지하고, 포커스된 행만 입력 형태로 바뀐다. */
+.marc-line-editing {
+  gap: 0.25rem;
+  background-color: #fff;
+}
+
+.marc-row-editor {
+  min-width: 0;
+}
+
+.marc-row-input {
+  min-width: 0;
+  padding-block: 0.2rem;
+  border: 0;
+  border-bottom: 1px solid var(--bs-border-color);
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.marc-row-input:focus {
+  border-bottom-color: var(--bs-primary);
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.marc-row-tag-input {
+  flex: 0 0 12%;
+  width: 12%;
+  min-width: 4.5rem;
+  color: #de3412;
+  font-weight: 700;
+}
+
 /* 그리드 헤더 정렬 */
 .sortable-th {
   cursor: pointer;

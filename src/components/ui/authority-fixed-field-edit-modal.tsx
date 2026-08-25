@@ -328,7 +328,7 @@ function FixedFieldInput({
           </div>
           {isOpen && filteredOptions.length > 0 && (
             <div
-              className="dropdown-menu show w-100 py-1"
+              className="dropdown-menu show py-1"
               id={listboxId}
               role="listbox"
               style={{ maxHeight: "16rem", overflowY: "auto", zIndex: 1080 }}

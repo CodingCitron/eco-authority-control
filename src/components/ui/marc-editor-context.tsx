@@ -12,6 +12,16 @@ export interface LeaderData {
   raw?: string;
 }
 
+/** 24자리 Leader 문자열을 고정길이 모달에서 사용하는 형태로 변환한다. */
+export function parseLeaderData(raw: string): LeaderData {
+  return {
+    status: raw[5] ?? "",
+    type: raw[6] ?? "",
+    encodingLevel: raw[17] ?? "",
+    raw,
+  };
+}
+
 export interface ControlField008 {
   entryDate: string; // 00-05: 입력날짜 (YYMMDD)
   geoSubdivision?: string; // 06: 지리구분
