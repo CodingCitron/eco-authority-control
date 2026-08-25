@@ -391,6 +391,7 @@ function AuthorityTable({
           columns={tableConfig["0"].columns}
           rows={rows.filter((row): row is PersonalRow => row.acType === "0")}
           getRowKey={(row) => row.recKey}
+          truncateCells
         />
       );
     case "1":
@@ -400,6 +401,7 @@ function AuthorityTable({
           columns={tableConfig["1"].columns}
           rows={rows.filter((row): row is CorporationRow => row.acType === "1")}
           getRowKey={(row) => row.recKey}
+          truncateCells
         />
       );
     case "5":
@@ -409,6 +411,7 @@ function AuthorityTable({
           columns={tableConfig["5"].columns}
           rows={rows.filter((row): row is GeographyRow => row.acType === "5")}
           getRowKey={(row) => row.recKey}
+          truncateCells
         />
       );
     case "4":
@@ -418,6 +421,7 @@ function AuthorityTable({
           columns={tableConfig["4"].columns}
           rows={rows.filter((row): row is SubjectRow => row.acType === "4")}
           getRowKey={(row) => row.recKey}
+          truncateCells
         />
       );
   }
@@ -481,7 +485,7 @@ export default function AuthoritySearchResult() {
   };
 
   return (
-    <div className="pt-2 overflow-auto">
+    <div className="pt-2">
       <AuthorityTable type={acType} rows={contents} />
       <div className="d-flex justify-content-center">
         <AppPagination

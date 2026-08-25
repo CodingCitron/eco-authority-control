@@ -349,6 +349,47 @@ body {
   font-weight: 700;
 }
 
+/* 너비가 긴 검색 결과 테이블은 셀을 한 줄로 유지하되 화면 밖으로 확장하지 않는다. */
+.table-layout-fixed {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table-layout-fixed th {
+  white-space: normal;
+  vertical-align: middle;
+}
+
+.table-layout-fixed th:first-child,
+.table-layout-fixed td:first-child {
+  width: 6rem;
+}
+
+.table-layout-fixed th:nth-child(2),
+.table-layout-fixed td:nth-child(2) {
+  width: 3rem;
+}
+
+.table-layout-fixed th:last-child,
+.table-layout-fixed td:last-child {
+  width: 8rem;
+}
+
+.table-cell-ellipsis {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-cell-tooltip .tooltip-inner {
+  max-width: min(28rem, calc(100vw - 2rem));
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  white-space: normal;
+}
+
 /* 삭제(flag) 처리된 행 */
 tr[data-deleted="true"] {
   color: var(--krds-light-color-text-subtle);
