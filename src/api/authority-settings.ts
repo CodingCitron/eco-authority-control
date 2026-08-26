@@ -18,8 +18,10 @@ export type AuthoritySettingsResponse = z.infer<
   typeof authoritySettingsResponseSchema
 >;
 
-export async function fetchAuthoritySettings(): Promise<AuthoritySettingsResponse> {
-  const { data } = await apiClient.get<unknown>("/cfg/settings");
+export async function fetchAuthoritySettings(
+  signal?: AbortSignal,
+): Promise<AuthoritySettingsResponse> {
+  const { data } = await apiClient.get<unknown>("/cfg/settings", { signal });
 
   return authoritySettingsResponseSchema.parse(data);
 }

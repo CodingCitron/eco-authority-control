@@ -1,14 +1,11 @@
 import { useEffect, useTransition } from "react";
 import { useSearchParams } from "react-router";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import {
-  parseAuthoritySearchNationality,
   parseAuthoritySearchType,
-  type AuthoritySearchNationality,
   type AuthoritySearchType,
   authorityTypeLabels,
-  authorityNationalLabels,
 } from "@/types/authority.types";
 
 import queryClient from "@/lib/query-client";
@@ -16,14 +13,19 @@ import {
   authoritySearchQueryKeys,
   getAuthoritySearchState,
 } from "@/hooks/use-authority-search";
+import { useAuthoritySettings } from "@/hooks/use-authority-settings";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
+
+function normalizeRegionCode(value: string | null) {
+  return !value || value === "all" ? "0" : value;
+}
 
 function getSearchScope(params: URLSearchParams) {
   return JSON.stringify({
     searchKeyword: params.get("searchKeyword") || undefined,
     searchType: params.get("searchType") || undefined,
-    acRegionCode: params.get("acRegionCode") || undefined,
+    acRegionCode: normalizeRegionCode(params.get("acRegionCode")),
     acType: params.get("acType") || "0",
     acControlNo: params.get("acControlNo") || undefined,
     page: params.get("page") || "1",
@@ -33,7 +35,7 @@ function getSearchScope(params: URLSearchParams) {
 
 interface AuthoritySearchFormValues {
   acType: AuthoritySearchType;
-  acRegionCode: AuthoritySearchNationality;
+  acRegionCode: string;
   acControlNo: string;
   searchKeyword: string;
   searchType: string;
@@ -41,10 +43,10 @@ interface AuthoritySearchFormValues {
 
 const emptyFormValues: AuthoritySearchFormValues = {
   acType: "0",
-  acRegionCode: "all",
+  acRegionCode: "0",
   acControlNo: "",
   searchKeyword: "",
-  searchType: "",
+  searchType: "CONTAINS",
 };
 
 function getFormValues(
@@ -52,12 +54,11 @@ function getFormValues(
 ): AuthoritySearchFormValues {
   return {
     acType: parseAuthoritySearchType(searchParams.get("acType")),
-    acRegionCode: parseAuthoritySearchNationality(
-      searchParams.get("acRegionCode"),
-    ),
+    acRegionCode: normalizeRegionCode(searchParams.get("acRegionCode")),
     acControlNo: searchParams.get("acControlNo") || "",
     searchKeyword: searchParams.get("searchKeyword") || "",
-    searchType: searchParams.get("searchType") || "",
+    searchType:
+      searchParams.get("searchType") || emptyFormValues.searchType,
   };
 }
 
@@ -66,8 +67,16 @@ export default function AuthoritySearchForm() {
   const searchParamsKey = searchParams.toString();
   const [isPending, startTransition] = useTransition();
 
+  const {
+    data: settingsResponse,
+    isLoading: isSettingsLoading,
+    isError: isSettingsError,
+  } = useAuthoritySettings();
+
+  const settings = settingsResponse?.data;
+
   const { clearSelectedRecordKeys } = useSearchPage();
-  const { register, handleSubmit, setValue } =
+  const { control, register, handleSubmit, setValue } =
     useForm<AuthoritySearchFormValues>({
       defaultValues: getFormValues(searchParams),
     });
@@ -77,7 +86,7 @@ export default function AuthoritySearchForm() {
     Object.entries(values).forEach(([name, value]) => {
       setValue(name as keyof AuthoritySearchFormValues, value);
     });
-  }, [searchParamsKey]);
+  }, [searchParamsKey, setValue]);
 
   const onSubmit = (values: AuthoritySearchFormValues) => {
     const nextParams = new URLSearchParams();
@@ -164,17 +173,34 @@ export default function AuthoritySearchForm() {
           </label>
         </div>
         <div className="col-auto">
-          <select
-            className="form-select form-select-sm"
-            id="searchArea"
-            {...register("acRegionCode")}
-          >
-            {Object.entries(authorityNationalLabels).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="acRegionCode"
+            control={control}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="form-select form-select-sm"
+                id="searchArea"
+                disabled={isSettingsLoading || isSettingsError}
+              >
+                {!settings && field.value !== "0" && (
+                  <option value={field.value}>
+                    {isSettingsError
+                      ? "설정 조회 실패"
+                      : "설정 불러오는 중"}
+                  </option>
+                )}
+                <option value="0">전체</option>
+                {Object.entries(settings?.REGION_CODE ?? {}).map(
+                  ([code, label]) => (
+                    <option key={code} value={code}>
+                      {label}
+                    </option>
+                  ),
+                )}
+              </select>
+            )}
+          />
         </div>
         <div className="col-auto">
           <label
@@ -210,13 +236,34 @@ export default function AuthoritySearchForm() {
           <label className="visually-hidden" htmlFor="searchTrunc">
             조회표목 절단방식
           </label>
-          <select
-            className="form-select form-select-sm"
-            id="searchTrunc"
-            {...register("searchType")}
-          >
-            <option value="">우절단</option>
-          </select>
+          <Controller
+            name="searchType"
+            control={control}
+            render={({ field }) => (
+              <select
+                {...field}
+                className="form-select form-select-sm"
+                id="searchTrunc"
+                disabled={isSettingsLoading || isSettingsError}
+              >
+                {settings ? (
+                  Object.entries(settings.TRUNCATION_TYPE).map(
+                    ([type, label]) => (
+                      <option key={type} value={type}>
+                        {label}
+                      </option>
+                    ),
+                  )
+                ) : (
+                  <option value={field.value}>
+                    {isSettingsError
+                      ? "설정 조회 실패"
+                      : "설정 불러오는 중"}
+                  </option>
+                )}
+              </select>
+            )}
+          />
         </div>
         <div className="col-auto ms-auto d-flex gap-1">
           <button

@@ -15,6 +15,18 @@ describe("URL 기반 조회 상태", () => {
     expect(
       getAuthoritySearchState(new URLSearchParams("acType=0")).isSearched,
     ).toBe(true);
+    expect(
+      getAuthoritySearchState(new URLSearchParams("acRegionCode=1"))
+        .isSearched,
+    ).toBe(true);
+    expect(
+      getAuthoritySearchState(new URLSearchParams("acRegionCode=0"))
+        .isSearched,
+    ).toBe(false);
+    expect(
+      getAuthoritySearchState(new URLSearchParams("acRegionCode=all"))
+        .params.acRegionCode,
+    ).toBe("0");
   });
 
   it("구축현황의 등록일자 조건과 조회 여부를 URL에서 변환한다", () => {

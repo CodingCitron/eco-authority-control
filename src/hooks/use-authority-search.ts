@@ -4,7 +4,6 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
 import type { AuthorityRecord } from "@/types/authority-search.types";
 import {
-  isAuthoritySearchNationality,
   isValidAcType,
   type AuthoritySearchType,
 } from "@/types/authority.types";
@@ -44,7 +43,8 @@ export function useAuthoritySearch<
 
 export function getAuthoritySearchState(searchParams: URLSearchParams) {
   const acType = searchParams.get("acType");
-  const acRegionCode = searchParams.get("acRegionCode");
+  const rawAcRegionCode = searchParams.get("acRegionCode");
+  const acRegionCode = rawAcRegionCode === "all" ? "0" : rawAcRegionCode;
   const acControlNo = searchParams.get("acControlNo")?.trim();
   const searchKeyword = searchParams.get("searchKeyword")?.trim();
   const searchType = searchParams.get("searchType")?.trim();
@@ -60,10 +60,10 @@ export function getAuthoritySearchState(searchParams: URLSearchParams) {
 
   const isSearched = Boolean(
     isValidAcType(acType) ||
-    isAuthoritySearchNationality(acRegionCode) ||
-    acControlNo ||
-    searchKeyword ||
-    searchType,
+      (acRegionCode && acRegionCode !== "0") ||
+      acControlNo ||
+      searchKeyword ||
+      searchType,
   );
 
   return {
