@@ -1,5 +1,5 @@
 import type { MarcSubfield } from "marc-eco";
-import type { AuthoritySearchType } from "@/types/authority.types";
+import type { AuthorityYesNo } from "@/types/authority.types";
 
 /** 화면의 MARC 편집기와 각 전거 유형 mapper가 함께 사용하는 서브필드 타입이다. */
 export type SubField = MarcSubfield;
@@ -24,8 +24,8 @@ export type MarcField = MarcControlField | MarcDataField;
 
 /** MARC 레코드와 함께 전거 생성 API에 전달할 화면 입력값이다. */
 export interface AuthorityCreateMetadata {
-  acType?: AuthoritySearchType;
   acRegionCode?: string;
-  firstInputDate?: string;
-  firstWorker?: string;
+  biographyPrivateYn?: AuthorityYesNo;
+  copyrightBlanketAgreeYn?: AuthorityYesNo;
+  copyrightBlanketAgreeDate?: string;
 }

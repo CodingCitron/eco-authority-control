@@ -17,7 +17,6 @@ import type {
 } from "@/types/marc-editor.types";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 import {
-  formatLeaderData,
   useMarcEditor,
   type LeaderData,
 } from "./marc-editor-context";
@@ -99,8 +98,12 @@ export default function MarcEditor({
   };
 
   const handleSave = () => {
-    const record = buildMarcRecord(leaderData, variableFields);
-    const params = buildAuthorityCreateParams(authorityCreateMetadata, record);
+    const record = buildMarcRecord(variableFields);
+    const params = buildAuthorityCreateParams(
+      leaderData,
+      authorityCreateMetadata,
+      record,
+    );
     console.log("전거 생성 최종 데이터", params);
   };
 
@@ -460,13 +463,12 @@ function getMarcRowErrorMessage(error: unknown) {
   }
 }
 
-function buildMarcRecord(leaderData: LeaderData, fields: MarcField[]) {
+function buildMarcRecord(fields: MarcField[]) {
   return {
-    leader: formatLeaderData(leaderData),
-    control_fields: fields.flatMap((field) =>
+    controlFields: fields.flatMap((field) =>
       field.type === "control" ? [{ tag: field.tag, value: field.value }] : [],
     ),
-    data_fields: fields.flatMap((field) =>
+    dataFields: fields.flatMap((field) =>
       field.type === "data"
         ? [
             {
@@ -481,28 +483,20 @@ function buildMarcRecord(leaderData: LeaderData, fields: MarcField[]) {
   };
 }
 
-type AuthorityCreateDraftParams = Pick<AuthorityCreateQueryParams, "record"> &
-  Partial<
-    Pick<
-      AuthorityCreateQueryParams,
-      "acType" | "acRegionCode" | "firstInputDate" | "firstWorker"
-    >
-  >;
-
-/** 값이 입력된 생성 메타데이터만 MARC 레코드와 함께 저장 객체에 포함한다. */
+/** Leader 입력값과 화면 메타데이터를 등록 API 요청 구조로 변환한다. */
 function buildAuthorityCreateParams(
+  leaderData: LeaderData,
   metadata: AuthorityCreateMetadata,
   record: AuthorityCreateQueryParams["record"],
-): AuthorityCreateDraftParams {
+): AuthorityCreateQueryParams {
   return {
-    ...(metadata.acType && { acType: metadata.acType }),
-    ...(metadata.acRegionCode && {
-      acRegionCode: metadata.acRegionCode,
-    }),
-    ...(metadata.firstInputDate && {
-      firstInputDate: metadata.firstInputDate,
-    }),
-    ...(metadata.firstWorker && { firstWorker: metadata.firstWorker }),
+    leaderStatus: leaderData.status,
+    leaderType: leaderData.type,
+    leaderInputLevel: leaderData.encodingLevel,
+    acRegionCode: metadata.acRegionCode ?? "",
+    biographyPrivateYn: metadata.biographyPrivateYn ?? "N",
+    copyrightBlanketAgreeYn: metadata.copyrightBlanketAgreeYn ?? "N",
+    copyrightBlanketAgreeDate: metadata.copyrightBlanketAgreeDate ?? "",
     record,
   };
 }

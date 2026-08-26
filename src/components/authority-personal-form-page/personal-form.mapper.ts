@@ -8,15 +8,13 @@ import {
   getMarcSubfieldValueFromFields,
   replaceMarcDataFieldSubfields,
   sortMarcFields,
-  sortMarcSubfields,
   type MarcSubfieldReplacement,
 } from "@/lib/marc/marc-field.utils";
 import type {
   AuthorityCreateMetadata,
-  MarcDataField,
   MarcField,
 } from "@/types/marc-editor.types";
-import { isAuthoritySearchType } from "@/types/authority.types";
+import type { AuthorityYesNo } from "@/types/authority.types";
 
 export type PersonalGender = "" | "unknown" | "male" | "female";
 
@@ -49,7 +47,7 @@ export interface PersonalAuthorityFormValues {
   occupationDateTo: string;
   gender: PersonalGender;
   language: string;
-  historyVisibility: string;
+  biographyPrivateYn: "" | AuthorityYesNo;
   education: string;
   biography: string;
   source: string;
@@ -92,7 +90,7 @@ export function createEmptyPersonalAuthorityFormValues(): PersonalAuthorityFormV
     occupationDateTo: "",
     gender: "",
     language: "",
-    historyVisibility: "",
+    biographyPrivateYn: "N",
     education: "",
     biography: "",
     source: "",
@@ -105,34 +103,38 @@ export function createEmptyPersonalAuthorityFormValues(): PersonalAuthorityFormV
   };
 }
 
-const authorityTagTypeMap = {
-  "100": "0",
-  "110": "1",
-  "150": "4",
-  "151": "5",
-} as const;
-
 /** 개인명 입력 폼의 공통 항목을 전거 생성 API 메타데이터로 변환한다. */
 export function mapPersonalFormValuesToAuthorityCreateMetadata(
   values: Pick<
     PersonalAuthorityFormValues,
-    "authorityType" | "region" | "createdAt" | "createdBy"
+    | "region"
+    | "biographyPrivateYn"
+    | "copyrightConsent"
+    | "copyrightConsentDate"
   >,
 ): AuthorityCreateMetadata {
-  const authorityType = values.authorityType.trim();
-  const acType =
-    authorityTagTypeMap[authorityType as keyof typeof authorityTagTypeMap] ??
-    (isAuthoritySearchType(authorityType) ? authorityType : undefined);
   const acRegionCode = values.region.trim();
-  const firstInputDate = values.createdAt.trim();
-  const firstWorker = values.createdBy.trim();
+  const biographyPrivateYn = values.biographyPrivateYn || "N";
+  const copyrightBlanketAgreeYn = values.copyrightConsent ? "Y" : "N";
+  const copyrightBlanketAgreeDate =
+    toIsoDateTime(values.copyrightConsentDate) ?? "";
 
   return {
-    ...(acType && { acType }),
     ...(acRegionCode && { acRegionCode }),
-    ...(firstInputDate && { firstInputDate }),
-    ...(firstWorker && { firstWorker }),
+    biographyPrivateYn,
+    copyrightBlanketAgreeYn,
+    copyrightBlanketAgreeDate,
   };
+}
+
+function toIsoDateTime(value: string) {
+  const normalizedValue = value.trim();
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  const date = new Date(normalizedValue);
+  return Number.isNaN(date.getTime()) ? normalizedValue : date.toISOString();
 }
 
 function splitBirthDeathDate(value: string) {
@@ -203,9 +205,7 @@ export function mapAuthorityDetailToPersonalFormValues(
 export type PersonalMarcAddTarget =
   | "heading"
   | "birthDeathDate"
-  | "referenceHeading"
-  | "referenceHanja"
-  | "referenceOriginalName"
+  | "references"
   | "place"
   | "address"
   | "activityField"
@@ -244,8 +244,8 @@ export function addPersonalFormValuesToMarcFields(
         date,
       );
     }
-    case "referenceHeading":
-      return appendMarcDataField(
+    case "references": {
+      const fieldsWithHeading = appendMarcDataField(
         fields,
         createMarcDataField(
           "400",
@@ -256,17 +256,16 @@ export function addPersonalFormValuesToMarcFields(
           "1",
         ),
       );
-    case "referenceHanja":
-      return updateReferenceHanja(fields, values);
-    case "referenceOriginalName":
+
       return appendMarcDataField(
-        fields,
+        fieldsWithHeading,
         createMarcDataField(
           "400",
           [createMarcSubfield("a", values.referenceOriginalName)],
           "1",
         ),
       );
+    }
     case "place":
       return appendMarcDataField(
         fields,
@@ -313,30 +312,22 @@ export function addPersonalFormValuesToMarcFields(
     case "language":
       return appendMarcDataField(
         fields,
-        createMarcDataField("377", [
-          createMarcSubfield("i", values.language),
-        ]),
+        createMarcDataField("377", [createMarcSubfield("i", values.language)]),
       );
     case "education":
       return appendMarcDataField(
         fields,
-        createMarcDataField("667", [
-          createMarcSubfield("a", values.education),
-        ]),
+        createMarcDataField("667", [createMarcSubfield("a", values.education)]),
       );
     case "biography":
       return appendMarcDataField(
         fields,
-        createMarcDataField("678", [
-          createMarcSubfield("a", values.biography),
-        ]),
+        createMarcDataField("678", [createMarcSubfield("a", values.biography)]),
       );
     case "source":
       return appendMarcDataField(
         fields,
-        createMarcDataField("670", [
-          createMarcSubfield("a", values.source),
-        ]),
+        createMarcDataField("670", [createMarcSubfield("a", values.source)]),
       );
   }
 }
@@ -443,9 +434,7 @@ function updatePersonalHeading(
       fields,
       createMarcDataField(
         "100",
-        replacements.map(({ code, value }) =>
-          createMarcSubfield(code, value),
-        ),
+        replacements.map(({ code, value }) => createMarcSubfield(code, value)),
         "1",
       ),
     );
@@ -464,60 +453,6 @@ function updatePersonalHeading(
       }
       return nextField ? [nextField] : [];
     }),
-  );
-}
-
-function updateReferenceHanja(
-  fields: MarcField[],
-  values: PersonalAuthorityFormValues,
-) {
-  const hanjaName = values.referenceHanja.trim();
-  if (!hanjaName) {
-    return fields;
-  }
-
-  const referenceHeading = values.referenceHeading.trim();
-  const fieldIndex = fields.findIndex(
-    (field) =>
-      field.type === "data" &&
-      field.tag === "400" &&
-      (!referenceHeading ||
-        field.subfields.some(
-          ({ code, value }) => code === "a" && value === referenceHeading,
-        )),
-  );
-
-  if (fieldIndex < 0) {
-    return referenceHeading
-      ? appendMarcDataField(
-          fields,
-          createMarcDataField(
-            "400",
-            [
-              { code: "a", value: referenceHeading },
-              { code: "g", value: hanjaName },
-            ],
-            "1",
-          ),
-        )
-      : fields;
-  }
-
-  const currentField = fields[fieldIndex];
-  if (currentField.type !== "data") {
-    return fields;
-  }
-
-  const nextField: MarcDataField = {
-    ...currentField,
-    subfields: sortMarcSubfields("400", [
-      ...currentField.subfields.filter(({ code }) => code !== "g"),
-      { code: "g", value: hanjaName },
-    ]),
-  };
-
-  return sortMarcFields(
-    fields.map((field, index) => (index === fieldIndex ? nextField : field)),
   );
 }
 

@@ -1,4 +1,5 @@
 export const authoritySearchTypes = ["0", "1", "5", "4"] as const;
+export const authorityYesNoValues = ["Y", "N"] as const;
 
 export const authorityTypeLabels: Record<AuthoritySearchType, string> = {
   "0": "개인명",
@@ -8,6 +9,7 @@ export const authorityTypeLabels: Record<AuthoritySearchType, string> = {
 };
 
 export type AuthoritySearchType = (typeof authoritySearchTypes)[number];
+export type AuthorityYesNo = (typeof authorityYesNoValues)[number];
 
 export function isValidAcType(
   type?: string | null,

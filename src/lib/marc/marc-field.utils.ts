@@ -173,38 +173,16 @@ export function replaceMarcDataFieldSubfields(
   );
 }
 
-/** 같은 태그, 지시기, 서브필드 값을 가진 데이터 필드인지 비교한다. */
-export function isSameMarcDataField(
-  field: MarcField,
-  nextField: MarcDataField,
-) {
-  return (
-    field.type === "data" &&
-    field.tag === nextField.tag &&
-    field.indicator1 === nextField.indicator1 &&
-    field.indicator2 === nextField.indicator2 &&
-    field.subfields.length === nextField.subfields.length &&
-    field.subfields.every(
-      (subfield, index) =>
-        subfield.code === nextField.subfields[index].code &&
-        subfield.value === nextField.subfields[index].value,
-    )
-  );
-}
-
 /**
- * 데이터 필드를 추가한다. 정확히 같은 필드는 중복하지 않으며, marc-eco에서
- * 비반복으로 정의한 태그가 이미 있으면 새 필드를 추가하지 않는다.
- * 규칙에 없는 태그는 편집기에서 손실되지 않도록 기존처럼 추가를 허용한다.
+ * 데이터 필드를 추가한다. marc-eco에서 반복 가능으로 정의한 태그는 같은
+ * 내용이어도 새 행을 추가하고, 비반복 태그가 이미 있으면 추가하지 않는다.
+ * 규칙에 없는 태그는 편집기에서 손실되지 않도록 추가를 허용한다.
  */
 export function appendMarcDataField(
   fields: MarcField[],
   nextField: MarcDataField | undefined,
 ) {
-  if (
-    !nextField ||
-    fields.some((field) => isSameMarcDataField(field, nextField))
-  ) {
+  if (!nextField) {
     return fields;
   }
 
