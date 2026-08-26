@@ -137,6 +137,12 @@ function getSubfield(field: DataField | undefined, code: string) {
   );
 }
 
+function getSubfieldFromFields(fields: DataField[], code: string) {
+  return fields
+    .map((field) => getSubfield(field, code))
+    .find(Boolean) ?? "";
+}
+
 function splitBirthDeathDate(value: string) {
   const normalizedValue = value.trim();
   const match = normalizedValue.match(
@@ -167,9 +173,18 @@ export function mapAuthorityDetailToPersonalFormValues(
   detail: AuthorityDetailData,
 ): PersonalAuthorityFormValues {
   const field100 = getField(detail, "100");
-  const dates = splitBirthDeathDate(
-    detail.birthDeathDate ?? getSubfield(field100, "d"),
+  const fields046 = detail.record.data_fields.filter(
+    (field) => field.tag === "046",
   );
+  const headingDates = splitBirthDeathDate(
+    detail.birthDeathDate || getSubfield(field100, "d"),
+  );
+  const dates = {
+    birthDate:
+      getSubfieldFromFields(fields046, "f") || headingDates.birthDate,
+    deathDate:
+      getSubfieldFromFields(fields046, "g") || headingDates.deathDate,
+  };
 
   // 반복 가능 필드는 오른쪽 MARC 에디터에서 기존 값을 관리한다.
   // 왼쪽 입력은 새 필드를 연속해서 추가하는 draft이므로 초기값을 채우지 않는다.
@@ -226,7 +241,7 @@ export function addPersonalFormValuesToMarcFields(
     case "birthDeathDate": {
       const date = formatBirthDeathDate(values.birthDate, values.deathDate);
       return date
-        ? updatePersonalHeading(fields, [{ code: "d", value: date }])
+        ? updateBirthDeathFields(fields, values.birthDate, values.deathDate, date)
         : fields;
     }
     case "referenceHeading":
@@ -313,6 +328,75 @@ export function addPersonalFormValuesToMarcFields(
         createDataField("670", [toSubfield("a", values.source)]),
       );
   }
+}
+
+/** 기존 레코드의 생몰년 표현 방식은 보존하고, 신규 값은 분리된 046으로 만든다. */
+function updateBirthDeathFields(
+  fields: MarcField[],
+  birthDate: string,
+  deathDate: string,
+  headingDate: string,
+) {
+  const hasHeadingDate = fields.some(
+    (field) =>
+      field.type === "data" &&
+      field.tag === "100" &&
+      field.subfields.some(({ code }) => code === "d"),
+  );
+  const hasCodedDate = fields.some(
+    (field) =>
+      field.type === "data" &&
+      field.tag === "046" &&
+      field.subfields.some(({ code }) => code === "f" || code === "g"),
+  );
+  let nextFields = hasHeadingDate
+    ? updatePersonalHeading(fields, [{ code: "d", value: headingDate }])
+    : fields;
+
+  // 046을 사용하던 레코드와 신규 레코드는 출생일·사망일을 각각 갱신/추가한다.
+  if (hasCodedDate || !hasHeadingDate) {
+    nextFields = upsertCodedDateField(nextFields, "f", birthDate);
+    nextFields = upsertCodedDateField(nextFields, "g", deathDate);
+  }
+
+  return nextFields;
+}
+
+function upsertCodedDateField(
+  fields: MarcField[],
+  code: "f" | "g",
+  value: string,
+) {
+  const dateSubfield = toSubfield(code, value);
+  if (!dateSubfield) {
+    return fields;
+  }
+
+  const fieldIndex = fields.findIndex(
+    (field) =>
+      field.type === "data" &&
+      field.tag === "046" &&
+      field.subfields.some((subfield) => subfield.code === code),
+  );
+
+  if (fieldIndex < 0) {
+    return appendDataField(fields, createDataField("046", [dateSubfield]));
+  }
+
+  return sortMarcFields(
+    fields.map((field, index) => {
+      if (index !== fieldIndex || field.type !== "data") {
+        return field;
+      }
+
+      return {
+        ...field,
+        subfields: field.subfields.map((subfield) =>
+          subfield.code === code ? dateSubfield : subfield,
+        ),
+      };
+    }),
+  );
 }
 
 function updatePersonalHeading(

@@ -40,17 +40,15 @@ export default function AuthorityPersonalForm({
   const addToMarcRecord = (target: PersonalMarcAddTarget) => {
     const values = getValues();
 
-    setVariableFields((fields) =>
-      addPersonalFormValuesToMarcFields(fields, target, values),
-    );
-  };
+    console.log(target);
+    console.log(values["referenceHeading"]);
 
-  // 상세 조회는 비동기로 도착하므로 수정 대상이 바뀔 때 폼 전체를 갱신한다.
-  useEffect(() => {
-    if (initialValues) {
-      reset(initialValues);
-    }
-  }, [initialValues, reset]);
+    setVariableFields((fields) => {
+      console.log(addPersonalFormValuesToMarcFields(fields, target, values));
+
+      return addPersonalFormValuesToMarcFields(fields, target, values);
+    });
+  };
 
   // 에디터의 저장 버튼에서도 왼쪽 입력 폼의 API 메타데이터를 사용할 수 있게 한다.
   useEffect(() => {

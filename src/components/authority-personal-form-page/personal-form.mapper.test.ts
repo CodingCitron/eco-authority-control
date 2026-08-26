@@ -21,7 +21,7 @@ describe("mapAuthorityDetailToPersonalFormValues", () => {
       activityField: "문학",
       hanjaName: "金素月",
       headingName: "김소월",
-      birthDeathDate: "1902-1934",
+      birthDeathDate: null,
       firstInputDate: "2026-08-25",
       firstWorker: "tester",
       lastUpdateDate: "2026-08-26",
@@ -39,8 +39,21 @@ describe("mapAuthorityDetailToPersonalFormValues", () => {
             subfields: [
               { code: "a", value: "김소월" },
               { code: "g", value: "金素月" },
-              { code: "d", value: "1902-1934" },
             ],
+          },
+          {
+            tag: "046",
+            ind1: " ",
+            ind2: " ",
+            subfields: [
+              { code: "f", value: "1902" },
+            ],
+          },
+          {
+            tag: "046",
+            ind1: " ",
+            ind2: " ",
+            subfields: [{ code: "g", value: "1934" }],
           },
           {
             tag: "400",
@@ -171,6 +184,8 @@ describe("addPersonalFormValuesToMarcFields", () => {
     );
 
     expect(fields.map(({ tag }) => tag)).toEqual([
+      "046",
+      "046",
       "100",
       "370",
       "371",
@@ -185,14 +200,21 @@ describe("addPersonalFormValuesToMarcFields", () => {
       "678",
     ]);
     expect(fields[0]).toMatchObject({
+      tag: "046",
+      subfields: [{ code: "f", value: "1902" }],
+    });
+    expect(fields[1]).toMatchObject({
+      tag: "046",
+      subfields: [{ code: "g", value: "1934" }],
+    });
+    expect(fields[2]).toMatchObject({
       tag: "100",
       subfields: [
         { code: "a", value: "김소월" },
         { code: "g", value: "金素月" },
-        { code: "d", value: "1902-1934" },
       ],
     });
-    expect(fields[1]).toMatchObject({
+    expect(fields[3]).toMatchObject({
       tag: "370",
       subfields: [
         { code: "a", value: "평안북도 구성" },
@@ -213,6 +235,102 @@ describe("addPersonalFormValuesToMarcFields", () => {
     });
     expect(fields.find(({ tag }) => tag === "678")).toMatchObject({
       subfields: [{ code: "a", value: "시인; 1920년 등단" }],
+    });
+  });
+
+  it("분리된 046 구조를 유지하고 없던 100 $d는 추가하지 않는다", () => {
+    const fields: MarcField[] = [
+      {
+        type: "data",
+        tag: "046",
+        indicator1: " ",
+        indicator2: " ",
+        subfields: [{ code: "f", value: "1898" }],
+      },
+      {
+        type: "data",
+        tag: "046",
+        indicator1: " ",
+        indicator2: " ",
+        subfields: [{ code: "g", value: "1976" }],
+      },
+      {
+        type: "data",
+        tag: "100",
+        indicator1: "1",
+        indicator2: " ",
+        subfields: [{ code: "a", value: "Aalto, Alvar" }],
+      },
+    ];
+    const values = {
+      ...createEmptyPersonalAuthorityFormValues(),
+      birthDate: "1899",
+      deathDate: "1977",
+    };
+
+    const result = addPersonalFormValuesToMarcFields(
+      fields,
+      "birthDeathDate",
+      values,
+    );
+
+    expect(result.filter(({ tag }) => tag === "046")).toMatchObject([
+      { subfields: [{ code: "f", value: "1899" }] },
+      { subfields: [{ code: "g", value: "1977" }] },
+    ]);
+    expect(result.find(({ tag }) => tag === "100")).toMatchObject({
+      subfields: [{ code: "a", value: "Aalto, Alvar" }],
+    });
+  });
+
+  it("기존 046의 생몰일을 갱신하면서 다른 서브필드는 보존한다", () => {
+    const fields: MarcField[] = [
+      {
+        type: "data",
+        tag: "046",
+        indicator1: " ",
+        indicator2: " ",
+        subfields: [
+          { code: "f", value: "1900" },
+          { code: "g", value: "1980" },
+          { code: "2", value: "edtf" },
+        ],
+      },
+      {
+        type: "data",
+        tag: "100",
+        indicator1: "1",
+        indicator2: " ",
+        subfields: [
+          { code: "a", value: "김소월" },
+          { code: "d", value: "1900-1980" },
+        ],
+      },
+    ];
+    const values = {
+      ...createEmptyPersonalAuthorityFormValues(),
+      birthDate: "1902",
+      deathDate: "1934",
+    };
+
+    const result = addPersonalFormValuesToMarcFields(
+      fields,
+      "birthDeathDate",
+      values,
+    );
+
+    expect(result.find(({ tag }) => tag === "046")).toMatchObject({
+      subfields: [
+        { code: "f", value: "1902" },
+        { code: "g", value: "1934" },
+        { code: "2", value: "edtf" },
+      ],
+    });
+    expect(result.find(({ tag }) => tag === "100")).toMatchObject({
+      subfields: [
+        { code: "a", value: "김소월" },
+        { code: "d", value: "1902-1934" },
+      ],
     });
   });
 

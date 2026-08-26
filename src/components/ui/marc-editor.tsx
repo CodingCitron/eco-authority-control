@@ -351,11 +351,16 @@ function MarcRowValue({ field }: { field: MarcField }) {
         {field.indicator1}
         {field.indicator2}
       </span>
-      {field.subfields.map((subfield, index) => (
-        <span key={`${subfield.code}-${subfield.value}-${index}`}>
-          <span className="marc-sf">${subfield.code}</span> {subfield.value}
-        </span>
-      ))}
+      <div className="d-flex gap-2">
+        {field.subfields.map((subfield, index) => (
+          <span
+            className="d-flex"
+            key={`${subfield.code}-${subfield.value}-${index}`}
+          >
+            <span className="marc-sf">${subfield.code}</span> {subfield.value}
+          </span>
+        ))}
+      </div>
       {/* MARC 필드의 끝을 의미하는 화면 표시 */}
       <span className="marc-eof">%</span>
     </>

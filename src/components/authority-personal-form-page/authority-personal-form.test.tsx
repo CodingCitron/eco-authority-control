@@ -40,8 +40,11 @@ describe("AuthorityPersonalForm", () => {
     expect(row).not.toBeNull();
     expect(within(row!).getByText("100")).toBeVisible();
     expect(within(row!).getByText("金素月")).toBeVisible();
-    expect(within(row!).getByText("1902-1934")).toBeVisible();
-    expect(container.querySelectorAll(".marc-tag")).toHaveLength(1);
+    expect(within(row!).queryByText("1902-1934")).not.toBeInTheDocument();
+    const codedDateRows = screen.getAllByLabelText("046 행");
+    expect(within(codedDateRows[0]).getByText("1902")).toBeVisible();
+    expect(within(codedDateRows[1]).getByText("1934")).toBeVisible();
+    expect(container.querySelectorAll(".marc-tag")).toHaveLength(3);
   });
 
   it("저장할 때 입력된 공통 항목을 MARC 레코드와 함께 출력한다", async () => {
