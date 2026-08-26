@@ -39,7 +39,7 @@ export default function AuthorityPersonalFormPage({
     : (searchParams.get("current") ?? recordKeys[0]);
 
   const { data: authorityDetail } = useAuthorityDetail(currentRecordKey ?? "", {
-    enabled: !isCreatePage
+    enabled: !isCreatePage,
   });
 
   const initialMarcFields = useMemo<MarcField[] | undefined>(() => {
@@ -120,7 +120,10 @@ export default function AuthorityPersonalFormPage({
           <AuthorityPersonalForm initialValues={initialFormValues} />
 
           <div className="col-lg-5">
-            <MarcEditor fontSize={`${fontSize}px`} />
+            <MarcEditor
+              showPrevAndNextButtons={!isCreatePage}
+              fontSize={`${fontSize}px`}
+            />
           </div>
         </div>
       </main>

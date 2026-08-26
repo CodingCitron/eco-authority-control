@@ -21,12 +21,16 @@ import {
 import { BibliographicRecordConsistencyButton } from "../authority-personal-form-page/bibliographic-record-consistency-modal";
 
 interface MarcEditorProps {
+  showPrevAndNextButtons?: boolean;
   fontSize: string;
 }
 
 type EditorMode = "form" | "text";
 
-export default function MarcEditor({ fontSize }: MarcEditorProps) {
+export default function MarcEditor({
+  showPrevAndNextButtons,
+  fontSize,
+}: MarcEditorProps) {
   const [mode, setMode] = useState<EditorMode>("form");
   const {
     leaderData,
@@ -114,8 +118,12 @@ export default function MarcEditor({ fontSize }: MarcEditorProps) {
       </div>
       <div className="card-footer bg-white d-flex justify-content-between">
         <div>
-          <button className="btn btn-outline-secondary">이전</button>{" "}
-          <button className="btn btn-outline-secondary">다음</button>{" "}
+          {showPrevAndNextButtons && (
+            <>
+              <button className="btn btn-outline-secondary">이전</button>{" "}
+              <button className="btn btn-outline-secondary">다음</button>{" "}
+            </>
+          )}
           <BibliographicRecordConsistencyButton />
         </div>
         <div>
