@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
 import { useForm } from "react-hook-form";
 
@@ -8,10 +8,10 @@ import {
   type AuthoritySearchType,
 } from "@/types/authority.types";
 import PrintButton from "@/components/ui/print-button";
-import { useAuthorityStatistics } from "@/hooks/use-authority-statistics";
+import { useCurrentAuthorityStatistics } from "@/hooks/use-authority-statistics";
 
 type FormValues = {
-  acType: AuthoritySearchType | ""; // 전거유형
+  acType: AuthoritySearchType | "all"; // 전거유형
   regDateFrom: string; // 등록일자 시작
   regDateTo: string; // 등록일자 종료
   modDateFrom: string; // 수정일자 시작
@@ -19,39 +19,56 @@ type FormValues = {
   editor: string; // 수정자
 };
 
-export default function AuthorityBuildStatusPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [hasSearched, setHasSearched] = useState(false);
+const emptyFormValues: FormValues = {
+  acType: "all",
+  regDateFrom: "",
+  regDateTo: "",
+  modDateFrom: "",
+  modDateTo: "",
+  editor: "",
+};
 
-  const contentRef = useRef<HTMLDivElement>(null);
+function getFormValues(searchParams: URLSearchParams): FormValues {
   const acType = searchParams.get("acType");
 
-  const { register, handleSubmit, reset } = useForm<FormValues>({
-    defaultValues: {
-      acType: isValidAcType(acType) ? acType : "",
-      regDateFrom: searchParams.get("regDateFrom") || "",
-      regDateTo: searchParams.get("regDateTo") || "",
-      modDateFrom: searchParams.get("modDateFrom") || "",
-      modDateTo: searchParams.get("modDateTo") || "",
-      editor: searchParams.get("editor") || "",
-    },
-  });
+  return {
+    acType: acType === "all" || isValidAcType(acType) ? acType : "all",
+    regDateFrom: searchParams.get("regDateFrom") || "",
+    regDateTo: searchParams.get("regDateTo") || "",
+    modDateFrom: searchParams.get("modDateFrom") || "",
+    modDateTo: searchParams.get("modDateTo") || "",
+    editor: searchParams.get("editor") || "",
+  };
+}
 
-  const statisticsParams = useMemo(
-    () => ({
-      from: searchParams.get("regDateFrom") || undefined,
-      to: searchParams.get("regDateTo") || undefined,
-    }),
-    [searchParams],
-  );
+function getSearchScope(searchParams: URLSearchParams) {
+  return JSON.stringify(getFormValues(searchParams));
+}
+
+export default function AuthorityBuildStatusPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParamsKey = searchParams.toString();
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const { register, handleSubmit, setValue } = useForm<FormValues>({
+    defaultValues: getFormValues(searchParams),
+  });
 
   const {
     data: statisticsResponse,
     isLoading,
     isError,
-  } = useAuthorityStatistics(statisticsParams, {
-    enabled: hasSearched,
-  });
+    isSearched,
+    refetch,
+  } = useCurrentAuthorityStatistics();
+
+  useEffect(() => {
+    const values = getFormValues(new URLSearchParams(searchParamsKey));
+    Object.entries(values).forEach(([name, value]) => {
+      setValue(name as keyof FormValues, value);
+    });
+  }, [searchParamsKey]);
 
   const onSubmit = (values: FormValues) => {
     const params = new URLSearchParams();
@@ -61,18 +78,24 @@ export default function AuthorityBuildStatusPage() {
         params.set(key, value);
       }
     });
+    const isSameSearch =
+      isSearched && getSearchScope(searchParams) === getSearchScope(params);
 
     setSearchParams(params);
-    setHasSearched(true);
+
+    if (isSameSearch) {
+      void refetch();
+    }
   };
 
   const onReset = () => {
-    reset();
+    Object.entries(emptyFormValues).forEach(([name, value]) => {
+      setValue(name as keyof FormValues, value);
+    });
     setSearchParams(new URLSearchParams());
-    setHasSearched(false);
   };
 
-  const statistics = hasSearched ? statisticsResponse?.data : undefined;
+  const statistics = isSearched ? statisticsResponse?.data : undefined;
 
   return (
     <main
@@ -110,7 +133,7 @@ export default function AuthorityBuildStatusPage() {
                 className="form-select form-select-sm"
                 {...register("acType")}
               >
-                <option value="">전체</option>
+                <option value="all">전체</option>
                 {Object.entries(authorityTypeLabels).map(([key, value]) => (
                   <option key={key} value={key}>
                     {value}

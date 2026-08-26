@@ -4,6 +4,7 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
 import type { AuthorityRecord } from "@/types/authority-search.types";
 import {
+  isAuthoritySearchNationality,
   isValidAcType,
   type AuthoritySearchType,
 } from "@/types/authority.types";
@@ -35,25 +36,35 @@ export function useAuthoritySearch<
 ) {
   return useQuery<TData, Error, TSelected>({
     queryKey: authoritySearchQueryKeys.list(params),
-    queryFn: () => fetchAuthoritySearch(params) as Promise<TData>,
+    queryFn: ({ signal }) =>
+      fetchAuthoritySearch(params, signal) as Promise<TData>,
     ...options,
   });
 }
 
-export function useCurrentAuthoritySearchParams() {
-  const [searchParams] = useSearchParams();
-
+export function getAuthoritySearchState(searchParams: URLSearchParams) {
+  const acType = searchParams.get("acType");
+  const acRegionCode = searchParams.get("acRegionCode");
+  const acControlNo = searchParams.get("acControlNo")?.trim();
+  const searchKeyword = searchParams.get("searchKeyword")?.trim();
+  const searchType = searchParams.get("searchType")?.trim();
   const params: AuthoritySearchQueryParams = {
-    searchKeyword: searchParams.get("searchKeyword") || undefined,
-    searchType: searchParams.get("searchType") || undefined,
-    acRegionCode: searchParams.get("acRegionCode") || undefined,
-    acType: searchParams.get("acType") || "0",
-    acControlNo: searchParams.get("acControlNo") || undefined,
+    searchKeyword: searchKeyword || undefined,
+    searchType: searchType || undefined,
+    acRegionCode: acRegionCode || undefined,
+    acType: acType || "0",
+    acControlNo: acControlNo || undefined,
     page: searchParams.get("page") || "1",
     display: searchParams.get("display") || "20",
   };
 
-  const isSearched = Boolean(searchParams.get("isSearched"));
+  const isSearched = Boolean(
+    isValidAcType(acType) ||
+    isAuthoritySearchNationality(acRegionCode) ||
+    acControlNo ||
+    searchKeyword ||
+    searchType,
+  );
 
   return {
     params,
@@ -61,10 +72,18 @@ export function useCurrentAuthoritySearchParams() {
   };
 }
 
+export function useCurrentAuthoritySearchParams() {
+  const [searchParams] = useSearchParams();
+
+  return getAuthoritySearchState(searchParams);
+}
+
 type AuthoritySearchQueryOptions<TSelected> = Omit<
   UseQueryOptions<AuthoritySearchResponse, Error, TSelected>,
-  "queryKey" | "queryFn"
->;
+  "queryKey" | "queryFn" | "enabled"
+> & {
+  enabled?: boolean;
+};
 
 // 현재 검색된 전거 데이터
 export function useCurrentAuthoritySearch<TSelected = AuthoritySearchResponse>(
@@ -75,8 +94,8 @@ export function useCurrentAuthoritySearch<TSelected = AuthoritySearchResponse>(
   const queryResult = useAuthoritySearch<AuthoritySearchResponse, TSelected>(
     params,
     {
-      enabled: isSearched,
       ...options,
+      enabled: isSearched && (options?.enabled ?? true),
     },
   );
 

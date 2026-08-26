@@ -1,5 +1,6 @@
-import { useState, useTransition, useEffect, type SubmitEvent } from "react";
+import { useEffect, useTransition } from "react";
 import { useSearchParams } from "react-router";
+import { useForm } from "react-hook-form";
 
 import {
   parseAuthoritySearchNationality,
@@ -11,14 +12,17 @@ import {
 } from "@/types/authority.types";
 
 import queryClient from "@/lib/query-client";
-import { authoritySearchQueryKeys } from "@/hooks/use-authority-search";
+import {
+  authoritySearchQueryKeys,
+  getAuthoritySearchState,
+} from "@/hooks/use-authority-search";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 
 function getSearchScope(params: URLSearchParams) {
   return JSON.stringify({
     searchKeyword: params.get("searchKeyword") || undefined,
-    searchType: params.get("acType") || undefined,
+    searchType: params.get("searchType") || undefined,
     acRegionCode: params.get("acRegionCode") || undefined,
     acType: params.get("acType") || "0",
     acControlNo: params.get("acControlNo") || undefined,
@@ -27,80 +31,109 @@ function getSearchScope(params: URLSearchParams) {
   });
 }
 
+interface AuthoritySearchFormValues {
+  acType: AuthoritySearchType;
+  acRegionCode: AuthoritySearchNationality;
+  acControlNo: string;
+  searchKeyword: string;
+  searchType: string;
+}
+
+const emptyFormValues: AuthoritySearchFormValues = {
+  acType: "0",
+  acRegionCode: "all",
+  acControlNo: "",
+  searchKeyword: "",
+  searchType: "",
+};
+
+function getFormValues(
+  searchParams: URLSearchParams,
+): AuthoritySearchFormValues {
+  return {
+    acType: parseAuthoritySearchType(searchParams.get("acType")),
+    acRegionCode: parseAuthoritySearchNationality(
+      searchParams.get("acRegionCode"),
+    ),
+    acControlNo: searchParams.get("acControlNo") || "",
+    searchKeyword: searchParams.get("searchKeyword") || "",
+    searchType: searchParams.get("searchType") || "",
+  };
+}
+
 export default function AuthoritySearchForm() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const searchParamsKey = searchParams.toString();
   const [isPending, startTransition] = useTransition();
 
   const { clearSelectedRecordKeys } = useSearchPage();
-
-  const [type, setType] = useState(
-    parseAuthoritySearchType(searchParams.get("acType")),
-  );
-  const [nationality, setNationality] = useState(
-    parseAuthoritySearchNationality(searchParams.get("acRegionCode")),
-  );
-  const [controlNumber, setControlNumber] = useState(
-    searchParams.get("acControlNo") || "",
-  );
-  const [heading, setHeading] = useState(
-    searchParams.get("searchKeyword") || "",
-  );
+  const { register, handleSubmit, setValue } =
+    useForm<AuthoritySearchFormValues>({
+      defaultValues: getFormValues(searchParams),
+    });
 
   useEffect(() => {
-    setType(parseAuthoritySearchType(searchParams.get("acType")));
-    setNationality(
-      parseAuthoritySearchNationality(searchParams.get("acRegionCode")),
-    );
-    setControlNumber(searchParams.get("acControlNo") || "");
-    setHeading(searchParams.get("searchKeyword") || "");
-  }, [searchParams]);
+    const values = getFormValues(new URLSearchParams(searchParamsKey));
+    Object.entries(values).forEach(([name, value]) => {
+      setValue(name as keyof AuthoritySearchFormValues, value);
+    });
+  }, [searchParamsKey]);
 
-  const handleSubmit = (e: SubmitEvent) => {
-    e.preventDefault();
-
+  const onSubmit = (values: AuthoritySearchFormValues) => {
     const nextParams = new URLSearchParams();
-    const trimmedControlNumber = controlNumber.trim();
-    const trimmedHeading = heading.trim();
+    const trimmedControlNumber = values.acControlNo.trim();
+    const trimmedHeading = values.searchKeyword.trim();
+    const trimmedSearchType = values.searchType.trim();
 
-    if (type) nextParams.set("acType", type);
-    if (nationality) nextParams.set("acRegionCode", nationality);
+    nextParams.set("acType", values.acType);
+    nextParams.set("acRegionCode", values.acRegionCode);
 
     if (trimmedControlNumber)
       nextParams.set("acControlNo", trimmedControlNumber);
 
     if (trimmedHeading) nextParams.set("searchKeyword", trimmedHeading);
-
-    nextParams.set("isSearched", "true");
+    if (trimmedSearchType) {
+      nextParams.set("searchType", trimmedSearchType);
+    }
 
     const hasSearchChanged =
       getSearchScope(searchParams) !== getSearchScope(nextParams);
 
     if (hasSearchChanged) {
       clearSelectedRecordKeys();
+    } else if (getAuthoritySearchState(searchParams).isSearched) {
+      void queryClient.refetchQueries({
+        queryKey: authoritySearchQueryKeys.all,
+        type: "active",
+      });
     }
+
     startTransition(() => {
       setSearchParams(nextParams);
     });
   };
 
   const handleReset = () => {
-    setType("0");
-    setNationality("all");
-    setControlNumber("");
-    setHeading("");
-
-    startTransition(() => {
-      setSearchParams(new URLSearchParams());
+    Object.entries(emptyFormValues).forEach(([name, value]) => {
+      setValue(name as keyof AuthoritySearchFormValues, value);
     });
 
-    queryClient.resetQueries({
+    clearSelectedRecordKeys();
+
+    void queryClient.cancelQueries({
       queryKey: authoritySearchQueryKeys.all,
     });
+
+    // URL을 즉시 비워 쿼리의 enabled 조건을 먼저 해제한다.
+    setSearchParams(new URLSearchParams());
   };
 
   return (
     <div className="card-header bg-white py-3">
-      <form className="row g-2 align-items-center" onSubmit={handleSubmit}>
+      <form
+        className="row g-2 align-items-center"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <div className="col-auto">
           <label
             className="form-label mb-0 fw-bold text-nowrap"
@@ -113,8 +146,7 @@ export default function AuthoritySearchForm() {
           <select
             className="form-select form-select-sm"
             id="searchType"
-            value={type}
-            onChange={(e) => setType(e.target.value as AuthoritySearchType)}
+            {...register("acType")}
           >
             {Object.entries(authorityTypeLabels).map(([key, value]) => (
               <option key={key} value={key}>
@@ -135,10 +167,7 @@ export default function AuthoritySearchForm() {
           <select
             className="form-select form-select-sm"
             id="searchArea"
-            value={nationality}
-            onChange={(e) =>
-              setNationality(e.target.value as AuthoritySearchNationality)
-            }
+            {...register("acRegionCode")}
           >
             {Object.entries(authorityNationalLabels).map(([key, value]) => (
               <option key={key} value={key}>
@@ -161,8 +190,7 @@ export default function AuthoritySearchForm() {
             className="form-control form-control-sm"
             id="searchCtrl"
             placeholder="검색어 입력"
-            value={controlNumber}
-            onChange={(e) => setControlNumber(e.target.value)}
+            {...register("acControlNo")}
           />
         </div>
         <div className="col-auto d-flex align-items-center gap-2">
@@ -177,14 +205,17 @@ export default function AuthoritySearchForm() {
             className="form-control form-control-sm"
             id="searchHeading"
             placeholder="검색어 입력"
-            value={heading}
-            onChange={(e) => setHeading(e.target.value)}
+            {...register("searchKeyword")}
           />
           <label className="visually-hidden" htmlFor="searchTrunc">
             조회표목 절단방식
           </label>
-          <select className="form-select form-select-sm" id="searchTrunc">
-            <option>우절단</option>
+          <select
+            className="form-select form-select-sm"
+            id="searchTrunc"
+            {...register("searchType")}
+          >
+            <option value="">우절단</option>
           </select>
         </div>
         <div className="col-auto ms-auto d-flex gap-1">
