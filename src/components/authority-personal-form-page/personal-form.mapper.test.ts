@@ -1,13 +1,94 @@
 import { describe, expect, it } from "vitest";
 
 import type { MarcField } from "@/components/ui/marc-editor-context";
+import type { AuthorityDetailData } from "@/types/authority-detail.types";
 
 import {
   addPersonalFormValuesToMarcFields,
   createEmptyPersonalAuthorityFormValues,
+  mapAuthorityDetailToPersonalFormValues,
   mapPersonalFormValuesToAuthorityCreateMetadata,
   type PersonalMarcAddTarget,
 } from "./personal-form.mapper";
+
+describe("mapAuthorityDetailToPersonalFormValues", () => {
+  it("수정 화면은 비반복 값을 채우고 반복 필드 입력은 비워 둔다", () => {
+    const detail: AuthorityDetailData = {
+      recKey: "1",
+      acType: "0",
+      acControlNo: "AUTH0001",
+      acRegionCode: "1",
+      activityField: "문학",
+      hanjaName: "金素月",
+      headingName: "김소월",
+      birthDeathDate: "1902-1934",
+      firstInputDate: "2026-08-25",
+      firstWorker: "tester",
+      lastUpdateDate: "2026-08-26",
+      lastWorker: "editor",
+      sourceControlNo: "",
+      sourceDataFound: "진달래꽃, 2011",
+      record: {
+        leader: "",
+        control_fields: [],
+        data_fields: [
+          {
+            tag: "100",
+            ind1: "1",
+            ind2: " ",
+            subfields: [
+              { code: "a", value: "김소월" },
+              { code: "g", value: "金素月" },
+              { code: "d", value: "1902-1934" },
+            ],
+          },
+          {
+            tag: "400",
+            ind1: "1",
+            ind2: " ",
+            subfields: [{ code: "a", value: "김정식" }],
+          },
+          {
+            tag: "370",
+            ind1: " ",
+            ind2: " ",
+            subfields: [{ code: "a", value: "평안북도 구성" }],
+          },
+          {
+            tag: "667",
+            ind1: " ",
+            ind2: " ",
+            subfields: [{ code: "a", value: "배재고등보통학교" }],
+          },
+          {
+            tag: "670",
+            ind1: " ",
+            ind2: " ",
+            subfields: [{ code: "a", value: "진달래꽃, 2011" }],
+          },
+        ],
+      },
+    };
+
+    const values = mapAuthorityDetailToPersonalFormValues(detail);
+
+    expect(values).toMatchObject({
+      authorityType: "100",
+      region: "1",
+      heading: "김소월",
+      hanjaName: "金素月",
+      birthDate: "1902",
+      deathDate: "1934",
+      referenceHeading: "",
+      place: "",
+      activityField: "",
+      education: "",
+      source: "",
+      createdBy: "tester",
+      updatedBy: "editor",
+    });
+  });
+});
 
 describe("mapPersonalFormValuesToAuthorityCreateMetadata", () => {
   it("신규 개인명 입력 폼은 개인명 전거를 기본 선택한다", () => {

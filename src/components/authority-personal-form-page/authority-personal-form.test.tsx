@@ -101,5 +101,11 @@ describe("AuthorityPersonalForm", () => {
 
     expect(within(educationRow!).getByText("667")).toBeVisible();
     expect(within(biographyRow!).getByText("678")).toBeVisible();
+    expect(screen.getByLabelText("학력(667)")).toHaveValue(
+      "배재고등보통학교",
+    );
+    expect(screen.getByLabelText("전기(678)")).toHaveValue(
+      "시인; 1920년 등단",
+    );
   });
 });

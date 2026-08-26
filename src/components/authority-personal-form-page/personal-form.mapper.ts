@@ -127,12 +127,8 @@ export function mapPersonalFormValuesToAuthorityCreateMetadata(
 
 type DataField = AuthorityDetailData["record"]["data_fields"][number];
 
-function getFields(detail: AuthorityDetailData, tag: string) {
-  return detail.record.data_fields.filter((field) => field.tag === tag);
-}
-
 function getField(detail: AuthorityDetailData, tag: string) {
-  return getFields(detail, tag)[0];
+  return detail.record.data_fields.find((field) => field.tag === tag);
 }
 
 function getSubfield(field: DataField | undefined, code: string) {
@@ -154,29 +150,6 @@ function splitBirthDeathDate(value: string) {
   return { birthDate: normalizedValue, deathDate: "" };
 }
 
-function getPlace(field: DataField | undefined) {
-  const placeTypes = [
-    { code: "a", type: "birth" },
-    { code: "b", type: "death" },
-    { code: "e", type: "residence" },
-    { code: "f", type: "activity" },
-  ] as const;
-  const matched = placeTypes.find(({ code }) => getSubfield(field, code));
-
-  return matched
-    ? { type: matched.type, value: getSubfield(field, matched.code) }
-    : { type: "", value: "" };
-}
-
-function getAddress(field: DataField | undefined) {
-  const codes = ["a", "b", "d", "e", "m"] as const;
-  const code = codes.find((candidate) => getSubfield(field, candidate));
-
-  return code
-    ? { type: code, value: getSubfield(field, code) }
-    : { type: "", value: "" };
-}
-
 function getGender(value: string): PersonalGender {
   const normalizedValue = value.trim().toLowerCase();
 
@@ -194,18 +167,12 @@ export function mapAuthorityDetailToPersonalFormValues(
   detail: AuthorityDetailData,
 ): PersonalAuthorityFormValues {
   const field100 = getField(detail, "100");
-  const fields400 = getFields(detail, "400");
-  const field370 = getField(detail, "370");
-  const field371 = getField(detail, "371");
-  const field372 = getField(detail, "372");
-  const field373 = getField(detail, "373");
-  const field374 = getField(detail, "374");
-  const place = getPlace(field370);
-  const address = getAddress(field371);
   const dates = splitBirthDeathDate(
     detail.birthDeathDate ?? getSubfield(field100, "d"),
   );
 
+  // 반복 가능 필드는 오른쪽 MARC 에디터에서 기존 값을 관리한다.
+  // 왼쪽 입력은 새 필드를 연속해서 추가하는 draft이므로 초기값을 채우지 않는다.
   return {
     ...createEmptyPersonalAuthorityFormValues(),
     authorityType: detail.acType === "0" ? "100" : detail.acType,
@@ -213,31 +180,7 @@ export function mapAuthorityDetailToPersonalFormValues(
     heading: detail.headingName ?? getSubfield(field100, "a"),
     hanjaName: detail.hanjaName ?? getSubfield(field100, "g"),
     ...dates,
-    referenceHeading: getSubfield(fields400[0], "a"),
-    referenceHanja: getSubfield(fields400[0], "g"),
-    referenceOriginalName: getSubfield(fields400[1], "a"),
-    placeType: place.type,
-    place: place.value,
-    placeDateFrom: getSubfield(field370, "s"),
-    placeDateTo: getSubfield(field370, "t"),
-    addressType: address.type,
-    address: address.value,
-    activityField: detail.activityField || getSubfield(field372, "a"),
-    activityFieldDateFrom: getSubfield(field372, "s"),
-    activityFieldDateTo: getSubfield(field372, "t"),
-    organization: getSubfield(field373, "a"),
-    organizationDateFrom: getSubfield(field373, "s"),
-    organizationDateTo: getSubfield(field373, "t"),
-    occupation: getSubfield(field374, "a"),
-    occupationDateFrom: getSubfield(field374, "s"),
-    occupationDateTo: getSubfield(field374, "t"),
     gender: getGender(getSubfield(getField(detail, "375"), "a")),
-    language:
-      getSubfield(getField(detail, "377"), "i") ||
-      getSubfield(getField(detail, "377"), "a"),
-    education: getSubfield(getField(detail, "667"), "a"),
-    biography: getSubfield(getField(detail, "678"), "a"),
-    source: getSubfield(getField(detail, "670"), "a") || detail.sourceDataFound,
     createdBy: detail.firstWorker,
     createdAt: detail.firstInputDate,
     updatedBy: detail.lastWorker,

@@ -39,6 +39,7 @@ export default function AuthorityPersonalForm({
 
   const addToMarcRecord = (target: PersonalMarcAddTarget) => {
     const values = getValues();
+
     setVariableFields((fields) =>
       addPersonalFormValuesToMarcFields(fields, target, values),
     );
