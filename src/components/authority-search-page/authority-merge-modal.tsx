@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import clsx from "clsx";
 
-import { authorityTypeLabels } from "@/types/authority-search.types";
+import { authorityTypeLabels } from "@/types/authority.types";
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 
 import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";

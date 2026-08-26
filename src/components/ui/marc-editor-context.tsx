@@ -5,7 +5,7 @@ import {
   type ControlFieldRule,
   type PositionRule,
 } from "marc-eco";
-import type { AuthoritySearchType } from "@/types/authority-search.types";
+import type { AuthoritySearchType } from "@/types/authority.types";
 
 export interface LeaderData {
   status: string; // 05

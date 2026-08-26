@@ -15,7 +15,7 @@ import { fetchGenerateAuthorityControlNumber } from "@/api/authortiy-control-num
 import {
   isValidAcType,
   type AuthoritySearchType,
-} from "@/types/authority-search.types";
+} from "@/types/authority.types";
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 
 export function AuthoritySplitButton() {

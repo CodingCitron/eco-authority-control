@@ -1,7 +1,7 @@
 import { http } from "msw";
 
 import { authoritySearchMockData } from "@/mocks/data/authority-search.data";
-import { isAuthoritySearchType } from "@/types/authority-search.types";
+import { isAuthoritySearchType } from "@/types/authority.types";
 import type { AuthoritySearchQueryParams } from "@/api/authority-search";
 import { createApiResponse } from "@/mocks/utils";
 

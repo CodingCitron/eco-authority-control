@@ -8,7 +8,7 @@ import {
   type AuthoritySearchType,
   authorityTypeLabels,
   authorityNationalLabels,
-} from "@/types/authority-search.types";
+} from "@/types/authority.types";
 
 import queryClient from "@/lib/query-client";
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search";

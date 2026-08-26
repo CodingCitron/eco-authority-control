@@ -5,7 +5,7 @@ import type {
   AuthorityControlField,
   AuthorityDataField,
 } from "@/types/authority-detail.types";
-import type { AuthoritySearchType } from "@/types/authority-search.types";
+import type { AuthoritySearchType } from "@/types/authority.types";
 import { authorityDetailResponseSchema } from "./authority-detail";
 
 export interface AuthorityCreateQueryParams {

@@ -6,7 +6,7 @@ import {
   type MarcField,
   type SubField,
 } from "@/components/ui/marc-editor-context";
-import { isAuthoritySearchType } from "@/types/authority-search.types";
+import { isAuthoritySearchType } from "@/types/authority.types";
 
 export type PersonalGender = "" | "unknown" | "male" | "female";
 
