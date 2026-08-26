@@ -57,8 +57,7 @@ function getFormValues(
     acRegionCode: normalizeRegionCode(searchParams.get("acRegionCode")),
     acControlNo: searchParams.get("acControlNo") || "",
     searchKeyword: searchParams.get("searchKeyword") || "",
-    searchType:
-      searchParams.get("searchType") || emptyFormValues.searchType,
+    searchType: searchParams.get("searchType") || emptyFormValues.searchType,
   };
 }
 
@@ -185,12 +184,9 @@ export default function AuthoritySearchForm() {
               >
                 {!settings && field.value !== "0" && (
                   <option value={field.value}>
-                    {isSettingsError
-                      ? "설정 조회 실패"
-                      : "설정 불러오는 중"}
+                    {isSettingsError ? "설정 조회 실패" : "설정 불러오는 중"}
                   </option>
                 )}
-                <option value="0">전체</option>
                 {Object.entries(settings?.REGION_CODE ?? {}).map(
                   ([code, label]) => (
                     <option key={code} value={code}>
@@ -256,9 +252,7 @@ export default function AuthoritySearchForm() {
                   )
                 ) : (
                   <option value={field.value}>
-                    {isSettingsError
-                      ? "설정 조회 실패"
-                      : "설정 불러오는 중"}
+                    {isSettingsError ? "설정 조회 실패" : "설정 불러오는 중"}
                   </option>
                 )}
               </select>

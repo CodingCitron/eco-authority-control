@@ -128,6 +128,7 @@ export default function AuthorityPersonalFormPage({
 
           <div className="col-lg-5">
             <MarcEditor
+              type={mode}
               showPrevAndNextButtons={!isCreatePage}
               saveButtonText={isCreatePage ? "저장" : "수정"}
               fontSize={`${fontSize}px`}

@@ -434,6 +434,7 @@ export function AuthorityFixedFieldEditModalBody({
       (field) => field.type === "control" && field.tag === "008",
     );
 
+    // 업데이트 할때 raw를 업데이트 해주어야 하나?
     setLeaderData({
       status,
       type,

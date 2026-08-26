@@ -16,13 +16,11 @@ import type {
   SubField,
 } from "@/types/marc-editor.types";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
-import {
-  useMarcEditor,
-  type LeaderData,
-} from "./marc-editor-context";
+import { useMarcEditor, type LeaderData } from "./marc-editor-context";
 import { BibliographicRecordConsistencyButton } from "../authority-personal-form-page/bibliographic-record-consistency-modal";
 
 interface MarcEditorProps {
+  type?: "create" | "edit";
   showPrevAndNextButtons?: boolean;
   saveButtonText?: string;
   fontSize: string;
@@ -31,6 +29,7 @@ interface MarcEditorProps {
 type EditorMode = "form" | "text";
 
 export default function MarcEditor({
+  type = "create",
   showPrevAndNextButtons,
   saveButtonText = "저장",
   fontSize,
@@ -72,9 +71,8 @@ export default function MarcEditor({
       }
 
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      const rows = scrollContainer.querySelectorAll<HTMLElement>(
-        "[data-marc-row]",
-      );
+      const rows =
+        scrollContainer.querySelectorAll<HTMLElement>("[data-marc-row]");
       rows.item(rows.length - 1)?.focus();
     });
 
@@ -103,7 +101,10 @@ export default function MarcEditor({
       leaderData,
       authorityCreateMetadata,
       record,
+      type,
     );
+
+    console.log(leaderData);
     console.log("전거 생성 최종 데이터", params);
   };
 
@@ -149,8 +150,7 @@ export default function MarcEditor({
           aria-label="MARC 행 추가"
           onClick={addVariableField}
         >
-          <i className="bi bi-plus-circle me-1" aria-hidden="true"></i>
-          행 추가
+          <i className="bi bi-plus-circle me-1" aria-hidden="true"></i>행 추가
         </button>
       </div>
       <div className="card-footer bg-white d-flex justify-content-between">
@@ -488,8 +488,9 @@ function buildAuthorityCreateParams(
   leaderData: LeaderData,
   metadata: AuthorityCreateMetadata,
   record: AuthorityCreateQueryParams["record"],
-): AuthorityCreateQueryParams {
-  return {
+  type: "create" | "edit",
+) {
+  const paramsWithoutRecord: Omit<AuthorityCreateQueryParams, "record"> = {
     leaderStatus: leaderData.status,
     leaderType: leaderData.type,
     leaderInputLevel: leaderData.encodingLevel,
@@ -497,6 +498,20 @@ function buildAuthorityCreateParams(
     biographyPrivateYn: metadata.biographyPrivateYn ?? "N",
     copyrightBlanketAgreeYn: metadata.copyrightBlanketAgreeYn ?? "N",
     copyrightBlanketAgreeDate: metadata.copyrightBlanketAgreeDate ?? "",
+  };
+
+  if (type === "edit") {
+    return {
+      ...paramsWithoutRecord,
+      record: {
+        ...record,
+        leader: leaderData.raw,
+      },
+    };
+  }
+
+  return {
+    ...paramsWithoutRecord,
     record,
   };
 }
