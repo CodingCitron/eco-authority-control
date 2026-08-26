@@ -6,7 +6,8 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
 export const authorityDetailKeys = {
   all: ["authority-detail"] as const,
-  detail: (reckey: string) => [...authorityDetailKeys.all, reckey] as const,
+  detail: (reckey: string) =>
+    [...authorityDetailKeys.all, "detail", reckey] as const,
 };
 
 export function useAuthorityDetail<

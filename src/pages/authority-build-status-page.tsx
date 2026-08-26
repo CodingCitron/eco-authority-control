@@ -1,4 +1,79 @@
+import { useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
+import { useForm } from "react-hook-form";
+
+import {
+  authorityTypeLabels,
+  isValidAcType,
+  type AuthoritySearchType,
+} from "@/types/authority.types";
+import PrintButton from "@/components/ui/print-button";
+import { useAuthorityStatistics } from "@/hooks/use-authority-statistics";
+
+type FormValues = {
+  acType: AuthoritySearchType | ""; // 전거유형
+  regDateFrom: string; // 등록일자 시작
+  regDateTo: string; // 등록일자 종료
+  modDateFrom: string; // 수정일자 시작
+  modDateTo: string; // 수정일자 종료
+  editor: string; // 수정자
+};
+
 export default function AuthorityBuildStatusPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const contentRef = useRef<HTMLDivElement>(null);
+  const acType = searchParams.get("acType");
+
+  const { register, handleSubmit, reset } = useForm<FormValues>({
+    defaultValues: {
+      acType: isValidAcType(acType) ? acType : "",
+      regDateFrom: searchParams.get("regDateFrom") || "",
+      regDateTo: searchParams.get("regDateTo") || "",
+      modDateFrom: searchParams.get("modDateFrom") || "",
+      modDateTo: searchParams.get("modDateTo") || "",
+      editor: searchParams.get("editor") || "",
+    },
+  });
+
+  const statisticsParams = useMemo(
+    () => ({
+      from: searchParams.get("regDateFrom") || undefined,
+      to: searchParams.get("regDateTo") || undefined,
+    }),
+    [searchParams],
+  );
+
+  const {
+    data: statisticsResponse,
+    isLoading,
+    isError,
+  } = useAuthorityStatistics(statisticsParams, {
+    enabled: hasSearched,
+  });
+
+  const onSubmit = (values: FormValues) => {
+    const params = new URLSearchParams();
+
+    Object.entries(values).forEach(([key, value]) => {
+      if (value) {
+        params.set(key, value);
+      }
+    });
+
+    setSearchParams(params);
+    setHasSearched(true);
+  };
+
+  const onReset = () => {
+    reset();
+    setSearchParams(new URLSearchParams());
+    setHasSearched(false);
+  };
+
+  const statistics = hasSearched ? statisticsResponse?.data : undefined;
+
   return (
     <main
       id="main-content"
@@ -11,13 +86,17 @@ export default function AuthorityBuildStatusPage() {
             <button type="button" className="btn btn-sm btn-outline-secondary">
               <i className="bi bi-printer me-1" aria-hidden="true"></i>출력
             </button>
+            <PrintButton contentRef={contentRef} />
           </div>
         </div>
       </div>
 
       <div className="card shadow-sm mb-4">
         <div className="card-header bg-white py-3">
-          <form className="row g-2 align-items-center">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="row g-2 align-items-center"
+          >
             <div className="col-auto">
               <label
                 className="form-label mb-0 fw-bold text-nowrap"
@@ -27,12 +106,16 @@ export default function AuthorityBuildStatusPage() {
               </label>
             </div>
             <div className="col-auto">
-              <select id="bs-authType" className="form-select form-select-sm">
-                <option>전체</option>
-                <option>개인명</option>
-                <option>단체명</option>
-                <option>지리명</option>
-                <option>주제명</option>
+              <select
+                className="form-select form-select-sm"
+                {...register("acType")}
+              >
+                <option value="">전체</option>
+                {Object.entries(authorityTypeLabels).map(([key, value]) => (
+                  <option key={key} value={key}>
+                    {value}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="col-auto d-flex align-items-center gap-1">
@@ -47,12 +130,14 @@ export default function AuthorityBuildStatusPage() {
                 id="bs-regDateFrom"
                 className="form-control form-control-sm"
                 aria-label="등록일자 시작"
+                {...register("regDateFrom")}
               />
               <span aria-hidden="true">~</span>
               <input
                 type="date"
                 className="form-control form-control-sm"
                 aria-label="등록일자 종료"
+                {...register("regDateTo")}
               />
             </div>
             <div className="col-auto d-flex align-items-center gap-1">
@@ -67,12 +152,14 @@ export default function AuthorityBuildStatusPage() {
                 id="bs-modDateFrom"
                 className="form-control form-control-sm"
                 aria-label="수정일자 시작"
+                {...register("modDateFrom")}
               />
               <span aria-hidden="true">~</span>
               <input
                 type="date"
                 className="form-control form-control-sm"
                 aria-label="수정일자 종료"
+                {...register("modDateTo")}
               />
             </div>
             <div className="col-auto d-flex align-items-center gap-1">
@@ -87,20 +174,25 @@ export default function AuthorityBuildStatusPage() {
                 id="bs-editor"
                 className="form-control form-control-sm"
                 placeholder="수정자 입력"
+                {...register("editor")}
               />
             </div>
             <div className="col-auto ms-auto">
-              <button type="button" className="btn btn-primary btn-sm">
+              <button type="submit" className="btn btn-primary btn-sm">
                 조회
               </button>{" "}
-              <button type="button" className="btn btn-secondary btn-sm">
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={onReset}
+              >
                 초기화
               </button>
             </div>
           </form>
         </div>
 
-        <div className="card-body">
+        <div className="card-body" ref={contentRef}>
           <table className="table table-bordered text-center align-middle">
             <caption className="visually-hidden">구축현황표</caption>
             <thead className="table-light">

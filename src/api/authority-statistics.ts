@@ -3,8 +3,15 @@ import z from "zod";
 import { apiClient } from "@/lib/axios";
 
 export interface AuthorityStatisticsQueryParams {
+  // 전거유형
+
+  // 등록일자
   from?: string;
   to?: string;
+
+  // 수정일자
+
+  // 수정자
 }
 
 export const authorityStatisticsResponseSchema = z.object({
