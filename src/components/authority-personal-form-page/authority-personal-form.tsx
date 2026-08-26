@@ -41,7 +41,7 @@ export default function AuthorityPersonalForm({
     const values = getValues();
 
     setVariableFields((fields) => {
-      console.log(addPersonalFormValuesToMarcFields(fields, target, values));
+      // console.log(addPersonalFormValuesToMarcFields(fields, target, values));
 
       return addPersonalFormValuesToMarcFields(fields, target, values);
     });

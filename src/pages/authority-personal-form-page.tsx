@@ -25,6 +25,7 @@ export default function AuthorityPersonalFormPage({
   mode,
 }: AuthorityPersonalFormPageProps) {
   const [fontSize, setFontSize] = useState(defaultFontSize);
+  const [editorSessionVersion, setEditorSessionVersion] = useState(0);
   const [searchParams] = useSearchParams();
   const isCreatePage = mode === "create";
 
@@ -80,11 +81,15 @@ export default function AuthorityPersonalFormPage({
     [authorityDetail],
   );
 
+  const resetEditorSession = () => {
+    setEditorSessionVersion((version) => version + 1);
+  };
+
   return (
     <MarcEditorProvider
       initialFields={initialMarcFields}
       initialLeader={initialLeader}
-      key={`${authorityDetail ? "record" : "loading"}-${currentRecordKey ?? "create"}`}
+      key={`${authorityDetail ? "record" : "loading"}-${currentRecordKey ?? "create"}-${editorSessionVersion}`}
     >
       <main
         id="main-content"
@@ -98,7 +103,11 @@ export default function AuthorityPersonalFormPage({
             <button type="button" className="btn btn-sm btn-primary">
               서지 목록보기
             </button>
-            <button type="button" className="btn btn-sm btn-secondary">
+            <button
+              type="button"
+              className="btn btn-sm btn-secondary"
+              onClick={resetEditorSession}
+            >
               화면 초기화
             </button>
             <label htmlFor="fontSizeSelect" className="visually-hidden">
