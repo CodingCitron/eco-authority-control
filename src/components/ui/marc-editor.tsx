@@ -6,6 +6,8 @@ import {
   type MouseEvent,
 } from "react";
 import { MarcError, parseLine } from "marc-eco";
+import clsx from "clsx";
+import { css } from "styled-system/css";
 
 import type { AuthorityCreateQueryParams } from "@/api/authority-create";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
@@ -22,6 +24,7 @@ import { BibliographicRecordConsistencyButton } from "../authority-personal-form
 
 interface MarcEditorProps {
   showPrevAndNextButtons?: boolean;
+  saveButtonText?: string;
   fontSize: string;
 }
 
@@ -29,6 +32,7 @@ type EditorMode = "form" | "text";
 
 export default function MarcEditor({
   showPrevAndNextButtons,
+  saveButtonText = "저장",
   fontSize,
 }: MarcEditorProps) {
   const [mode, setMode] = useState<EditorMode>("form");
@@ -75,7 +79,14 @@ export default function MarcEditor({
   };
 
   return (
-    <div className="card shadow-sm h-100">
+    <div
+      className={clsx(
+        "card shadow-sm",
+        css({
+          maxHeight: "800px",
+        }),
+      )}
+    >
       <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
         <span>MARC 레코드 뷰</span>
         <div className="d-flex gap-2">
@@ -92,7 +103,7 @@ export default function MarcEditor({
           <AuthorityFixedFieldEditButton />
         </div>
       </div>
-      <div className="card-body p-0">
+      <div className="card-body p-0 h-100 overflow-auto">
         <div
           className="form-control marc-textarea marc-record-view h-100 border-0 rounded-0 font-monospace bg-light"
           style={{ minHeight: "200px", fontSize }}
@@ -133,7 +144,7 @@ export default function MarcEditor({
             className="btn btn-primary"
             onClick={handleSave}
           >
-            저장
+            {saveButtonText}
           </button>{" "}
           <button className="btn btn-secondary">취소</button>
         </div>
