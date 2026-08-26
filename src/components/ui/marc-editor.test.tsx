@@ -3,12 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import MarcEditor from "./marc-editor";
-import {
-  parseLeaderData,
-  type AuthorityCreateMetadata,
-  type MarcField,
-} from "./marc-editor-context";
+import { parseLeaderData } from "./marc-editor-context";
 import MarcEditorProvider from "./marc-editor-provider";
+import type {
+  AuthorityCreateMetadata,
+  MarcField,
+} from "@/types/marc-editor.types";
 
 const initialFields: MarcField[] = [
   { type: "control", tag: "001", value: "AUTH0001" },

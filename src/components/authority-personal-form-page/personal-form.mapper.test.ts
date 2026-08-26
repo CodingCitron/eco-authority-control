@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { MarcField } from "@/components/ui/marc-editor-context";
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
+import type { MarcField } from "@/types/marc-editor.types";
 
 import {
   addPersonalFormValuesToMarcFields,
@@ -348,5 +348,91 @@ describe("addPersonalFormValuesToMarcFields", () => {
     expect(
       addPersonalFormValuesToMarcFields(firstFields, "source", values),
     ).toBe(firstFields);
+  });
+
+  it("비반복 채택표목을 비우면 기존 100 필드를 삭제한다", () => {
+    const fields: MarcField[] = [
+      {
+        type: "data",
+        tag: "100",
+        indicator1: "1",
+        indicator2: " ",
+        subfields: [
+          { code: "a", value: "김소월" },
+          { code: "g", value: "金素月" },
+        ],
+      },
+      {
+        type: "data",
+        tag: "400",
+        indicator1: "1",
+        indicator2: " ",
+        subfields: [{ code: "a", value: "김정식" }],
+      },
+    ];
+    const values = createEmptyPersonalAuthorityFormValues();
+
+    const result = addPersonalFormValuesToMarcFields(fields, "heading", values);
+
+    expect(result.some(({ tag }) => tag === "100")).toBe(false);
+    expect(result.some(({ tag }) => tag === "400")).toBe(true);
+  });
+
+  it("생몰년을 비우면 100 $d와 046 $f·$g를 삭제한다", () => {
+    const fields: MarcField[] = [
+      {
+        type: "data",
+        tag: "046",
+        indicator1: " ",
+        indicator2: " ",
+        subfields: [{ code: "f", value: "1902" }],
+      },
+      {
+        type: "data",
+        tag: "046",
+        indicator1: " ",
+        indicator2: " ",
+        subfields: [{ code: "g", value: "1934" }],
+      },
+      {
+        type: "data",
+        tag: "100",
+        indicator1: "1",
+        indicator2: " ",
+        subfields: [
+          { code: "a", value: "김소월" },
+          { code: "d", value: "1902-1934" },
+        ],
+      },
+    ];
+    const values = createEmptyPersonalAuthorityFormValues();
+
+    const result = addPersonalFormValuesToMarcFields(
+      fields,
+      "birthDeathDate",
+      values,
+    );
+
+    expect(result.some(({ tag }) => tag === "046")).toBe(false);
+    expect(result.find(({ tag }) => tag === "100")).toMatchObject({
+      subfields: [{ code: "a", value: "김소월" }],
+    });
+  });
+
+  it("반복 필드 추가 입력이 비어 있으면 기존 값을 변경하지 않는다", () => {
+    const fields: MarcField[] = [
+      {
+        type: "data",
+        tag: "400",
+        indicator1: "1",
+        indicator2: " ",
+        subfields: [{ code: "a", value: "김정식" }],
+      },
+    ];
+    const values = createEmptyPersonalAuthorityFormValues();
+
+    expect(
+      addPersonalFormValuesToMarcFields(fields, "referenceHeading", values),
+    ).toBe(fields);
   });
 });

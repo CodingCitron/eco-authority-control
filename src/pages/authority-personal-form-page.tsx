@@ -5,15 +5,13 @@ import { useSearchParams } from "react-router";
 import AuthorityPersonalForm from "@/components/authority-personal-form-page/authority-personal-form";
 import { mapAuthorityDetailToPersonalFormValues } from "@/components/authority-personal-form-page/personal-form.mapper";
 import MarcEditor from "@/components/ui/marc-editor";
-import {
-  parseLeaderData,
-  type MarcField,
-} from "@/components/ui/marc-editor-context";
+import { parseLeaderData } from "@/components/ui/marc-editor-context";
 import MarcEditorProvider from "@/components/ui/marc-editor-provider";
 import MarcFontSizeSelect, {
   defaultFontSize,
 } from "@/components/ui/marc-font-size-select";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
+import type { MarcField } from "@/types/marc-editor.types";
 
 export type AuthorityPersonalFormMode = "create" | "edit";
 

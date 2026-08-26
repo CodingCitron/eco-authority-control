@@ -1,11 +1,10 @@
 import { useState, type ReactNode } from "react";
-import {
-  MarcEditorContext,
-  sortMarcFields,
-  type AuthorityCreateMetadata,
-  type LeaderData,
-  type MarcField,
-} from "./marc-editor-context";
+import { sortMarcFields } from "@/lib/marc/marc-field.utils";
+import type {
+  AuthorityCreateMetadata,
+  MarcField,
+} from "@/types/marc-editor.types";
+import { MarcEditorContext, type LeaderData } from "./marc-editor-context";
 
 export default function MarcEditorProvider({
   children,

@@ -9,15 +9,17 @@ import {
 import { MarcError, parseLine } from "marc-eco";
 
 import type { AuthorityCreateQueryParams } from "@/api/authority-create";
+import { sortMarcFields } from "@/lib/marc/marc-field.utils";
+import type {
+  AuthorityCreateMetadata,
+  MarcField,
+  SubField,
+} from "@/types/marc-editor.types";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 import {
   formatLeaderData,
-  sortMarcFields,
   useMarcEditor,
-  type AuthorityCreateMetadata,
   type LeaderData,
-  type MarcField,
-  type SubField,
 } from "./marc-editor-context";
 import { BibliographicRecordConsistencyButton } from "../authority-personal-form-page/bibliographic-record-consistency-modal";
 

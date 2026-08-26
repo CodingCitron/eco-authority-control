@@ -12,8 +12,8 @@ import {
   useMarcEditor,
   type ControlField008,
   type LeaderData,
-  type MarcControlField,
 } from "./marc-editor-context";
+import type { MarcControlField } from "@/types/marc-editor.types";
 
 import { getCodeSet } from "marc-eco";
 

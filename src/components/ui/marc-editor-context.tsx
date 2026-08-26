@@ -5,7 +5,10 @@ import {
   type ControlFieldRule,
   type PositionRule,
 } from "marc-eco";
-import type { AuthoritySearchType } from "@/types/authority.types";
+import type {
+  AuthorityCreateMetadata,
+  MarcField,
+} from "@/types/marc-editor.types";
 
 export interface LeaderData {
   status: string; // 05
@@ -205,19 +208,6 @@ export function formatControlField008(data: ControlField008) {
   return characters.join("");
 }
 
-export interface SubField {
-  code: string; // 서브필드 코드 (예: "a", "b", "c")
-  value: string; // 서브필드 값
-}
-
-export interface MarcDataField {
-  type: "data";
-  tag: string; // 태그 번호 (예: "100", "400")
-  indicator1: string; // 제1지시기
-  indicator2: string; // 제2지시기
-  subfields: SubField[];
-}
-
 export interface MarcData {
   leaderData?: LeaderData;
   variableFields?: MarcField[];
@@ -227,36 +217,6 @@ export interface MarcData {
   setAuthorityCreateMetadata: Dispatch<
     SetStateAction<AuthorityCreateMetadata>
   >;
-}
-
-/** MARC 레코드와 함께 전거 생성 API에 전달할 화면 입력값이다. */
-export interface AuthorityCreateMetadata {
-  acType?: AuthoritySearchType;
-  acRegionCode?: string;
-  firstInputDate?: string;
-  firstWorker?: string;
-}
-
-export interface MarcControlField {
-  type: "control";
-  tag: string;
-  value: string;
-}
-
-export type MarcField = MarcControlField | MarcDataField;
-
-/** MARC 필드를 태그 오름차순으로 정렬하며, 직접 추가할 빈 행은 마지막에 둔다. */
-export function sortMarcFields(fields: MarcField[]) {
-  return [...fields].sort((left, right) => {
-    if (!left.tag) {
-      return right.tag ? 1 : 0;
-    }
-    if (!right.tag) {
-      return -1;
-    }
-
-    return left.tag.localeCompare(right.tag);
-  });
 }
 
 export const MarcEditorContext = createContext<MarcData | null>(null);
