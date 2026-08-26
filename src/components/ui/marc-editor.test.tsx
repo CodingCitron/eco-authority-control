@@ -56,6 +56,16 @@ afterEach(() => {
 });
 
 describe("MarcEditor", () => {
+  it("항상 보이는 행 추가 버튼으로 빈 행을 만들고 태그 입력에 포커스한다", async () => {
+    const user = userEvent.setup();
+    renderEditor();
+
+    await user.click(screen.getByRole("button", { name: "MARC 행 추가" }));
+
+    const tagInput = await screen.findByRole("textbox", { name: "MARC 태그" });
+    expect(tagInput).toHaveFocus();
+  });
+
   it("제어필드와 데이터필드를 각각 폼 모드에서 수정한다", async () => {
     const user = userEvent.setup();
     renderEditor();

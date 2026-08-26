@@ -27,7 +27,7 @@ export default function AuthorityPersonalForm({
   initialValues,
   onSubmit,
 }: AuthorityPersonalFormProps) {
-  const { register, reset, handleSubmit, getValues, control } =
+  const { register, handleSubmit, getValues, control } =
     useForm<PersonalAuthorityFormValues>({
       defaultValues: initialValues ?? createEmptyPersonalAuthorityFormValues(),
     });
@@ -39,9 +39,6 @@ export default function AuthorityPersonalForm({
 
   const addToMarcRecord = (target: PersonalMarcAddTarget) => {
     const values = getValues();
-
-    console.log(target);
-    console.log(values["referenceHeading"]);
 
     setVariableFields((fields) => {
       console.log(addPersonalFormValuesToMarcFields(fields, target, values));

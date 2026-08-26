@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useRef,
   useState,
   type FocusEvent,
@@ -6,8 +7,6 @@ import {
   type MouseEvent,
 } from "react";
 import { MarcError, parseLine } from "marc-eco";
-import clsx from "clsx";
-import { css } from "styled-system/css";
 
 import type { AuthorityCreateQueryParams } from "@/api/authority-create";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
@@ -36,6 +35,8 @@ export default function MarcEditor({
   fontSize,
 }: MarcEditorProps) {
   const [mode, setMode] = useState<EditorMode>("form");
+  const recordScrollRef = useRef<HTMLDivElement>(null);
+  const shouldFocusAddedRowRef = useRef(false);
   const {
     leaderData,
     variableFields,
@@ -44,6 +45,7 @@ export default function MarcEditor({
   } = useMarcEditor();
 
   const addVariableField = () => {
+    shouldFocusAddedRowRef.current = true;
     setVariableFields((currentFields) => [
       ...currentFields,
       {
@@ -55,6 +57,28 @@ export default function MarcEditor({
       },
     ]);
   };
+
+  useEffect(() => {
+    if (!shouldFocusAddedRowRef.current) {
+      return;
+    }
+
+    shouldFocusAddedRowRef.current = false;
+    const animationFrameId = requestAnimationFrame(() => {
+      const scrollContainer = recordScrollRef.current;
+      if (!scrollContainer) {
+        return;
+      }
+
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      const rows = scrollContainer.querySelectorAll<HTMLElement>(
+        "[data-marc-row]",
+      );
+      rows.item(rows.length - 1)?.focus();
+    });
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [variableFields.length]);
 
   const updateVariableField = (index: number, nextField: MarcField) => {
     setVariableFields((currentFields) =>
@@ -79,14 +103,7 @@ export default function MarcEditor({
   };
 
   return (
-    <div
-      className={clsx(
-        "card shadow-sm",
-        css({
-          maxHeight: "800px",
-        }),
-      )}
-    >
+    <div className="card shadow-sm marc-editor-card">
       <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
         <span>MARC 레코드 뷰</span>
         <div className="d-flex gap-2">
@@ -103,9 +120,10 @@ export default function MarcEditor({
           <AuthorityFixedFieldEditButton />
         </div>
       </div>
-      <div className="card-body p-0 h-100 overflow-auto">
+      <div className="card-body p-0">
         <div
-          className="form-control marc-textarea marc-record-view h-100 border-0 rounded-0 font-monospace bg-light"
+          ref={recordScrollRef}
+          className="form-control marc-textarea marc-record-view marc-editor-scroll h-100 border-0 rounded-0 font-monospace bg-light"
           style={{ minHeight: "200px", fontSize }}
         >
           {variableFields.map((field, index) => (
@@ -117,15 +135,18 @@ export default function MarcEditor({
               onRemove={() => removeVariableField(index)}
             />
           ))}
-          <button
-            type="button"
-            className="marc-line marc-line-data d-flex justify-content-center"
-            aria-label="MARC 행 추가"
-            onClick={addVariableField}
-          >
-            <i className="bi bi-plus-circle fs-3"></i>
-          </button>
         </div>
+      </div>
+      <div className="marc-editor-add-toolbar border-top bg-white p-2 text-center">
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-primary"
+          aria-label="MARC 행 추가"
+          onClick={addVariableField}
+        >
+          <i className="bi bi-plus-circle me-1" aria-hidden="true"></i>
+          행 추가
+        </button>
       </div>
       <div className="card-footer bg-white d-flex justify-content-between">
         <div>
@@ -179,6 +200,9 @@ function MarcRow({ field, mode, onChange, onRemove }: MarcRowProps) {
     }
 
     skipBlurCommitRef.current = false;
+    if (!field.tag) {
+      setFormFocusTarget("tag");
+    }
     // 외부 폼이나 고정길이 모달에서 값이 바뀌었을 수 있으므로 현재값으로 시작한다.
     setTagDraft(field.tag);
     setContentDraft(formatFieldContent(field));
@@ -262,6 +286,7 @@ function MarcRow({ field, mode, onChange, onRemove }: MarcRowProps) {
 
   return (
     <div
+      data-marc-row
       className={`marc-line ${
         field.type === "control" ? "marc-line-control" : "marc-line-data"
       } d-flex align-items-center${isEditing ? " marc-line-editing" : ""}`}
