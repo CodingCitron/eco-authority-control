@@ -195,10 +195,10 @@ export function mapAuthorityDetailToPersonalFormValues(
         "a",
       ),
     ),
-    createdBy: detail.firstWorker,
-    createdAt: detail.firstInputDate,
-    updatedBy: detail.lastWorker,
-    updatedAt: detail.lastUpdateDate,
+    createdBy: detail.firstWorker ?? "",
+    createdAt: detail.firstInputDate ?? "",
+    updatedBy: detail.lastWorker ?? "",
+    updatedAt: detail.lastUpdateDate ?? "",
   };
 }
 
