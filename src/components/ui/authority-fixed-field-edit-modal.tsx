@@ -408,6 +408,7 @@ export function AuthorityFixedFieldEditModalBody({
     (field): field is MarcControlField =>
       field.type === "control" && field.tag === "008",
   );
+
   const controlField008 = field008
     ? parseControlField008(field008.value)
     : EMPTY_CONTROL_FIELD_008;

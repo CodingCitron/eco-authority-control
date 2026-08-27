@@ -204,7 +204,8 @@ function MarcEditorToolbarWithError({
       {isMessageOpen && (
         <div className="border-top bg-white p-2">
           <div
-            className="alert alert-danger text-start mb-0 py-2 px-3"
+            // alert alert-danger
+            className="text-start mb-0 py-2 px-3"
             role="alert"
           >
             <div className="d-flex align-items-start justify-content-between gap-2">

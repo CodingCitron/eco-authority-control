@@ -1,5 +1,5 @@
 // 개인명 등록/수정
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -87,6 +87,11 @@ export default function AuthorityPersonalFormPage({
       }
     },
   });
+  const resetSaveMutation = saveMutation.reset;
+
+  useEffect(() => {
+    resetSaveMutation();
+  }, [currentRecordKey, mode, resetSaveMutation]);
 
   const initialMarcFields = useMemo<MarcField[] | undefined>(() => {
     if (!authorityDetail) {
@@ -127,7 +132,7 @@ export default function AuthorityPersonalFormPage({
   );
 
   const resetEditorSession = () => {
-    saveMutation.reset();
+    resetSaveMutation();
     setEditorSessionVersion((version) => version + 1);
   };
 
@@ -237,9 +242,19 @@ function buildAuthorityUpdateParams(
   recKey: string,
   { leaderData, authorityCreateMetadata, record }: MarcEditorSaveData,
 ): AuthorityUpdateQueryParams {
+  const copyrightBlanketAgreeDate =
+    authorityCreateMetadata.copyrightBlanketAgreeDate?.trim();
+
   return {
     recKey,
-    acRegionCode: authorityCreateMetadata.acRegionCode,
+    leaderStatus: leaderData.status,
+    leaderType: leaderData.type,
+    leaderInputLevel: leaderData.encodingLevel,
+    acRegionCode: authorityCreateMetadata.acRegionCode ?? "",
+    biographyPrivateYn: authorityCreateMetadata.biographyPrivateYn ?? "N",
+    copyrightBlanketAgreeYn:
+      authorityCreateMetadata.copyrightBlanketAgreeYn ?? "N",
+    ...(copyrightBlanketAgreeDate && { copyrightBlanketAgreeDate }),
     record: {
       leader: formatLeaderData(leaderData),
       ...record,

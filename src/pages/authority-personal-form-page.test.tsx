@@ -138,7 +138,7 @@ describe("AuthorityPersonalFormPage", () => {
       },
     });
 
-    render(
+    const { rerender } = render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
           <AuthorityPersonalFormPage mode="create" />
@@ -157,7 +157,7 @@ describe("AuthorityPersonalFormPage", () => {
     expect(errorAlert).toHaveTextContent("Required field 003 is missing.");
     expect(errorAlert.closest(".marc-editor-card")).not.toBeNull();
     const messageToggle = screen.getByRole("button", {
-      name: "글로벌 메시지 2건",
+      name: "메시지 2건",
     });
     expect(messageToggle).toHaveAttribute("aria-expanded", "true");
     expect(
@@ -173,6 +173,21 @@ describe("AuthorityPersonalFormPage", () => {
     await user.click(messageToggle);
     expect(await screen.findByRole("alert")).toBeVisible();
     expect(messageToggle).toHaveAttribute("aria-expanded", "true");
+
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AuthorityPersonalFormPage mode="edit" />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+    expect(
+      screen.getByRole("button", { name: "메시지 없음" }),
+    ).toBeDisabled();
   });
 
   it("수정 버튼을 누르면 recKey와 기존 Leader를 개인명 수정 API에 전달한다", async () => {
@@ -230,7 +245,12 @@ describe("AuthorityPersonalFormPage", () => {
     await waitFor(() => {
       expect(fetchAuthorityUpdate).toHaveBeenCalledWith({
         recKey: "record-1",
+        leaderStatus: "n",
+        leaderType: "z",
+        leaderInputLevel: "n",
         acRegionCode: "1",
+        biographyPrivateYn: "N",
+        copyrightBlanketAgreeYn: "N",
         record: {
           leader,
           controlFields: [{ tag: "001", value: "AUTH0001" }],

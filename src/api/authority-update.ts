@@ -1,9 +1,16 @@
 import { apiClient } from "@/lib/axios";
+import type { AuthorityYesNo } from "@/types/authority.types";
 import type { MarcEditorRecord } from "@/types/marc-editor.types";
 
 export interface AuthorityUpdateQueryParams {
   recKey: string;
-  acRegionCode?: string;
+  leaderStatus: string;
+  leaderType: string;
+  leaderInputLevel: string;
+  acRegionCode: string;
+  biographyPrivateYn: AuthorityYesNo;
+  copyrightBlanketAgreeYn: AuthorityYesNo;
+  copyrightBlanketAgreeDate?: string;
   record: MarcEditorRecord & {
     leader: string;
   };

@@ -57,10 +57,10 @@ export interface ControlField008 {
   romanization?: string; // 07: 로마자변좌
   recordKind?: string; // 09: 레코드 종류
   catalogingForm?: string; // 10: 목록기술형식
-  subjectHeading?: string; // 11: 주제명목표표
+  subjectHeading?: string; // 11: 주제명목표
   seriesType?: string; // 12: 총서유형
   seriesNumFlag?: string; // 13: 총서번호유무
-  mainHeadingUse?: string; // 14: 표목사용(주목목)
+  mainHeadingUse?: string; // 14: 표목사용(주목)
   subjAddedEntry?: string; // 15: 주제부출표목
   seriesAddedEntry?: string; // 16: 총서부출표목
   subjectSubtype?: string; // 17: 주제세목유형
@@ -146,6 +146,7 @@ function readPosition(value: string, start: number, length = 1) {
 
 /** 40자리 008 문자열을 편집 모달에서 사용하는 구조로 변환한다. */
 export function parseControlField008(value: string): ControlField008 {
+  console.log(value);
   const fieldRule = getControlField008Rule();
   const sourceValue = value
     .padEnd(fieldRule.length, " ")
@@ -163,7 +164,8 @@ export function parseControlField008(value: string): ControlField008 {
       position.start,
       position.length,
     );
-    result[name] = name === "entryDate" ? positionValue.trimEnd() : positionValue;
+    result[name] =
+      name === "entryDate" ? positionValue.trimEnd() : positionValue;
   });
 
   return result;
@@ -185,7 +187,9 @@ function writePosition(
 
 /** 편집된 값을 40자리 008 문자열로 변환하며 편집하지 않은 위치는 보존한다. */
 export function formatControlField008(data: ControlField008) {
+  console.log(data);
   const fieldRule = getControlField008Rule();
+  console.log(fieldRule);
   const characters = (data.sourceValue ?? "")
     .padEnd(fieldRule.length, " ")
     .slice(0, fieldRule.length)
@@ -197,12 +201,7 @@ export function formatControlField008(data: ControlField008) {
       return;
     }
 
-    writePosition(
-      characters,
-      position.start,
-      position.length,
-      data[name],
-    );
+    writePosition(characters, position.start, position.length, data[name]);
   });
 
   return characters.join("");
@@ -214,9 +213,7 @@ export interface MarcData {
   authorityCreateMetadata: AuthorityCreateMetadata;
   setLeaderData: (leaderData: LeaderData) => void;
   setVariableFields: Dispatch<SetStateAction<MarcField[]>>;
-  setAuthorityCreateMetadata: Dispatch<
-    SetStateAction<AuthorityCreateMetadata>
-  >;
+  setAuthorityCreateMetadata: Dispatch<SetStateAction<AuthorityCreateMetadata>>;
 }
 
 export const MarcEditorContext = createContext<MarcData | null>(null);
