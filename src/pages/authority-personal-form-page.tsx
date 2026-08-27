@@ -108,7 +108,7 @@ export default function AuthorityPersonalFormPage({
 
   const initialMarcFields = useMemo<MarcField[] | undefined>(() => {
     if (!authorityDetail) {
-      return undefined;
+      return;
     }
 
     return [

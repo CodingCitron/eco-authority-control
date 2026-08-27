@@ -1,9 +1,10 @@
 import { createBrowserRouter } from "react-router";
 
-import RootLayout from "@/components/layouts/root-layout";
+import MainLayout from "@/components/layouts/main-layout";
 
 import GlobalErrorPage from "@/pages/global-error-page";
 
+import SignInPage from "@/pages/sign-in-page";
 import AuthoritySearchPage from "@/pages/authority-search-page";
 import AuthorityPersonalFormPage from "@/pages/authority-personal-form-page";
 import AuthorityCorporationFormPage from "@/pages/authority-corporation-form-page";
@@ -16,62 +17,70 @@ import NotFoundPage from "@/pages/not-found-page";
 const router = createBrowserRouter([
   {
     errorElement: <GlobalErrorPage />,
-    element: <RootLayout />,
     children: [
       {
-        // 통합 전거 검색
-        path: "",
-        element: <AuthoritySearchPage />,
+        path: "/sign-in",
+        element: <SignInPage />,
       },
       {
-        // 개인명 등록
-        path: "personal/new",
-        element: <AuthorityPersonalFormPage mode="create" />,
-      },
-      {
-        // 개인명 수정
-        path: "personal/edit",
-        element: <AuthorityPersonalFormPage mode="edit" />,
-      },
-      {
-        // 단체명 등록
-        path: "corporation/new",
-        element: <AuthorityCorporationFormPage />,
-      },
-      {
-        // 단체명 수정
-        path: "corporation/edit",
-        element: <AuthorityCorporationFormPage />,
-      },
-      {
-        // 지리명 등록
-        path: "geography/new",
-        element: <AuthorityGeographyFormPage />,
-      },
-      {
-        // 지리명 수정
-        path: "geography/edit",
-        element: <AuthorityGeographyFormPage />,
-      },
-      {
-        // 주제명 등록
-        path: "subject/new",
-        element: <AuthoritySubjectFormPage />,
-      },
-      {
-        // 주제명 수정
-        path: "subject/edit",
-        element: <AuthoritySubjectFormPage />,
-      },
-      {
-        // 전거 반입 관리
-        path: "tools",
-        element: <AuthorityToolsPage />,
-      },
-      {
-        // 구축현황
-        path: "build-status",
-        element: <AuthorityBuildStatusPage />,
+        element: <MainLayout />,
+        children: [
+          {
+            // 통합 전거 검색
+            path: "",
+            element: <AuthoritySearchPage />,
+          },
+          {
+            // 개인명 등록
+            path: "personal/new",
+            element: <AuthorityPersonalFormPage mode="create" />,
+          },
+          {
+            // 개인명 수정
+            path: "personal/edit",
+            element: <AuthorityPersonalFormPage mode="edit" />,
+          },
+          {
+            // 단체명 등록
+            path: "corporation/new",
+            element: <AuthorityCorporationFormPage />,
+          },
+          {
+            // 단체명 수정
+            path: "corporation/edit",
+            element: <AuthorityCorporationFormPage />,
+          },
+          {
+            // 지리명 등록
+            path: "geography/new",
+            element: <AuthorityGeographyFormPage />,
+          },
+          {
+            // 지리명 수정
+            path: "geography/edit",
+            element: <AuthorityGeographyFormPage />,
+          },
+          {
+            // 주제명 등록
+            path: "subject/new",
+            element: <AuthoritySubjectFormPage />,
+          },
+          {
+            // 주제명 수정
+            path: "subject/edit",
+            element: <AuthoritySubjectFormPage />,
+          },
+          {
+            // 전거 반입 관리
+            path: "tools",
+            element: <AuthorityToolsPage />,
+          },
+          {
+            // 구축현황
+            path: "build-status",
+            element: <AuthorityBuildStatusPage />,
+          },
+        ],
       },
     ],
   },

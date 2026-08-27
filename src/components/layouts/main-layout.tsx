@@ -3,7 +3,7 @@ import { Outlet } from "react-router";
 import Header from "@/components/layouts/header";
 import SideNavigation from "@/components/layouts/side-navigation";
 
-export default function RootLayout() {
+export default function MainLayout() {
   return (
     <div className="bg-light">
       <Header />
