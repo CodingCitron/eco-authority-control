@@ -15,6 +15,7 @@ import BaseModal from "@/components/ui/base-modal";
 import OverflowTooltip from "@/components/ui/overflow-tooltip";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import MarcRecordPreview from "../ui/record-preview";
+import { css } from "styled-system/css";
 
 interface AuthorityMergeModalProps {
   show: boolean;
@@ -111,29 +112,38 @@ function AuthorityMergeModalBody({
   const firstRecordKey = data[0]?.recKey;
   const secondRecordKey = data[1]?.recKey;
 
-  const {
-    data: firstResponse,
-    isLoading: isFirstLoading,
-    isError: isFirstError,
-  } = useAuthorityDetail(firstRecordKey, {
-    enabled: show && !!firstRecordKey,
-  });
+  const { data: firstResponse, isError: isFirstError } = useAuthorityDetail(
+    firstRecordKey,
+    {
+      enabled: show && !!firstRecordKey,
+    },
+  );
 
-  const {
-    data: secondResponse,
-    isLoading: isSecondLoading,
-    isError: isSecondError,
-  } = useAuthorityDetail(secondRecordKey, {
-    enabled: show && !!secondRecordKey,
-  });
+  const { data: secondResponse, isError: isSecondError } = useAuthorityDetail(
+    secondRecordKey,
+    {
+      enabled: show && !!secondRecordKey,
+    },
+  );
 
   const firstDetail = firstResponse?.data;
   const secondDetail = secondResponse?.data;
-  const isFirstMaster = masterRecordKey === firstRecordKey;
+  const isFirstMaster =
+    masterRecordKey === undefined || masterRecordKey === firstRecordKey;
   const master = isFirstMaster ? firstDetail : secondDetail;
   const target = isFirstMaster ? secondDetail : firstDetail;
-  const isDetailLoading = isFirstLoading || isSecondLoading;
-  const isDetailError = isFirstError || isSecondError;
+  const isMasterError =
+    master === undefined && (isFirstMaster ? isFirstError : isSecondError);
+  const isTargetError =
+    target === undefined && (isFirstMaster ? isSecondError : isFirstError);
+  const masterControlNo =
+    master?.acControlNo ??
+    (isFirstMaster ? data[0]?.acControlNo : data[1]?.acControlNo) ??
+    "";
+  const targetControlNo =
+    target?.acControlNo ??
+    (isFirstMaster ? data[1]?.acControlNo : data[0]?.acControlNo) ??
+    "";
   const isRecordFetchComplete = !isLoading && !isError;
   const canMerge =
     data.length === 2 && master !== undefined && target !== undefined;
@@ -149,7 +159,12 @@ function AuthorityMergeModalBody({
           전거통합 통합화면
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body
+        className={css({
+          maxHeight: "80vh",
+          overflow: "auto",
+        })}
+      >
         <p className="text-muted small mb-2">
           두 레코드 중 <strong>통합 주자료</strong> 열의 선택 버튼(또는 행
           클릭)으로 주자료로 지정할 레코드를 하나씩 눌러보며 선택하세요. <br />
@@ -162,27 +177,15 @@ function AuthorityMergeModalBody({
         )}
 
         {!isLoading && isError && (
-          <p className="alert alert-danger mb-0" role="alert">
+          <p className="mb-0">
             선택한 전거자료를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
           </p>
         )}
 
         {isRecordFetchComplete && data.length !== 2 && (
-          <p className="alert alert-warning mb-0" role="alert">
+          <p className="mb-0">
             선택한 전거자료 2건 중 {data.length}건만 조회되었습니다. 목록을
             확인한 후 다시 시도해주세요.
-          </p>
-        )}
-
-        {isRecordFetchComplete && isDetailLoading && (
-          <p className="alert alert-info mb-0" role="status">
-            선택한 전거의 상세 정보를 불러오는 중입니다.
-          </p>
-        )}
-
-        {isRecordFetchComplete && !isDetailLoading && isDetailError && (
-          <p className="alert alert-danger mb-0" role="alert">
-            선택한 전거의 상세 정보를 불러오지 못했습니다.
           </p>
         )}
 
@@ -266,7 +269,7 @@ function AuthorityMergeModalBody({
                 <div className="border p-3 bg-light rounded h-100">
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <span className="badge bg-primary">
-                      통합주자료({master ? master.acControlNo : ""})
+                      통합주자료({masterControlNo})
                     </span>
                     <div className="d-flex gap-2">
                       <MarcFontSizeSelect
@@ -283,18 +286,25 @@ function AuthorityMergeModalBody({
                       </button>
                     </div>
                   </div>
-                  <MarcRecordPreview
-                    detail={master}
-                    fontSize={`${masterFontSize}px`}
-                    className="bg-white"
-                  />
+                  {isMasterError ? (
+                    <p className="mb-0">
+                      통합 주자료의 상세 정보를 불러오지 못했습니다. 잠시 후
+                      다시 시도해주세요.
+                    </p>
+                  ) : (
+                    <MarcRecordPreview
+                      detail={master}
+                      fontSize={`${masterFontSize}px`}
+                      className="bg-white"
+                    />
+                  )}
                 </div>
               </section>
               <section className="col-md-6">
                 <div className="border p-3 bg-white rounded h-100">
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <span className="badge bg-secondary">
-                      통합대상자료({target ? target.acControlNo : ""})
+                      통합대상자료({targetControlNo})
                     </span>
                     <div className="d-flex gap-2">
                       <MarcFontSizeSelect
@@ -311,11 +321,18 @@ function AuthorityMergeModalBody({
                       </button>
                     </div>
                   </div>
-                  <MarcRecordPreview
-                    detail={target}
-                    fontSize={`${targetFontSize}px`}
-                    className="bg-light"
-                  />
+                  {isTargetError ? (
+                    <p className="mb-0">
+                      통합 대상자료의 상세 정보를 불러오지 못했습니다. 잠시 후
+                      다시 시도해주세요.
+                    </p>
+                  ) : (
+                    <MarcRecordPreview
+                      detail={target}
+                      fontSize={`${targetFontSize}px`}
+                      className="bg-light"
+                    />
+                  )}
                 </div>
               </section>
             </div>
