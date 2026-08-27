@@ -34,6 +34,30 @@ afterEach(() => {
 });
 
 describe("AuthorityPersonalFormPage", () => {
+  it("고정길이 편집 모달의 라벨에 Leader와 008 위치를 표시한다", async () => {
+    const user = userEvent.setup();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AuthorityPersonalFormPage mode="create" />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "고정길이편집" }));
+
+    expect(screen.getByLabelText("상 태 (05)")).toBeVisible();
+    expect(screen.getByLabelText("입력수준 (17)")).toBeVisible();
+    expect(screen.getByLabelText("입력날짜 (0~5)")).toBeVisible();
+    expect(screen.getByLabelText("지리구분 (6)")).toBeVisible();
+    expect(screen.getByLabelText("참조평가 (29)")).toBeVisible();
+    expect(screen.getByLabelText("목록작성기관 (39)")).toBeVisible();
+  });
+
   it("입력 화면을 초기화하면 왼쪽 폼과 오른쪽 MARC 레코드를 함께 비운다", async () => {
     const user = userEvent.setup();
     const queryClient = new QueryClient({
