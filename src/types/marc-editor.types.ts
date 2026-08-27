@@ -22,6 +22,34 @@ export interface MarcControlField {
 
 export type MarcField = MarcControlField | MarcDataField;
 
+/** 에디터가 저장 이벤트로 부모 컴포넌트에 전달하는 MARC 레코드 형태이다. */
+export interface MarcEditorRecord {
+  controlFields: Array<Pick<MarcControlField, "tag" | "value">>;
+  dataFields: Array<{
+    tag: string;
+    ind1: string;
+    ind2: string;
+    subfields: SubField[];
+  }>;
+}
+
+/** 저장 API에서 반환한 MARC 검증 오류 한 건이다. */
+export interface MarcEditorSaveErrorDetail {
+  severity?: string;
+  code: string;
+  message: string;
+  path?: string;
+  tag?: string;
+  actual?: unknown;
+}
+
+/** MARC 에디터의 저장 영역에 표시할 API 오류이다. */
+export interface MarcEditorSaveError {
+  code: string;
+  message: string;
+  details: MarcEditorSaveErrorDetail[];
+}
+
 /** MARC 레코드와 함께 전거 생성 API에 전달할 화면 입력값이다. */
 export interface AuthorityCreateMetadata {
   acRegionCode?: string;

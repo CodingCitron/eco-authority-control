@@ -1,17 +1,36 @@
 // 개인명 등록/수정
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import {
+  fetchAuthorityCreate,
+  type AuthorityCreateQueryParams,
+} from "@/api/authority-create";
+import {
+  fetchAuthorityUpdate,
+  type AuthorityUpdateQueryParams,
+} from "@/api/authority-update";
+import { getAuthoritySaveError } from "@/api/authority-save-error";
 import AuthorityPersonalForm from "@/components/authority-personal-form-page/authority-personal-form";
 import { mapAuthorityDetailToPersonalFormValues } from "@/components/authority-personal-form-page/personal-form.mapper";
-import MarcEditor from "@/components/ui/marc-editor";
-import { parseLeaderData } from "@/components/ui/marc-editor-context";
+import MarcEditor, {
+  type MarcEditorSaveData,
+} from "@/components/ui/marc-editor";
+import {
+  formatLeaderData,
+  parseLeaderData,
+} from "@/components/ui/marc-editor-context";
 import MarcEditorProvider from "@/components/ui/marc-editor-provider";
 import MarcFontSizeSelect, {
   defaultFontSize,
 } from "@/components/ui/marc-font-size-select";
-import { useAuthorityDetail } from "@/hooks/use-authority-detail";
-import type { MarcField } from "@/types/marc-editor.types";
+import {
+  authorityDetailKeys,
+  useAuthorityDetail,
+} from "@/hooks/use-authority-detail";
+import { authoritySearchQueryKeys } from "@/hooks/use-authority-search";
+import type { MarcEditorSaveError, MarcField } from "@/types/marc-editor.types";
 
 export type AuthorityPersonalFormMode = "create" | "edit";
 
@@ -22,6 +41,7 @@ interface AuthorityPersonalFormPageProps {
 export default function AuthorityPersonalFormPage({
   mode,
 }: AuthorityPersonalFormPageProps) {
+  const queryClient = useQueryClient();
   const [fontSize, setFontSize] = useState(defaultFontSize);
   const [editorSessionVersion, setEditorSessionVersion] = useState(0);
   const [searchParams] = useSearchParams();
@@ -39,6 +59,33 @@ export default function AuthorityPersonalFormPage({
 
   const { data: authorityDetail } = useAuthorityDetail(currentRecordKey ?? "", {
     enabled: !isCreatePage,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (saveData: MarcEditorSaveData) => {
+      if (isCreatePage) {
+        return fetchAuthorityCreate(buildAuthorityCreateParams(saveData));
+      }
+
+      if (!currentRecordKey) {
+        throw new Error("수정할 전거 레코드 키가 없습니다.");
+      }
+
+      return fetchAuthorityUpdate(
+        buildAuthorityUpdateParams(currentRecordKey, saveData),
+      );
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: authoritySearchQueryKeys.all,
+      });
+
+      if (currentRecordKey) {
+        await queryClient.invalidateQueries({
+          queryKey: authorityDetailKeys.detail(currentRecordKey),
+        });
+      }
+    },
   });
 
   const initialMarcFields = useMemo<MarcField[] | undefined>(() => {
@@ -80,8 +127,14 @@ export default function AuthorityPersonalFormPage({
   );
 
   const resetEditorSession = () => {
+    saveMutation.reset();
     setEditorSessionVersion((version) => version + 1);
   };
+
+  const saveError = saveMutation.isError
+    ? (getAuthoritySaveError(saveMutation.error) ??
+      getFallbackSaveError(isCreatePage))
+    : undefined;
 
   return (
     <MarcEditorProvider
@@ -128,9 +181,13 @@ export default function AuthorityPersonalFormPage({
 
           <div className="col-lg-5">
             <MarcEditor
-              type={mode}
               showPrevAndNextButtons={!isCreatePage}
               saveButtonText={isCreatePage ? "저장" : "수정"}
+              onSave={saveMutation.mutate}
+              isSaving={saveMutation.isPending}
+              saveDisabled={!isCreatePage && !authorityDetail}
+              saveError={saveError}
+              saveErrorKey={saveMutation.submittedAt}
               fontSize={`${fontSize}px`}
             />
           </div>
@@ -153,4 +210,49 @@ function parseRecordKeys(value: string | null): string[] {
         .filter(Boolean),
     ),
   ];
+}
+
+function buildAuthorityCreateParams({
+  leaderData,
+  authorityCreateMetadata,
+  record,
+}: MarcEditorSaveData): AuthorityCreateQueryParams {
+  const copyrightBlanketAgreeDate =
+    authorityCreateMetadata.copyrightBlanketAgreeDate?.trim();
+
+  return {
+    leaderStatus: leaderData.status,
+    leaderType: leaderData.type,
+    leaderInputLevel: leaderData.encodingLevel,
+    acRegionCode: authorityCreateMetadata.acRegionCode ?? "",
+    biographyPrivateYn: authorityCreateMetadata.biographyPrivateYn ?? "N",
+    copyrightBlanketAgreeYn:
+      authorityCreateMetadata.copyrightBlanketAgreeYn ?? "N",
+    ...(copyrightBlanketAgreeDate && { copyrightBlanketAgreeDate }),
+    record,
+  };
+}
+
+function buildAuthorityUpdateParams(
+  recKey: string,
+  { leaderData, authorityCreateMetadata, record }: MarcEditorSaveData,
+): AuthorityUpdateQueryParams {
+  return {
+    recKey,
+    acRegionCode: authorityCreateMetadata.acRegionCode,
+    record: {
+      leader: formatLeaderData(leaderData),
+      ...record,
+    },
+  };
+}
+
+function getFallbackSaveError(isCreatePage: boolean): MarcEditorSaveError {
+  return {
+    code: "SAVE_FAILED",
+    message: isCreatePage
+      ? "개인명 전거를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."
+      : "개인명 전거를 수정하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    details: [],
+  };
 }

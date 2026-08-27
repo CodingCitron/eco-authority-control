@@ -8,10 +8,11 @@ import {
 } from "react";
 import { MarcError, parseLine } from "marc-eco";
 
-import type { AuthorityCreateQueryParams } from "@/api/authority-create";
 import { sortMarcFields } from "@/lib/marc/marc-field.utils";
 import type {
   AuthorityCreateMetadata,
+  MarcEditorRecord,
+  MarcEditorSaveError,
   MarcField,
   SubField,
 } from "@/types/marc-editor.types";
@@ -20,18 +21,32 @@ import { useMarcEditor, type LeaderData } from "./marc-editor-context";
 import { BibliographicRecordConsistencyButton } from "../authority-personal-form-page/bibliographic-record-consistency-modal";
 
 interface MarcEditorProps {
-  type?: "create" | "edit";
   showPrevAndNextButtons?: boolean;
   saveButtonText?: string;
+  onSave: (data: MarcEditorSaveData) => void;
+  isSaving?: boolean;
+  saveDisabled?: boolean;
+  saveError?: MarcEditorSaveError;
+  saveErrorKey?: string | number;
   fontSize: string;
+}
+
+export interface MarcEditorSaveData {
+  leaderData: LeaderData;
+  authorityCreateMetadata: AuthorityCreateMetadata;
+  record: MarcEditorRecord;
 }
 
 type EditorMode = "form" | "text";
 
 export default function MarcEditor({
-  type = "create",
   showPrevAndNextButtons,
   saveButtonText = "저장",
+  onSave,
+  isSaving = false,
+  saveDisabled = false,
+  saveError,
+  saveErrorKey,
   fontSize,
 }: MarcEditorProps) {
   const [mode, setMode] = useState<EditorMode>("form");
@@ -96,16 +111,11 @@ export default function MarcEditor({
   };
 
   const handleSave = () => {
-    const record = buildMarcRecord(variableFields);
-    const params = buildAuthorityCreateParams(
+    onSave({
       leaderData,
       authorityCreateMetadata,
-      record,
-      type,
-    );
-
-    console.log(leaderData);
-    console.log("전거 생성 최종 데이터", params);
+      record: buildMarcRecord(variableFields),
+    });
   };
 
   return (
@@ -143,16 +153,15 @@ export default function MarcEditor({
           ))}
         </div>
       </div>
-      <div className="marc-editor-add-toolbar border-top bg-white p-2 text-center">
-        <button
-          type="button"
-          className="btn btn-sm btn-outline-primary"
-          aria-label="MARC 행 추가"
-          onClick={addVariableField}
-        >
-          <i className="bi bi-plus-circle me-1" aria-hidden="true"></i>행 추가
-        </button>
-      </div>
+      {saveError ? (
+        <MarcEditorToolbarWithError
+          key={saveErrorKey}
+          error={saveError}
+          onAddRow={addVariableField}
+        />
+      ) : (
+        <MarcEditorToolbar onAddRow={addVariableField} />
+      )}
       <div className="card-footer bg-white d-flex justify-content-between">
         <div>
           {showPrevAndNextButtons && (
@@ -168,15 +177,134 @@ export default function MarcEditor({
           <button
             type="button"
             className="btn btn-primary"
+            disabled={isSaving || saveDisabled}
             onClick={handleSave}
           >
-            {saveButtonText}
+            {isSaving ? `${saveButtonText} 중...` : saveButtonText}
           </button>{" "}
           <button className="btn btn-secondary">취소</button>
         </div>
       </div>
     </div>
   );
+}
+
+function MarcEditorToolbarWithError({
+  error,
+  onAddRow,
+}: {
+  error: MarcEditorSaveError;
+  onAddRow: () => void;
+}) {
+  const [isMessageOpen, setIsMessageOpen] = useState(true);
+  const messageCount = error.details.length || 1;
+
+  return (
+    <>
+      {isMessageOpen && (
+        <div className="border-top bg-white p-2">
+          <div
+            className="alert alert-danger text-start mb-0 py-2 px-3"
+            role="alert"
+          >
+            <div className="d-flex align-items-start justify-content-between gap-2">
+              <div>
+                <div className="d-flex flex-wrap align-items-center gap-2">
+                  <strong>{error.message}</strong>
+                  <code className="text-danger-emphasis">{error.code}</code>
+                </div>
+                {error.details.length > 0 && (
+                  <ul className="small mb-0 mt-2 ps-0">
+                    {error.details.map((detail, index) => (
+                      <li key={`${detail.code}-${detail.path ?? ""}-${index}`}>
+                        {detail.tag && (
+                          <span className="badge text-bg-danger me-1">
+                            {detail.tag}
+                          </span>
+                        )}
+                        <code className="me-1">{detail.code}</code>
+                        <span>{detail.message}</span>
+                        {detail.actual !== undefined && (
+                          <span>
+                            {" "}
+                            (actual:{" "}
+                            <code>{formatActualValue(detail.actual)}</code>)
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <button
+                type="button"
+                className="btn-close flex-shrink-0"
+                aria-label="오류 메시지 닫기"
+                onClick={() => setIsMessageOpen(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      <MarcEditorToolbar
+        messageCount={messageCount}
+        isMessageOpen={isMessageOpen}
+        onToggleMessage={() => setIsMessageOpen((isOpen) => !isOpen)}
+        onAddRow={onAddRow}
+      />
+    </>
+  );
+}
+
+function MarcEditorToolbar({
+  messageCount = 0,
+  isMessageOpen = false,
+  onToggleMessage,
+  onAddRow,
+}: {
+  messageCount?: number;
+  isMessageOpen?: boolean;
+  onToggleMessage?: () => void;
+  onAddRow: () => void;
+}) {
+  const hasMessages = messageCount > 0;
+
+  return (
+    <div className="marc-editor-add-toolbar border-top bg-white p-2 px-3 d-flex justify-content-between align-items-center">
+      <button
+        type="button"
+        className={`btn btn-sm ${
+          hasMessages ? "btn-outline-danger" : "btn-outline-secondary"
+        }`}
+        aria-expanded={hasMessages ? isMessageOpen : undefined}
+        aria-label={hasMessages ? `메시지 ${messageCount}건` : "메시지 없음"}
+        disabled={!hasMessages}
+        onClick={onToggleMessage}
+      >
+        메시지 ({messageCount})
+      </button>
+      <button
+        type="button"
+        className="btn btn-sm btn-outline-primary"
+        aria-label="MARC 행 추가"
+        onClick={onAddRow}
+      >
+        <i className="bi bi-plus-circle me-1" aria-hidden="true" />행 추가
+      </button>
+    </div>
+  );
+}
+
+function formatActualValue(value: unknown) {
+  if (typeof value === "string") {
+    return JSON.stringify(value);
+  }
+
+  try {
+    return JSON.stringify(value) ?? String(value);
+  } catch {
+    return String(value);
+  }
 }
 
 interface MarcRowProps {
@@ -480,38 +608,5 @@ function buildMarcRecord(fields: MarcField[]) {
           ]
         : [],
     ),
-  };
-}
-
-/** Leader 입력값과 화면 메타데이터를 등록 API 요청 구조로 변환한다. */
-function buildAuthorityCreateParams(
-  leaderData: LeaderData,
-  metadata: AuthorityCreateMetadata,
-  record: AuthorityCreateQueryParams["record"],
-  type: "create" | "edit",
-) {
-  const paramsWithoutRecord: Omit<AuthorityCreateQueryParams, "record"> = {
-    leaderStatus: leaderData.status,
-    leaderType: leaderData.type,
-    leaderInputLevel: leaderData.encodingLevel,
-    acRegionCode: metadata.acRegionCode ?? "",
-    biographyPrivateYn: metadata.biographyPrivateYn ?? "N",
-    copyrightBlanketAgreeYn: metadata.copyrightBlanketAgreeYn ?? "N",
-    copyrightBlanketAgreeDate: metadata.copyrightBlanketAgreeDate ?? "",
-  };
-
-  if (type === "edit") {
-    return {
-      ...paramsWithoutRecord,
-      record: {
-        ...record,
-        leader: leaderData.raw,
-      },
-    };
-  }
-
-  return {
-    ...paramsWithoutRecord,
-    record,
   };
 }

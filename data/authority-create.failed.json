@@ -1,0 +1,77 @@
+{
+  "code": "MARC_VALIDATION_FAILED",
+  "message": "KORMARC validation failed.",
+  "details": [
+    {
+      "severity": "error",
+      "code": "INVALID_CONTROL_FIELD_CODE",
+      "message": "Field 008 position 9 has an invalid value.",
+      "path": "controlFields[0].value",
+      "tag": "008",
+      "actual": "z"
+    },
+    {
+      "severity": "error",
+      "code": "INVALID_CONTROL_FIELD_CODE",
+      "message": "Field 008 position 10 has an invalid value.",
+      "path": "controlFields[0].value",
+      "tag": "008",
+      "actual": "a"
+    },
+    {
+      "severity": "error",
+      "code": "INVALID_CONTROL_FIELD_CODE",
+      "message": "Field 008 position 11 has an invalid value.",
+      "path": "controlFields[0].value",
+      "tag": "008",
+      "actual": " "
+    },
+    {
+      "severity": "error",
+      "code": "INVALID_CONTROL_FIELD_CODE",
+      "message": "Field 008 position 12 has an invalid value.",
+      "path": "controlFields[0].value",
+      "tag": "008",
+      "actual": " "
+    },
+    {
+      "severity": "error",
+      "code": "INVALID_CONTROL_FIELD_CODE",
+      "message": "Field 008 position 13 has an invalid value.",
+      "path": "controlFields[0].value",
+      "tag": "008",
+      "actual": " "
+    },
+    {
+      "severity": "error",
+      "code": "INVALID_CONTROL_FIELD_CODE",
+      "message": "Field 008 position 31 has an invalid value.",
+      "path": "controlFields[0].value",
+      "tag": "008",
+      "actual": "n"
+    },
+    {
+      "severity": "error",
+      "code": "INVALID_CONTROL_FIELD_CODE",
+      "message": "Field 008 position 32 has an invalid value.",
+      "path": "controlFields[0].value",
+      "tag": "008",
+      "actual": "p"
+    },
+    {
+      "severity": "error",
+      "code": "INVALID_CONTROL_FIELD_CODE",
+      "message": "Field 008 position 39 has an invalid value.",
+      "path": "controlFields[0].value",
+      "tag": "008",
+      "actual": "K"
+    },
+    {
+      "severity": "error",
+      "code": "MISSING_REQUIRED_FIELD",
+      "message": "Required field 003 is missing.",
+      "path": "controlFields",
+      "tag": "003"
+    }
+  ]
+}
