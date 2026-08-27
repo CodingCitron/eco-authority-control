@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useSearchParams } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fetchAuthorityCreate } from "@/api/authority-create";
@@ -9,6 +9,16 @@ import { fetchAuthorityUpdate } from "@/api/authority-update";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 
 import AuthorityPersonalFormPage from "./authority-personal-form-page";
+
+function CurrentSearchParamProbe() {
+  const [searchParams] = useSearchParams();
+
+  return (
+    <output data-testid="current-search-param">
+      {searchParams.get("current") ?? "없음"}
+    </output>
+  );
+}
 
 vi.mock("@/api/authority-create", () => ({
   fetchAuthorityCreate: vi.fn(),
@@ -34,6 +44,76 @@ afterEach(() => {
 });
 
 describe("AuthorityPersonalFormPage", () => {
+  it("수정 화면의 이전·다음 버튼으로 recKeys의 current 인덱스를 이동한다", async () => {
+    const user = userEvent.setup();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter
+          initialEntries={[
+            "/personal/edit?recKeys=1226277,1238369,1238510",
+          ]}
+        >
+          <AuthorityPersonalFormPage mode="edit" />
+          <CurrentSearchParamProbe />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    const getPreviousButton = () =>
+      screen.getByRole("button", { name: "이전" });
+    const getNextButton = () => screen.getByRole("button", { name: "다음" });
+
+    expect(screen.getByTestId("current-search-param")).toHaveTextContent(
+      "없음",
+    );
+    expect(useAuthorityDetail).toHaveBeenLastCalledWith("1226277", {
+      enabled: true,
+    });
+    expect(getPreviousButton()).toBeDisabled();
+    expect(getNextButton()).toBeEnabled();
+
+    await user.click(getNextButton());
+
+    await waitFor(() => {
+      expect(screen.getByTestId("current-search-param")).toHaveTextContent(
+        "1",
+      );
+      expect(useAuthorityDetail).toHaveBeenLastCalledWith("1238369", {
+        enabled: true,
+      });
+    });
+    expect(getPreviousButton()).toBeEnabled();
+    expect(getNextButton()).toBeEnabled();
+
+    await user.click(getNextButton());
+
+    await waitFor(() => {
+      expect(screen.getByTestId("current-search-param")).toHaveTextContent(
+        "2",
+      );
+      expect(useAuthorityDetail).toHaveBeenLastCalledWith("1238510", {
+        enabled: true,
+      });
+    });
+    expect(getPreviousButton()).toBeEnabled();
+    expect(getNextButton()).toBeDisabled();
+
+    await user.click(getPreviousButton());
+
+    await waitFor(() => {
+      expect(screen.getByTestId("current-search-param")).toHaveTextContent(
+        "1",
+      );
+      expect(useAuthorityDetail).toHaveBeenLastCalledWith("1238369", {
+        enabled: true,
+      });
+    });
+  });
+
   it("고정길이 편집 모달의 라벨에 Leader와 008 위치를 표시한다", async () => {
     const user = userEvent.setup();
     const queryClient = new QueryClient({

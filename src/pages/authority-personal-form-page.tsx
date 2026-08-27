@@ -44,7 +44,7 @@ export default function AuthorityPersonalFormPage({
   const queryClient = useQueryClient();
   const [fontSize, setFontSize] = useState(defaultFontSize);
   const [editorSessionVersion, setEditorSessionVersion] = useState(0);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isCreatePage = mode === "create";
 
   // 등록은 대상 레코드가 없고, 수정은 하나 또는 여러 recKey를 받을 수 있다.
@@ -53,12 +53,25 @@ export default function AuthorityPersonalFormPage({
     : parseRecordKeys(
         searchParams.get("recKeys") ?? searchParams.get("recKey"),
       );
+  const currentRecordIndex = isCreatePage
+    ? 0
+    : parseCurrentRecordIndex(searchParams.get("current"), recordKeys.length);
   const currentRecordKey = isCreatePage
     ? undefined
-    : (searchParams.get("current") ?? recordKeys[0]);
+    : recordKeys[currentRecordIndex];
+
+  const moveToRecord = (nextIndex: number) => {
+    if (isCreatePage || nextIndex < 0 || nextIndex >= recordKeys.length) {
+      return;
+    }
+
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.set("current", String(nextIndex));
+    setSearchParams(nextSearchParams);
+  };
 
   const { data: authorityDetail } = useAuthorityDetail(currentRecordKey ?? "", {
-    enabled: !isCreatePage,
+    enabled: !isCreatePage && Boolean(currentRecordKey),
   });
 
   const saveMutation = useMutation({
@@ -187,6 +200,15 @@ export default function AuthorityPersonalFormPage({
           <div className="col-lg-5">
             <MarcEditor
               showPrevAndNextButtons={!isCreatePage}
+              onPrevious={() => moveToRecord(currentRecordIndex - 1)}
+              onNext={() => moveToRecord(currentRecordIndex + 1)}
+              previousDisabled={
+                recordKeys.length <= 1 || currentRecordIndex === 0
+              }
+              nextDisabled={
+                recordKeys.length <= 1 ||
+                currentRecordIndex === recordKeys.length - 1
+              }
               saveButtonText={isCreatePage ? "저장" : "수정"}
               onSave={saveMutation.mutate}
               isSaving={saveMutation.isPending}
@@ -215,6 +237,15 @@ function parseRecordKeys(value: string | null): string[] {
         .filter(Boolean),
     ),
   ];
+}
+
+function parseCurrentRecordIndex(value: string | null, recordCount: number) {
+  if (value === null || !/^\d+$/.test(value)) {
+    return 0;
+  }
+
+  const index = Number(value);
+  return Number.isSafeInteger(index) && index < recordCount ? index : 0;
 }
 
 function buildAuthorityCreateParams({

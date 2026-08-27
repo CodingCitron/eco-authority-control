@@ -22,6 +22,10 @@ import { BibliographicRecordConsistencyButton } from "../authority-personal-form
 
 interface MarcEditorProps {
   showPrevAndNextButtons?: boolean;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  previousDisabled?: boolean;
+  nextDisabled?: boolean;
   saveButtonText?: string;
   onSave: (data: MarcEditorSaveData) => void;
   isSaving?: boolean;
@@ -41,6 +45,10 @@ type EditorMode = "form" | "text";
 
 export default function MarcEditor({
   showPrevAndNextButtons,
+  onPrevious,
+  onNext,
+  previousDisabled = false,
+  nextDisabled = false,
   saveButtonText = "저장",
   onSave,
   isSaving = false,
@@ -166,8 +174,22 @@ export default function MarcEditor({
         <div>
           {showPrevAndNextButtons && (
             <>
-              <button className="btn btn-outline-secondary">이전</button>{" "}
-              <button className="btn btn-outline-secondary">다음</button>{" "}
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                disabled={previousDisabled}
+                onClick={onPrevious}
+              >
+                이전
+              </button>{" "}
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                disabled={nextDisabled}
+                onClick={onNext}
+              >
+                다음
+              </button>{" "}
             </>
           )}
           <BibliographicRecordConsistencyButton />
