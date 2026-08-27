@@ -423,6 +423,21 @@ body {
   white-space: normal;
 }
 
+/* 전거 통합 요약 테이블의 '통합 주자료' 헤더가 좁은 열에서 줄바꿈되지 않게 한다. */
+#mergeSummaryTable th {
+  white-space: nowrap;
+}
+
+#mergeSummaryTable th:first-child,
+#mergeSummaryTable td:first-child {
+  width: 4rem;
+}
+
+#mergeSummaryTable th:nth-child(2),
+#mergeSummaryTable td:nth-child(2) {
+  width: 8rem;
+}
+
 /* 삭제(flag) 처리된 행 */
 tr[data-deleted="true"] {
   color: var(--krds-light-color-text-subtle);

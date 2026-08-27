@@ -12,6 +12,7 @@ import MarcFontSizeSelect, {
   defaultFontSize,
 } from "@/components/ui/marc-font-size-select";
 import BaseModal from "@/components/ui/base-modal";
+import OverflowTooltip from "@/components/ui/overflow-tooltip";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import MarcRecordPreview from "../ui/record-preview";
 
@@ -191,7 +192,7 @@ function AuthorityMergeModalBody({
               <Table
                 bordered
                 size="sm"
-                className="text-center align-middle mb-4"
+                className="text-center align-middle mb-4 table-layout-fixed"
                 id="mergeSummaryTable"
               >
                 <caption className="visually-hidden">
@@ -209,6 +210,10 @@ function AuthorityMergeModalBody({
                 <tbody>
                   {data.map((record, index) => {
                     const isChecked = masterRecordKey === record.recKey;
+                    const authorityTypeLabel =
+                      authorityTypeLabels[record.acType];
+                    const headingName = record.headingName ?? "";
+                    const sourceDataFound = record.sourceDataFound ?? "";
 
                     return (
                       <tr
@@ -221,22 +226,34 @@ function AuthorityMergeModalBody({
                           <Form.Check
                             type="radio"
                             name="merge-master"
-                            aria-label={`${record.headingName}을 통합 주자료로 선택`}
+                            aria-label={`${headingName}을 통합 주자료로 선택`}
                             checked={isChecked}
                             onChange={() => setMasterRecordKey(record.recKey)}
                           />
                         </td>
-                        <td>{authorityTypeLabels[record.acType]}</td>
-                        <td>{record.acControlNo}</td>
+                        <td>
+                          <OverflowTooltip text={authorityTypeLabel}>
+                            {authorityTypeLabel}
+                          </OverflowTooltip>
+                        </td>
+                        <td>
+                          <OverflowTooltip text={record.acControlNo}>
+                            {record.acControlNo}
+                          </OverflowTooltip>
+                        </td>
                         <td
                           className={clsx("text-start", {
                             "fw-bold text-primary": isChecked,
                           })}
                         >
-                          {record.headingName}
+                          <OverflowTooltip text={headingName}>
+                            {headingName}
+                          </OverflowTooltip>
                         </td>
                         <td className="text-center">
-                          {record.sourceDataFound}
+                          <OverflowTooltip text={sourceDataFound}>
+                            {sourceDataFound}
+                          </OverflowTooltip>
                         </td>
                       </tr>
                     );
