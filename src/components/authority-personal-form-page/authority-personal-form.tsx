@@ -400,7 +400,7 @@ export default function AuthorityPersonalForm({
                   <div className="col-md-2">
                     <span className="form-label mb-0 fw-bold">성별(375)</span>
                   </div>
-                  <div className="col-md-auto d-flex align-items-center gap-3">
+                  <div className="col d-flex align-items-center gap-3">
                     {[
                       ["unknown", "모름"],
                       ["male", "남성"],
@@ -423,6 +423,10 @@ export default function AuthorityPersonalForm({
                       </div>
                     ))}
                   </div>
+                  <AddButton
+                    ariaLabel="성별(375) 추가"
+                    onClick={() => addToMarcRecord("gender")}
+                  />
                 </div>
 
                 <SimpleInputRow

@@ -215,6 +215,7 @@ export type PersonalMarcAddTarget =
   | "activityField"
   | "organization"
   | "occupation"
+  | "gender"
   | "language"
   | "education"
   | "biography"
@@ -225,6 +226,12 @@ const PLACE_SUBFIELD_CODE: Readonly<Record<string, string>> = {
   death: "b",
   residence: "e",
   activity: "f",
+};
+
+const GENDER_LABEL: Readonly<Record<Exclude<PersonalGender, "">, string>> = {
+  unknown: "모름",
+  male: "남성",
+  female: "여성",
 };
 
 /** 왼쪽 개인명 폼의 한 항목을 오른쪽 MARC 레코드에 반영한다. */
@@ -319,6 +326,13 @@ export function addPersonalFormValuesToMarcFields(
         values.occupation,
         values.occupationDateFrom,
         values.occupationDateTo,
+      );
+    case "gender":
+      return appendMarcDataField(
+        fields,
+        createMarcDataField("375", [
+          createMarcSubfield("a", values.gender && GENDER_LABEL[values.gender]),
+        ]),
       );
     case "language":
       return appendMarcDataField(
