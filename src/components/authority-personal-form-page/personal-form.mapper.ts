@@ -26,7 +26,7 @@ export interface PersonalAuthorityFormValues {
   hanjaName: string;
   birthDate: string;
   deathDate: string;
-  birthdatePrivate: boolean;
+  birthDeathDatePrivateYn: AuthorityYesNo;
   referenceHeading: string;
   referenceHanja: string;
   referenceOriginalName: string;
@@ -70,7 +70,7 @@ export function createEmptyPersonalAuthorityFormValues(): PersonalAuthorityFormV
     hanjaName: "",
     birthDate: "",
     deathDate: "",
-    birthdatePrivate: false,
+    birthDeathDatePrivateYn: "N",
     referenceHeading: "",
     referenceHanja: "",
     referenceOriginalName: "",
@@ -110,6 +110,7 @@ export function mapPersonalFormValuesToAuthorityCreateMetadata(
   values: Pick<
     PersonalAuthorityFormValues,
     | "region"
+    | "birthDeathDatePrivateYn"
     | "biographyPrivateYn"
     | "copyrightConsent"
     | "copyrightConsentDate"
@@ -123,6 +124,7 @@ export function mapPersonalFormValuesToAuthorityCreateMetadata(
 
   return {
     ...(acRegionCode && { acRegionCode }),
+    birthDeathDatePrivateYn: values.birthDeathDatePrivateYn,
     biographyPrivateYn,
     copyrightBlanketAgreeYn,
     copyrightBlanketAgreeDate,
@@ -191,6 +193,7 @@ export function mapAuthorityDetailToPersonalFormValues(
     heading: detail.headingName ?? getMarcSubfieldValue(field100, "a"),
     hanjaName: detail.hanjaName ?? getMarcSubfieldValue(field100, "g"),
     ...dates,
+    birthDeathDatePrivateYn: detail.birthDeathDatePrivateYn ?? "N",
     gender: getGender(
       getMarcSubfieldValue(
         findMarcFieldByTag(detail.record.dataFields, "375"),

@@ -1,5 +1,7 @@
 import z from "zod";
 
+import { authorityYesNoValues } from "@/types/authority.types";
+
 /** 제어 필드(001, 005, 008 등) */
 export const authorityControlFieldSchema = z.object({
   tag: z.string(),
@@ -31,6 +33,7 @@ export const authorityDetailDataSchema = z.object({
   hanjaName: z.string().nullish(),
   headingName: z.string().nullish(),
   birthDeathDate: z.string().nullish(),
+  birthDeathDatePrivateYn: z.enum(authorityYesNoValues).nullish(),
   firstInputDate: z.string().nullish(),
   firstWorker: z.string().nullish(),
   lastUpdateDate: z.string().nullish(),

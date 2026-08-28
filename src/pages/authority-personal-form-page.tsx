@@ -287,6 +287,8 @@ function buildAuthorityCreateParams({
     leaderType: leaderData.type,
     leaderInputLevel: leaderData.encodingLevel,
     acRegionCode: authorityCreateMetadata.acRegionCode ?? "",
+    birthDeathDatePrivateYn:
+      authorityCreateMetadata.birthDeathDatePrivateYn ?? "N",
     biographyPrivateYn: authorityCreateMetadata.biographyPrivateYn ?? "N",
     copyrightBlanketAgreeYn:
       authorityCreateMetadata.copyrightBlanketAgreeYn ?? "N",
@@ -308,6 +310,8 @@ function buildAuthorityUpdateParams(
     leaderType: leaderData.type,
     leaderInputLevel: leaderData.encodingLevel,
     acRegionCode: authorityCreateMetadata.acRegionCode ?? "",
+    birthDeathDatePrivateYn:
+      authorityCreateMetadata.birthDeathDatePrivateYn ?? "N",
     biographyPrivateYn: authorityCreateMetadata.biographyPrivateYn ?? "N",
     copyrightBlanketAgreeYn:
       authorityCreateMetadata.copyrightBlanketAgreeYn ?? "N",

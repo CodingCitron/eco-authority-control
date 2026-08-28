@@ -339,6 +339,8 @@ describe("AuthorityPersonalFormPage", () => {
 
     await user.selectOptions(screen.getByLabelText("전거지역구분"), "1");
     await user.type(screen.getByLabelText("채택표목(100)"), "김소월");
+    await user.click(screen.getByLabelText("비공개"));
+    expect(screen.getByLabelText("비공개")).toBeChecked();
     await user.click(
       screen.getByRole("button", {
         name: "채택표목 및 생몰년(100) 추가",
@@ -352,6 +354,7 @@ describe("AuthorityPersonalFormPage", () => {
         leaderType: "",
         leaderInputLevel: "",
         acRegionCode: "1",
+        birthDeathDatePrivateYn: "Y",
         biographyPrivateYn: "N",
         copyrightBlanketAgreeYn: "N",
         record: {
@@ -479,6 +482,7 @@ describe("AuthorityPersonalFormPage", () => {
         hanjaName: "金素月",
         headingName: "김소월",
         birthDeathDate: "1902-1934",
+        birthDeathDatePrivateYn: "Y" as const,
         firstInputDate: "2026-08-25T10:00:00.000Z",
         firstWorker: "creator",
         lastUpdateDate: "2026-08-26T10:00:00.000Z",
@@ -514,6 +518,7 @@ describe("AuthorityPersonalFormPage", () => {
 
     const updateButton = await screen.findByRole("button", { name: "수정" });
     await waitFor(() => expect(updateButton).toBeEnabled());
+    expect(screen.getByLabelText("비공개")).toBeChecked();
     await user.click(updateButton);
 
     await waitFor(() => {
@@ -523,6 +528,7 @@ describe("AuthorityPersonalFormPage", () => {
         leaderType: "z",
         leaderInputLevel: "n",
         acRegionCode: "1",
+        birthDeathDatePrivateYn: "Y",
         biographyPrivateYn: "N",
         copyrightBlanketAgreeYn: "N",
         record: {

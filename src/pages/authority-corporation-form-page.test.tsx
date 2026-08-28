@@ -227,6 +227,7 @@ describe("AuthorityCorporationFormPage", () => {
         leaderType: "",
         leaderInputLevel: "",
         acRegionCode: "1",
+        birthDeathDatePrivateYn: "N",
         biographyPrivateYn: "N",
         copyrightBlanketAgreeYn: "N",
         record: {
@@ -286,6 +287,7 @@ describe("AuthorityCorporationFormPage", () => {
         leaderType: "z",
         leaderInputLevel: "n",
         acRegionCode: "1",
+        birthDeathDatePrivateYn: "N",
         biographyPrivateYn: "N",
         copyrightBlanketAgreeYn: "N",
         record: {

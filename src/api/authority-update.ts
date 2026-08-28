@@ -11,6 +11,7 @@ export interface AuthorityUpdateQueryParams {
   leaderType: string;
   leaderInputLevel: string;
   acRegionCode: string;
+  birthDeathDatePrivateYn: AuthorityYesNo;
   biographyPrivateYn: AuthorityYesNo;
   copyrightBlanketAgreeYn: AuthorityYesNo;
   copyrightBlanketAgreeDate?: string;

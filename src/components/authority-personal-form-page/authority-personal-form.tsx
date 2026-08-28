@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import {
+  Controller,
   useForm,
   useWatch,
   type FieldPathByValue,
@@ -32,16 +33,22 @@ export default function AuthorityPersonalForm({
       defaultValues: initialValues ?? createEmptyPersonalAuthorityFormValues(),
     });
   const { setVariableFields, setAuthorityCreateMetadata } = useMarcEditor();
-  const [region, biographyPrivateYn, copyrightConsent, copyrightConsentDate] =
-    useWatch({
-      control,
-      name: [
-        "region",
-        "biographyPrivateYn",
-        "copyrightConsent",
-        "copyrightConsentDate",
-      ],
-    });
+  const [
+    region,
+    birthDeathDatePrivateYn,
+    biographyPrivateYn,
+    copyrightConsent,
+    copyrightConsentDate,
+  ] = useWatch({
+    control,
+    name: [
+      "region",
+      "birthDeathDatePrivateYn",
+      "biographyPrivateYn",
+      "copyrightConsent",
+      "copyrightConsentDate",
+    ],
+  });
 
   const addToMarcRecord = (target: PersonalMarcAddTarget) => {
     const values = getValues();
@@ -56,6 +63,7 @@ export default function AuthorityPersonalForm({
     setAuthorityCreateMetadata(
       mapPersonalFormValuesToAuthorityCreateMetadata({
         region,
+        birthDeathDatePrivateYn,
         biographyPrivateYn,
         copyrightConsent,
         copyrightConsentDate,
@@ -65,6 +73,7 @@ export default function AuthorityPersonalForm({
     biographyPrivateYn,
     copyrightConsent,
     copyrightConsentDate,
+    birthDeathDatePrivateYn,
     region,
     setAuthorityCreateMetadata,
   ]);
@@ -206,13 +215,27 @@ export default function AuthorityPersonalForm({
                       {...register("deathDate")}
                     />
                     <div className="input-group-text text-nowrap">
-                      <input
-                        className="form-check-input mt-0"
-                        type="checkbox"
-                        id="birthdatePrivate"
-                        {...register("birthdatePrivate")}
+                      <Controller
+                        control={control}
+                        name="birthDeathDatePrivateYn"
+                        render={({ field }) => (
+                          <input
+                            className="form-check-input mt-0"
+                            type="checkbox"
+                            id="birthDeathDatePrivateYn"
+                            name={field.name}
+                            ref={field.ref}
+                            onBlur={field.onBlur}
+                            checked={field.value === "Y"}
+                            onChange={(event) =>
+                              field.onChange(
+                                event.target.checked ? "Y" : "N",
+                              )
+                            }
+                          />
+                        )}
                       />{" "}
-                      <label htmlFor="birthdatePrivate">비공개</label>
+                      <label htmlFor="birthDeathDatePrivateYn">비공개</label>
                     </div>
                   </div>
                 </div>

@@ -53,6 +53,7 @@ export interface MarcEditorSaveError {
 /** MARC 레코드와 함께 전거 생성 API에 전달할 화면 입력값이다. */
 export interface AuthorityCreateMetadata {
   acRegionCode?: string;
+  birthDeathDatePrivateYn?: AuthorityYesNo;
   biographyPrivateYn?: AuthorityYesNo;
   copyrightBlanketAgreeYn?: AuthorityYesNo;
   copyrightBlanketAgreeDate?: string;

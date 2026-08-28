@@ -266,6 +266,7 @@ function buildAuthorityCreateParams({
     leaderType: leaderData.type,
     leaderInputLevel: leaderData.encodingLevel,
     acRegionCode: authorityCreateMetadata.acRegionCode ?? "",
+    birthDeathDatePrivateYn: "N",
     biographyPrivateYn: "N",
     copyrightBlanketAgreeYn: "N",
     record,
@@ -282,6 +283,7 @@ function buildAuthorityUpdateParams(
     leaderType: leaderData.type,
     leaderInputLevel: leaderData.encodingLevel,
     acRegionCode: authorityCreateMetadata.acRegionCode ?? "",
+    birthDeathDatePrivateYn: "N",
     biographyPrivateYn: "N",
     copyrightBlanketAgreeYn: "N",
     record: {
