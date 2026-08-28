@@ -1,12 +1,20 @@
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 import {
+  appendMarcDataField,
+  createMarcDataField,
+  createMarcSubfield,
+  findMarcFieldByTag,
+  getMarcSubfieldValue,
+  getMarcSubfieldValueFromFields,
+  replaceMarcDataFieldSubfields,
   sortMarcFields,
-  type AuthorityCreateMetadata,
-  type MarcDataField,
-  type MarcField,
-  type SubField,
-} from "@/components/ui/marc-editor-context";
-import { isAuthoritySearchType } from "@/types/authority-search.types";
+  type MarcSubfieldReplacement,
+} from "@/lib/marc/marc-field.utils";
+import type {
+  AuthorityCreateMetadata,
+  MarcField,
+} from "@/types/marc-editor.types";
+import type { AuthorityYesNo } from "@/types/authority.types";
 
 export type PersonalGender = "" | "unknown" | "male" | "female";
 
@@ -39,7 +47,7 @@ export interface PersonalAuthorityFormValues {
   occupationDateTo: string;
   gender: PersonalGender;
   language: string;
-  historyVisibility: string;
+  biographyPrivateYn: "" | AuthorityYesNo;
   education: string;
   biography: string;
   source: string;
@@ -82,7 +90,7 @@ export function createEmptyPersonalAuthorityFormValues(): PersonalAuthorityFormV
     occupationDateTo: "",
     gender: "",
     language: "",
-    historyVisibility: "",
+    biographyPrivateYn: "N",
     education: "",
     biography: "",
     source: "",
@@ -95,50 +103,38 @@ export function createEmptyPersonalAuthorityFormValues(): PersonalAuthorityFormV
   };
 }
 
-const authorityTagTypeMap = {
-  "100": "0",
-  "110": "1",
-  "150": "4",
-  "151": "5",
-} as const;
-
 /** 개인명 입력 폼의 공통 항목을 전거 생성 API 메타데이터로 변환한다. */
 export function mapPersonalFormValuesToAuthorityCreateMetadata(
   values: Pick<
     PersonalAuthorityFormValues,
-    "authorityType" | "region" | "createdAt" | "createdBy"
+    | "region"
+    | "biographyPrivateYn"
+    | "copyrightConsent"
+    | "copyrightConsentDate"
   >,
 ): AuthorityCreateMetadata {
-  const authorityType = values.authorityType.trim();
-  const acType =
-    authorityTagTypeMap[authorityType as keyof typeof authorityTagTypeMap] ??
-    (isAuthoritySearchType(authorityType) ? authorityType : undefined);
   const acRegionCode = values.region.trim();
-  const firstInputDate = values.createdAt.trim();
-  const firstWorker = values.createdBy.trim();
+  const biographyPrivateYn = values.biographyPrivateYn || "N";
+  const copyrightBlanketAgreeYn = values.copyrightConsent ? "Y" : "N";
+  const copyrightBlanketAgreeDate =
+    toIsoDateTime(values.copyrightConsentDate) ?? "";
 
   return {
-    ...(acType && { acType }),
     ...(acRegionCode && { acRegionCode }),
-    ...(firstInputDate && { firstInputDate }),
-    ...(firstWorker && { firstWorker }),
+    biographyPrivateYn,
+    copyrightBlanketAgreeYn,
+    copyrightBlanketAgreeDate,
   };
 }
 
-type DataField = AuthorityDetailData["record"]["data_fields"][number];
+function toIsoDateTime(value: string) {
+  const normalizedValue = value.trim();
+  if (!normalizedValue) {
+    return undefined;
+  }
 
-function getFields(detail: AuthorityDetailData, tag: string) {
-  return detail.record.data_fields.filter((field) => field.tag === tag);
-}
-
-function getField(detail: AuthorityDetailData, tag: string) {
-  return getFields(detail, tag)[0];
-}
-
-function getSubfield(field: DataField | undefined, code: string) {
-  return (
-    field?.subfields.find((subfield) => subfield.code === code)?.value ?? ""
-  );
+  const date = new Date(normalizedValue);
+  return Number.isNaN(date.getTime()) ? normalizedValue : date.toISOString();
 }
 
 function splitBirthDeathDate(value: string) {
@@ -152,29 +148,6 @@ function splitBirthDeathDate(value: string) {
   }
 
   return { birthDate: normalizedValue, deathDate: "" };
-}
-
-function getPlace(field: DataField | undefined) {
-  const placeTypes = [
-    { code: "a", type: "birth" },
-    { code: "b", type: "death" },
-    { code: "e", type: "residence" },
-    { code: "f", type: "activity" },
-  ] as const;
-  const matched = placeTypes.find(({ code }) => getSubfield(field, code));
-
-  return matched
-    ? { type: matched.type, value: getSubfield(field, matched.code) }
-    : { type: "", value: "" };
-}
-
-function getAddress(field: DataField | undefined) {
-  const codes = ["a", "b", "d", "e", "m"] as const;
-  const code = codes.find((candidate) => getSubfield(field, candidate));
-
-  return code
-    ? { type: code, value: getSubfield(field, code) }
-    : { type: "", value: "" };
 }
 
 function getGender(value: string): PersonalGender {
@@ -193,64 +166,46 @@ function getGender(value: string): PersonalGender {
 export function mapAuthorityDetailToPersonalFormValues(
   detail: AuthorityDetailData,
 ): PersonalAuthorityFormValues {
-  const field100 = getField(detail, "100");
-  const fields400 = getFields(detail, "400");
-  const field370 = getField(detail, "370");
-  const field371 = getField(detail, "371");
-  const field372 = getField(detail, "372");
-  const field373 = getField(detail, "373");
-  const field374 = getField(detail, "374");
-  const place = getPlace(field370);
-  const address = getAddress(field371);
-  const dates = splitBirthDeathDate(
-    detail.birthDeathDate ?? getSubfield(field100, "d"),
+  const field100 = findMarcFieldByTag(detail.record.data_fields, "100");
+  const fields046 = detail.record.data_fields.filter(
+    (field) => field.tag === "046",
   );
+  const headingDates = splitBirthDeathDate(
+    detail.birthDeathDate || getMarcSubfieldValue(field100, "d"),
+  );
+  const dates = {
+    birthDate:
+      getMarcSubfieldValueFromFields(fields046, "f") || headingDates.birthDate,
+    deathDate:
+      getMarcSubfieldValueFromFields(fields046, "g") || headingDates.deathDate,
+  };
 
+  // 반복 가능 필드는 오른쪽 MARC 에디터에서 기존 값을 관리한다.
+  // 왼쪽 입력은 새 필드를 연속해서 추가하는 draft이므로 초기값을 채우지 않는다.
   return {
     ...createEmptyPersonalAuthorityFormValues(),
     authorityType: detail.acType === "0" ? "100" : detail.acType,
     region: detail.acRegionCode ?? "",
-    heading: detail.headingName ?? getSubfield(field100, "a"),
-    hanjaName: detail.hanjaName ?? getSubfield(field100, "g"),
+    heading: detail.headingName ?? getMarcSubfieldValue(field100, "a"),
+    hanjaName: detail.hanjaName ?? getMarcSubfieldValue(field100, "g"),
     ...dates,
-    referenceHeading: getSubfield(fields400[0], "a"),
-    referenceHanja: getSubfield(fields400[0], "g"),
-    referenceOriginalName: getSubfield(fields400[1], "a"),
-    placeType: place.type,
-    place: place.value,
-    placeDateFrom: getSubfield(field370, "s"),
-    placeDateTo: getSubfield(field370, "t"),
-    addressType: address.type,
-    address: address.value,
-    activityField: detail.activityField || getSubfield(field372, "a"),
-    activityFieldDateFrom: getSubfield(field372, "s"),
-    activityFieldDateTo: getSubfield(field372, "t"),
-    organization: getSubfield(field373, "a"),
-    organizationDateFrom: getSubfield(field373, "s"),
-    organizationDateTo: getSubfield(field373, "t"),
-    occupation: getSubfield(field374, "a"),
-    occupationDateFrom: getSubfield(field374, "s"),
-    occupationDateTo: getSubfield(field374, "t"),
-    gender: getGender(getSubfield(getField(detail, "375"), "a")),
-    language:
-      getSubfield(getField(detail, "377"), "i") ||
-      getSubfield(getField(detail, "377"), "a"),
-    education: getSubfield(getField(detail, "667"), "a"),
-    biography: getSubfield(getField(detail, "678"), "a"),
-    source: getSubfield(getField(detail, "670"), "a") || detail.sourceDataFound,
-    createdBy: detail.firstWorker,
-    createdAt: detail.firstInputDate,
-    updatedBy: detail.lastWorker,
-    updatedAt: detail.lastUpdateDate,
+    gender: getGender(
+      getMarcSubfieldValue(
+        findMarcFieldByTag(detail.record.data_fields, "375"),
+        "a",
+      ),
+    ),
+    createdBy: detail.firstWorker ?? "",
+    createdAt: detail.firstInputDate ?? "",
+    updatedBy: detail.lastWorker ?? "",
+    updatedAt: detail.lastUpdateDate ?? "",
   };
 }
 
 export type PersonalMarcAddTarget =
   | "heading"
   | "birthDeathDate"
-  | "referenceHeading"
-  | "referenceHanja"
-  | "referenceOriginalName"
+  | "references"
   | "place"
   | "address"
   | "activityField"
@@ -277,52 +232,57 @@ export function addPersonalFormValuesToMarcFields(
   switch (target) {
     case "heading":
       return updatePersonalHeading(fields, [
-        toSubfield("a", values.heading),
-        toSubfield("g", values.hanjaName),
+        { code: "a", value: values.heading },
+        { code: "g", value: values.hanjaName },
       ]);
     case "birthDeathDate": {
       const date = formatBirthDeathDate(values.birthDate, values.deathDate);
-      return date
-        ? updatePersonalHeading(fields, [{ code: "d", value: date }])
-        : fields;
-    }
-    case "referenceHeading":
-      return appendDataField(
+      return updateBirthDeathFields(
         fields,
-        createDataField(
+        values.birthDate,
+        values.deathDate,
+        date,
+      );
+    }
+    case "references": {
+      const fieldsWithHeading = appendMarcDataField(
+        fields,
+        createMarcDataField(
           "400",
           [
-            toSubfield("a", values.referenceHeading),
-            toSubfield("g", values.referenceHanja),
+            createMarcSubfield("a", values.referenceHeading),
+            createMarcSubfield("g", values.referenceHanja),
           ],
           "1",
         ),
       );
-    case "referenceHanja":
-      return updateReferenceHanja(fields, values);
-    case "referenceOriginalName":
-      return appendDataField(
-        fields,
-        createDataField(
+
+      return appendMarcDataField(
+        fieldsWithHeading,
+        createMarcDataField(
           "400",
-          [toSubfield("a", values.referenceOriginalName)],
+          [createMarcSubfield("a", values.referenceOriginalName)],
           "1",
         ),
       );
+    }
     case "place":
-      return appendDataField(
+      return appendMarcDataField(
         fields,
-        createDataField("370", [
-          toSubfield(PLACE_SUBFIELD_CODE[values.placeType], values.place),
-          toSubfield("s", values.placeDateFrom),
-          toSubfield("t", values.placeDateTo),
+        createMarcDataField("370", [
+          createMarcSubfield(
+            PLACE_SUBFIELD_CODE[values.placeType],
+            values.place,
+          ),
+          createMarcSubfield("s", values.placeDateFrom),
+          createMarcSubfield("t", values.placeDateTo),
         ]),
       );
     case "address":
-      return appendDataField(
+      return appendMarcDataField(
         fields,
-        createDataField("371", [
-          toSubfield(values.addressType, values.address),
+        createMarcDataField("371", [
+          createMarcSubfield(values.addressType, values.address),
         ]),
       );
     case "activityField":
@@ -350,101 +310,97 @@ export function addPersonalFormValuesToMarcFields(
         values.occupationDateTo,
       );
     case "language":
-      return appendDataField(
+      return appendMarcDataField(
         fields,
-        createDataField("377", [toSubfield("i", values.language)]),
+        createMarcDataField("377", [createMarcSubfield("i", values.language)]),
       );
     case "education":
-      return appendDataField(
+      return appendMarcDataField(
         fields,
-        createDataField("667", [toSubfield("a", values.education)]),
+        createMarcDataField("667", [createMarcSubfield("a", values.education)]),
       );
     case "biography":
-      return appendDataField(
+      return appendMarcDataField(
         fields,
-        createDataField("678", [toSubfield("a", values.biography)]),
+        createMarcDataField("678", [createMarcSubfield("a", values.biography)]),
       );
     case "source":
-      return appendDataField(
+      return appendMarcDataField(
         fields,
-        createDataField("670", [toSubfield("a", values.source)]),
+        createMarcDataField("670", [createMarcSubfield("a", values.source)]),
       );
   }
 }
 
-function updatePersonalHeading(
+/** 기존 레코드의 생몰년 표현 방식은 보존하고, 신규 값은 분리된 046으로 만든다. */
+function updateBirthDeathFields(
   fields: MarcField[],
-  replacements: Array<SubField | undefined>,
+  birthDate: string,
+  deathDate: string,
+  headingDate: string,
 ) {
-  const nextSubfields = replacements.filter((subfield): subfield is SubField =>
-    Boolean(subfield),
+  const hasHeadingDate = fields.some(
+    (field) =>
+      field.type === "data" &&
+      field.tag === "100" &&
+      field.subfields.some(({ code }) => code === "d"),
   );
-  if (nextSubfields.length === 0) {
-    return fields;
+  const hasCodedDate = fields.some(
+    (field) =>
+      field.type === "data" &&
+      field.tag === "046" &&
+      field.subfields.some(({ code }) => code === "f" || code === "g"),
+  );
+  let nextFields = hasHeadingDate
+    ? updatePersonalHeading(fields, [{ code: "d", value: headingDate }])
+    : fields;
+
+  // 046을 사용하던 레코드와 신규 레코드는 출생일·사망일을 각각 갱신/추가한다.
+  if (hasCodedDate || !hasHeadingDate) {
+    nextFields = upsertCodedDateField(nextFields, "f", birthDate);
+    nextFields = upsertCodedDateField(nextFields, "g", deathDate);
   }
 
-  const fieldIndex = fields.findIndex(
-    (field) => field.type === "data" && field.tag === "100",
-  );
-  const currentField = fieldIndex >= 0 ? fields[fieldIndex] : undefined;
-  const currentSubfields =
-    currentField?.type === "data" ? currentField.subfields : [];
-  const replacedCodes = new Set(nextSubfields.map(({ code }) => code));
-  const mergedSubfields = orderPersonalNameSubfields([
-    ...currentSubfields.filter(({ code }) => !replacedCodes.has(code)),
-    ...nextSubfields,
-  ]);
-  const nextField: MarcDataField = {
-    type: "data",
-    tag: "100",
-    indicator1: currentField?.type === "data" ? currentField.indicator1 : "1",
-    indicator2: currentField?.type === "data" ? currentField.indicator2 : " ",
-    subfields: mergedSubfields,
-  };
-
-  if (fieldIndex < 0) {
-    return sortMarcFields([...fields, nextField]);
-  }
-
-  return sortMarcFields(
-    fields.map((field, index) => (index === fieldIndex ? nextField : field)),
-  );
+  return nextFields;
 }
 
-function updateReferenceHanja(
+function upsertCodedDateField(
   fields: MarcField[],
-  values: PersonalAuthorityFormValues,
+  code: "f" | "g",
+  value: string,
 ) {
-  const hanjaName = values.referenceHanja.trim();
-  if (!hanjaName) {
-    return fields;
+  const dateSubfield = createMarcSubfield(code, value);
+  if (!dateSubfield) {
+    return sortMarcFields(
+      fields.flatMap((field): MarcField[] => {
+        if (
+          field.type !== "data" ||
+          field.tag !== "046" ||
+          !field.subfields.some((subfield) => subfield.code === code)
+        ) {
+          return [field];
+        }
+
+        const nextField = replaceMarcDataFieldSubfields(field, [
+          { code, value: "" },
+        ]);
+        return nextField ? [nextField] : [];
+      }),
+    );
   }
 
-  const referenceHeading = values.referenceHeading.trim();
   const fieldIndex = fields.findIndex(
     (field) =>
       field.type === "data" &&
-      field.tag === "400" &&
-      (!referenceHeading ||
-        field.subfields.some(
-          ({ code, value }) => code === "a" && value === referenceHeading,
-        )),
+      field.tag === "046" &&
+      field.subfields.some((subfield) => subfield.code === code),
   );
 
   if (fieldIndex < 0) {
-    return referenceHeading
-      ? appendDataField(
-          fields,
-          createDataField(
-            "400",
-            [
-              { code: "a", value: referenceHeading },
-              { code: "g", value: hanjaName },
-            ],
-            "1",
-          ),
-        )
-      : fields;
+    return appendMarcDataField(
+      fields,
+      createMarcDataField("046", [dateSubfield]),
+    );
   }
 
   const currentField = fields[fieldIndex];
@@ -452,16 +408,51 @@ function updateReferenceHanja(
     return fields;
   }
 
-  const nextField: MarcDataField = {
-    ...currentField,
-    subfields: [
-      ...currentField.subfields.filter(({ code }) => code !== "g"),
-      { code: "g", value: hanjaName },
-    ],
-  };
-
+  const nextField = replaceMarcDataFieldSubfields(currentField, [
+    { code, value: dateSubfield.value },
+  ]);
   return sortMarcFields(
-    fields.map((field, index) => (index === fieldIndex ? nextField : field)),
+    fields.flatMap((field, index): MarcField[] => {
+      if (index !== fieldIndex) {
+        return [field];
+      }
+      return nextField ? [nextField] : [];
+    }),
+  );
+}
+
+function updatePersonalHeading(
+  fields: MarcField[],
+  replacements: readonly MarcSubfieldReplacement[],
+) {
+  const fieldIndex = fields.findIndex(
+    (field) => field.type === "data" && field.tag === "100",
+  );
+
+  if (fieldIndex < 0) {
+    return appendMarcDataField(
+      fields,
+      createMarcDataField(
+        "100",
+        replacements.map(({ code, value }) => createMarcSubfield(code, value)),
+        "1",
+      ),
+    );
+  }
+
+  const currentField = fields[fieldIndex];
+  if (currentField.type !== "data") {
+    return fields;
+  }
+
+  const nextField = replaceMarcDataFieldSubfields(currentField, replacements);
+  return sortMarcFields(
+    fields.flatMap((field, index): MarcField[] => {
+      if (index !== fieldIndex) {
+        return [field];
+      }
+      return nextField ? [nextField] : [];
+    }),
   );
 }
 
@@ -472,54 +463,14 @@ function appendRelatedDateField(
   dateFrom: string,
   dateTo: string,
 ) {
-  return appendDataField(
+  return appendMarcDataField(
     fields,
-    createDataField(tag, [
-      toSubfield("a", value),
-      toSubfield("s", dateFrom),
-      toSubfield("t", dateTo),
+    createMarcDataField(tag, [
+      createMarcSubfield("a", value),
+      createMarcSubfield("s", dateFrom),
+      createMarcSubfield("t", dateTo),
     ]),
   );
-}
-
-function appendDataField(
-  fields: MarcField[],
-  nextField: MarcDataField | undefined,
-) {
-  if (!nextField || fields.some((field) => isSameDataField(field, nextField))) {
-    return fields;
-  }
-
-  return sortMarcFields([...fields, nextField]);
-}
-
-function createDataField(
-  tag: string,
-  subfields: Array<SubField | undefined>,
-  indicator1 = " ",
-): MarcDataField | undefined {
-  const normalizedSubfields = subfields.filter(
-    (subfield): subfield is SubField => Boolean(subfield),
-  );
-  if (normalizedSubfields.length === 0) {
-    return undefined;
-  }
-
-  return {
-    type: "data",
-    tag,
-    indicator1,
-    indicator2: " ",
-    subfields: normalizedSubfields,
-  };
-}
-
-function toSubfield(code: string | undefined, value: string) {
-  const normalizedCode = code?.trim();
-  const normalizedValue = value.trim();
-  return normalizedCode && normalizedValue
-    ? { code: normalizedCode, value: normalizedValue }
-    : undefined;
 }
 
 function formatBirthDeathDate(birthDate: string, deathDate: string) {
@@ -533,35 +484,4 @@ function formatBirthDeathDate(birthDate: string, deathDate: string) {
     return `-${normalizedDeathDate}`;
   }
   return normalizedBirthDate;
-}
-
-function orderPersonalNameSubfields(subfields: SubField[]) {
-  const order = ["a", "g", "d"];
-  return subfields
-    .map((subfield, index) => ({ subfield, index }))
-    .sort((left, right) => {
-      const leftOrder = order.indexOf(left.subfield.code);
-      const rightOrder = order.indexOf(right.subfield.code);
-      const normalizedLeftOrder = leftOrder < 0 ? order.length : leftOrder;
-      const normalizedRightOrder = rightOrder < 0 ? order.length : rightOrder;
-      return (
-        normalizedLeftOrder - normalizedRightOrder || left.index - right.index
-      );
-    })
-    .map(({ subfield }) => subfield);
-}
-
-function isSameDataField(field: MarcField, nextField: MarcDataField) {
-  return (
-    field.type === "data" &&
-    field.tag === nextField.tag &&
-    field.indicator1 === nextField.indicator1 &&
-    field.indicator2 === nextField.indicator2 &&
-    field.subfields.length === nextField.subfields.length &&
-    field.subfields.every(
-      (subfield, index) =>
-        subfield.code === nextField.subfields[index].code &&
-        subfield.value === nextField.subfields[index].value,
-    )
-  );
 }

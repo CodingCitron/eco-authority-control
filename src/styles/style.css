@@ -267,6 +267,39 @@ body {
   word-break: break-all;
 }
 
+.marc-editor-card {
+  height: min(800px, calc(100dvh - 2rem));
+  min-height: 26rem;
+}
+
+.marc-editor-card > .card-body {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.marc-editor-scroll {
+  min-height: 0 !important;
+  overflow-y: auto;
+}
+
+.marc-editor-add-toolbar {
+  flex: 0 0 auto;
+}
+
+@media (min-width: 992px) {
+  .marc-editor-card {
+    position: sticky;
+    top: 80px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .marc-editor-card {
+    height: min(70dvh, 36rem);
+    min-height: 24rem;
+  }
+}
+
 .marc-line {
   display: flex;
   margin-bottom: 0;
@@ -388,6 +421,21 @@ body {
   padding: 0.5rem 0.75rem;
   text-align: left;
   white-space: normal;
+}
+
+/* 전거 통합 요약 테이블의 '통합 주자료' 헤더가 좁은 열에서 줄바꿈되지 않게 한다. */
+#mergeSummaryTable th {
+  white-space: nowrap;
+}
+
+#mergeSummaryTable th:first-child,
+#mergeSummaryTable td:first-child {
+  width: 4rem;
+}
+
+#mergeSummaryTable th:nth-child(2),
+#mergeSummaryTable td:nth-child(2) {
+  width: 8rem;
 }
 
 /* 삭제(flag) 처리된 행 */

@@ -12,8 +12,8 @@ import {
   useMarcEditor,
   type ControlField008,
   type LeaderData,
-  type MarcControlField,
 } from "./marc-editor-context";
+import type { MarcControlField } from "@/types/marc-editor.types";
 
 import { getCodeSet } from "marc-eco";
 
@@ -22,6 +22,7 @@ type FixedFieldFormValues = LeaderData & ControlField008;
 type FieldDefinition = {
   name: Exclude<keyof FixedFieldFormValues, "raw" | "sourceValue">;
   label: string;
+  position: string;
   defaultValue: string;
   codeSet: string;
 };
@@ -30,13 +31,21 @@ const LEADER_FIELDS: FieldDefinition[] = [
   {
     name: "status",
     label: "상 태",
+    position: "05",
     defaultValue: "",
     codeSet: "LEADER_STATUS",
   },
-  { name: "type", label: "형 태", defaultValue: "", codeSet: "LEADER_TYPE" },
+  {
+    name: "type",
+    label: "형 태",
+    position: "06",
+    defaultValue: "",
+    codeSet: "LEADER_TYPE",
+  },
   {
     name: "encodingLevel",
     label: "입력수준",
+    position: "17",
     defaultValue: "",
     codeSet: "LEADER_INPUT_LEVEL",
   },
@@ -44,40 +53,52 @@ const LEADER_FIELDS: FieldDefinition[] = [
 
 const BIBLIOGRAPHIC_FIELD_ROWS: FieldDefinition[][] = [
   [
-    { name: "entryDate", label: "입력날짜", defaultValue: "", codeSet: "" },
+    {
+      name: "entryDate",
+      label: "입력날짜",
+      position: "0~5",
+      defaultValue: "",
+      codeSet: "",
+    },
     {
       name: "geoSubdivision",
       label: "지리구분",
+      position: "6",
       defaultValue: "",
       codeSet: "FIX_008_06",
     },
     {
       name: "romanization",
       label: "로마자번자표",
+      position: "7",
       defaultValue: "",
       codeSet: "FIX_008_07",
     },
     {
       name: "recordKind",
       label: "레코드 종류",
+      position: "9",
       defaultValue: "",
       codeSet: "FIX_008_09",
     },
     {
       name: "catalogingForm",
       label: "목록기술형식",
+      position: "10",
       defaultValue: "",
       codeSet: "FIX_008_10",
     },
     {
       name: "subjectHeading",
       label: "주제명표목표",
+      position: "11",
       defaultValue: "",
       codeSet: "FIX_008_11",
     },
     {
       name: "seriesType",
       label: "총서유형",
+      position: "12",
       defaultValue: "",
       codeSet: "FIX_008_12",
     },
@@ -86,42 +107,49 @@ const BIBLIOGRAPHIC_FIELD_ROWS: FieldDefinition[][] = [
     {
       name: "seriesNumFlag",
       label: "총서번호 유무",
+      position: "13",
       defaultValue: "",
       codeSet: "FIX_008_13",
     },
     {
       name: "mainHeadingUse",
       label: "기본표목/부출표목",
+      position: "14",
       defaultValue: "",
       codeSet: "FIX_008_14",
     },
     {
       name: "subjAddedEntry",
       label: "주제명부출표목",
+      position: "15",
       defaultValue: "",
       codeSet: "FIX_008_15",
     },
     {
       name: "seriesAddedEntry",
       label: "총서부출표목",
+      position: "16",
       defaultValue: "",
       codeSet: "FIX_008_16",
     },
     {
       name: "subjectSubtype",
       label: "주제세목유형",
+      position: "17",
       defaultValue: "",
       codeSet: "FIX_008_17",
     },
     {
       name: "referenceEvaluation",
       label: "참조평가",
+      position: "29",
       defaultValue: "",
       codeSet: "FIX_008_29",
     },
     {
       name: "recordUpdate",
       label: "레코드갱신",
+      position: "31",
       defaultValue: "",
       codeSet: "FIX_008_31",
     },
@@ -130,24 +158,28 @@ const BIBLIOGRAPHIC_FIELD_ROWS: FieldDefinition[][] = [
     {
       name: "nameType",
       label: "이름 유형",
+      position: "32",
       defaultValue: "",
       codeSet: "FIX_008_32",
     },
     {
       name: "headingLevel",
       label: "채택표목수준",
+      position: "33",
       defaultValue: "",
       codeSet: "FIX_008_33",
     },
     {
       name: "modifiedRecord",
       label: "수정레코드",
+      position: "38",
       defaultValue: "",
       codeSet: "FIX_008_38",
     },
     {
       name: "catalogingAgency",
       label: "목록작성기관",
+      position: "39",
       defaultValue: "",
       codeSet: "FIX_008_39",
     },
@@ -240,7 +272,8 @@ function FixedFieldInput({
   return (
     <div className={className}>
       <label className="form-label" htmlFor={id}>
-        {field.label}
+        {field.label}{" "}
+        <span className="text-muted fw-normal">({field.position})</span>
       </label>
       {options.length > 0 ? (
         <div className="position-relative">
@@ -408,6 +441,7 @@ export function AuthorityFixedFieldEditModalBody({
     (field): field is MarcControlField =>
       field.type === "control" && field.tag === "008",
   );
+
   const controlField008 = field008
     ? parseControlField008(field008.value)
     : EMPTY_CONTROL_FIELD_008;
@@ -434,6 +468,7 @@ export function AuthorityFixedFieldEditModalBody({
       (field) => field.type === "control" && field.tag === "008",
     );
 
+    // 업데이트 할때 raw를 업데이트 해주어야 하나?
     setLeaderData({
       status,
       type,

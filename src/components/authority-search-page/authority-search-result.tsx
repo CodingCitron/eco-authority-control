@@ -7,10 +7,12 @@ import {
   type GeographyRow,
   type CorporationRow,
   type SubjectRow,
-  authorityTypeLabels,
-  type AuthoritySearchType,
   type AuthorityRecord,
 } from "@/types/authority-search.types";
+import {
+  authorityTypeLabels,
+  type AuthoritySearchType,
+} from "@/types/authority.types";
 
 import { useSearchPage } from "./authority-search-page-context";
 

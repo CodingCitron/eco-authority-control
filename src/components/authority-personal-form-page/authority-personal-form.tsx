@@ -27,41 +27,51 @@ export default function AuthorityPersonalForm({
   initialValues,
   onSubmit,
 }: AuthorityPersonalFormProps) {
-  const { register, reset, handleSubmit, getValues, control } =
+  const { register, handleSubmit, getValues, control } =
     useForm<PersonalAuthorityFormValues>({
       defaultValues: initialValues ?? createEmptyPersonalAuthorityFormValues(),
     });
   const { setVariableFields, setAuthorityCreateMetadata } = useMarcEditor();
-  const [authorityType, region, createdAt, createdBy] = useWatch({
+  const [
+    region,
+    biographyPrivateYn,
+    copyrightConsent,
+    copyrightConsentDate,
+  ] = useWatch({
     control,
-    name: ["authorityType", "region", "createdAt", "createdBy"],
+    name: [
+      "region",
+      "biographyPrivateYn",
+      "copyrightConsent",
+      "copyrightConsentDate",
+    ],
   });
 
   const addToMarcRecord = (target: PersonalMarcAddTarget) => {
     const values = getValues();
-    setVariableFields((fields) =>
-      addPersonalFormValuesToMarcFields(fields, target, values),
-    );
-  };
 
-  // 상세 조회는 비동기로 도착하므로 수정 대상이 바뀔 때 폼 전체를 갱신한다.
-  useEffect(() => {
-    if (initialValues) {
-      reset(initialValues);
-    }
-  }, [initialValues, reset]);
+    setVariableFields((fields) => {
+      return addPersonalFormValuesToMarcFields(fields, target, values);
+    });
+  };
 
   // 에디터의 저장 버튼에서도 왼쪽 입력 폼의 API 메타데이터를 사용할 수 있게 한다.
   useEffect(() => {
     setAuthorityCreateMetadata(
       mapPersonalFormValuesToAuthorityCreateMetadata({
-        authorityType,
         region,
-        createdAt,
-        createdBy,
+        biographyPrivateYn,
+        copyrightConsent,
+        copyrightConsentDate,
       }),
     );
-  }, [authorityType, createdAt, createdBy, region, setAuthorityCreateMetadata]);
+  }, [
+    biographyPrivateYn,
+    copyrightConsent,
+    copyrightConsentDate,
+    region,
+    setAuthorityCreateMetadata,
+  ]);
 
   return (
     <div className="col-lg-7">
@@ -228,24 +238,23 @@ export default function AuthorityPersonalForm({
                   label="참조표목(400)"
                   name="referenceHeading"
                   register={register}
-                  addTarget="referenceHeading"
-                  onAdd={addToMarcRecord}
                   bold
+                  showAdd={false}
                 />
                 <SimpleInputRow
                   id="p-ref400hanja"
                   label="한자명"
                   name="referenceHanja"
                   register={register}
-                  addTarget="referenceHanja"
-                  onAdd={addToMarcRecord}
+                  showAdd={false}
                 />
                 <SimpleInputRow
                   id="p-ref400roman"
                   label="원어명"
                   name="referenceOriginalName"
                   register={register}
-                  addTarget="referenceOriginalName"
+                  addTarget="references"
+                  addAriaLabel="참조표목(400) 추가"
                   onAdd={addToMarcRecord}
                   last
                 />
@@ -426,18 +435,18 @@ export default function AuthorityPersonalForm({
                       className="form-label mb-0 fw-bold"
                       htmlFor="p-historyVis"
                     >
-                      이력사항 공개구분(368)
+                      이력사항 공개구분
                     </label>
                   </div>
                   <div className="col-md-3">
                     <select
                       className="form-select form-select-sm"
                       id="p-historyVis"
-                      {...register("historyVisibility")}
+                      {...register("biographyPrivateYn")}
                     >
                       <option value="">선택</option>
-                      <option value="e">외부(공개)</option>
-                      <option value="i">내부(비공개)</option>
+                      <option value="N">외부(공개)</option>
+                      <option value="Y">내부(비공개)</option>
                     </select>
                   </div>
                   <div className="col-auto">
@@ -544,6 +553,7 @@ interface SimpleInputRowProps extends RegisteredFieldProps {
   last?: boolean;
   placeholder?: string;
   showAdd?: boolean;
+  addAriaLabel?: string;
   addTarget?: PersonalMarcAddTarget;
   onAdd?: (target: PersonalMarcAddTarget) => void;
 }
@@ -557,6 +567,7 @@ function SimpleInputRow({
   last = false,
   placeholder,
   showAdd = true,
+  addAriaLabel,
   addTarget,
   onAdd,
 }: SimpleInputRowProps) {
@@ -581,7 +592,7 @@ function SimpleInputRow({
       </div>
       {showAdd && addTarget && onAdd && (
         <AddButton
-          ariaLabel={`${label} 추가`}
+          ariaLabel={addAriaLabel ?? `${label} 추가`}
           onClick={() => onAdd(addTarget)}
         />
       )}

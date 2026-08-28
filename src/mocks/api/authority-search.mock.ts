@@ -1,7 +1,8 @@
 import { http } from "msw";
 
 import { authoritySearchMockData } from "@/mocks/data/authority-search.data";
-import { isAuthoritySearchType } from "@/types/authority-search.types";
+import { authoritySettingsMockData } from "@/mocks/data/authority-settings.data";
+import { isAuthoritySearchType } from "@/types/authority.types";
 import type { AuthoritySearchQueryParams } from "@/api/authority-search";
 import { createApiResponse } from "@/mocks/utils";
 
@@ -22,6 +23,12 @@ function parseQueryParams(request: Request): AuthoritySearchQueryParams {
 export const authoritySearchHandlers = [
   http.get("/api/ac/search", ({ request }) => {
     const query = parseQueryParams(request);
+    const regionCode = query.acRegionCode;
+    const regionLabel = regionCode
+      ? authoritySettingsMockData.REGION_CODE[
+          regionCode as keyof typeof authoritySettingsMockData.REGION_CODE
+        ] ?? regionCode
+      : undefined;
     const filteredRows = authoritySearchMockData.filter((row) => {
       if (
         query.acType &&
@@ -32,9 +39,10 @@ export const authoritySearchHandlers = [
       }
 
       if (
-        query.acRegionCode &&
-        query.acRegionCode !== "all" &&
-        row.acRegionDesc !== query.acRegionCode
+        regionCode &&
+        regionCode !== "0" &&
+        regionCode !== "all" &&
+        row.acRegionDesc !== regionLabel
       ) {
         return false;
       }

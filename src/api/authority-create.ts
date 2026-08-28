@@ -1,29 +1,17 @@
-import z from "zod";
-
 import { apiClient } from "@/lib/axios";
-import type {
-  AuthorityControlField,
-  AuthorityDataField,
-} from "@/types/authority-detail.types";
-import type { AuthoritySearchType } from "@/types/authority-search.types";
+import type { MarcEditorRecord } from "@/types/marc-editor.types";
+import type { AuthorityYesNo } from "@/types/authority.types";
 import { authorityDetailResponseSchema } from "./authority-detail";
 
 export interface AuthorityCreateQueryParams {
-  acType: AuthoritySearchType;
+  leaderStatus: string;
+  leaderType: string;
+  leaderInputLevel: string;
   acRegionCode: string;
-  // activityField: string;
-  // hanjaName?: string;
-  // headingName?: string;
-  // birthDeathDate?: string;
-  firstInputDate?: string;
-  firstWorker?: string;
-  // lastUpdateDate?: string;
-  // lastWorker?: string;
-  record: {
-    leader: string;
-    control_fields: AuthorityControlField[];
-    data_fields: AuthorityDataField[];
-  };
+  biographyPrivateYn: AuthorityYesNo;
+  copyrightBlanketAgreeYn: AuthorityYesNo;
+  copyrightBlanketAgreeDate?: string;
+  record: MarcEditorRecord;
 }
 
 export async function fetchAuthorityCreate(params: AuthorityCreateQueryParams) {

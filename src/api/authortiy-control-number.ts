@@ -1,7 +1,7 @@
 import z from "zod";
 
 import { apiClient } from "@/lib/axios";
-import type { AuthoritySearchType } from "@/types/authority-search.types";
+import type { AuthoritySearchType } from "@/types/authority.types";
 
 export const generateControlNumberResponseSchema = z.object({
   data: z.string(),

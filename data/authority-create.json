@@ -1,0 +1,119 @@
+{
+  "leaderStatus": "n",
+  "leaderType": "z",
+  "leaderInputLevel": "n",
+  "acRegionCode": "",
+  "biographyPrivateYn": "N",
+  "copyrightBlanketAgreeYn": "N",
+  "record": {
+    "controlFields": [
+      {
+        "tag": "008",
+        "value": "260827 a za   aaan           a npn     K"
+      }
+    ],
+    "dataFields": [
+      {
+        "tag": "046",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "f",
+            "value": "1952-03-14"
+          }
+        ]
+      },
+      {
+        "tag": "046",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "g",
+            "value": "2021-11-08"
+          }
+        ]
+      },
+      {
+        "tag": "100",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "한가람"
+          },
+          {
+            "code": "d",
+            "value": "1952-2021"
+          },
+          {
+            "code": "g",
+            "value": "韓嘉藍"
+          }
+        ]
+      },
+      {
+        "tag": "370",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "부산광역시"
+          },
+          {
+            "code": "s",
+            "value": "1952"
+          },
+          {
+            "code": "t",
+            "value": "1970"
+          }
+        ]
+      },
+      {
+        "tag": "374",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "동화작가"
+          },
+          {
+            "code": "s",
+            "value": "1980"
+          },
+          {
+            "code": "t",
+            "value": "2021"
+          }
+        ]
+      },
+      {
+        "tag": "400",
+        "ind1": "1",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "Han, Garam"
+          }
+        ]
+      },
+      {
+        "tag": "670",
+        "ind1": " ",
+        "ind2": " ",
+        "subfields": [
+          {
+            "code": "a",
+            "value": "가상인명사전, 2026: p. 100"
+          }
+        ]
+      }
+    ]
+  }
+}

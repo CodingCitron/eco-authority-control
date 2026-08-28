@@ -14,10 +14,10 @@ export function BibliographicRecordConsistencyButton() {
     <>
       <button
         type="button"
-        className="btn btn-light-info ms-2"
+        className="btn btn-light-info"
         onClick={handleClick}
       >
-        서지레코드 일치성 검사
+        서지레코드 일관성 검사
       </button>
       <BibliographicRecordConsistencyModal
         show={modalIsOpen}

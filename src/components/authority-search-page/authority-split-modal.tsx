@@ -15,7 +15,7 @@ import { fetchGenerateAuthorityControlNumber } from "@/api/authortiy-control-num
 import {
   isValidAcType,
   type AuthoritySearchType,
-} from "@/types/authority-search.types";
+} from "@/types/authority.types";
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 
 export function AuthoritySplitButton() {
@@ -175,19 +175,17 @@ export function AuthoritySplitModalBody({
         )}
 
         {!isLoading && isError && (
-          <p className="alert alert-danger mb-0" role="alert">
+          <p className="mb-0">
             선택한 전거자료를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
           </p>
         )}
 
         {isRecordFetchComplete && isDetailDataLoading && (
-          <p className="alert alert-info mb-0" role="status">
-            선택한 전거의 상세 정보를 불러오는 중입니다.
-          </p>
+          <p className="mb-0">선택한 전거의 상세 정보를 불러오는 중입니다.</p>
         )}
 
         {isRecordFetchComplete && !isDetailDataLoading && isDetailDataError && (
-          <p className="alert alert-danger mb-0" role="alert">
+          <p className="mb-0">
             선택한 전거자료를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
           </p>
         )}

@@ -1,10 +1,10 @@
 import { useState, type ReactNode } from "react";
-import {
-  MarcEditorContext,
-  type AuthorityCreateMetadata,
-  type LeaderData,
-  type MarcField,
-} from "./marc-editor-context";
+import { sortMarcFields } from "@/lib/marc/marc-field.utils";
+import type {
+  AuthorityCreateMetadata,
+  MarcField,
+} from "@/types/marc-editor.types";
+import { MarcEditorContext, type LeaderData } from "./marc-editor-context";
 
 export default function MarcEditorProvider({
   children,
@@ -29,7 +29,7 @@ export default function MarcEditorProvider({
     },
   );
   const [variableFields, setVariableFields] = useState<MarcField[]>(
-    initialFields ?? [],
+    sortMarcFields(initialFields ?? []),
   );
   const [authorityCreateMetadata, setAuthorityCreateMetadata] =
     useState<AuthorityCreateMetadata>(initialAuthorityCreateMetadata ?? {});
@@ -42,8 +42,6 @@ export default function MarcEditorProvider({
     setVariableFields,
     setAuthorityCreateMetadata,
   };
-
-  // setVariableFields 이후, sorting되게 해야 함
 
   return (
     <MarcEditorContext.Provider value={value}>
