@@ -225,6 +225,7 @@ export default function AuthorityPersonalFormPage({
           <div className="col-lg-5">
             <MarcEditor
               showPrevAndNextButtons={!isCreatePage}
+              showBibliographicRecordConsistencyButton={!isCreatePage}
               onPrevious={() => moveToRecord(currentRecordIndex - 1)}
               onNext={() => moveToRecord(currentRecordIndex + 1)}
               previousDisabled={

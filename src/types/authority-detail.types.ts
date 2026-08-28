@@ -26,6 +26,7 @@ export const authorityDetailDataSchema = z.object({
   acType: z.string(),
   acControlNo: z.string(),
   acRegionCode: z.string().nullish(),
+  acRegionDesc: z.string().nullish(),
   activityField: z.string().nullish(),
   hanjaName: z.string().nullish(),
   headingName: z.string().nullish(),

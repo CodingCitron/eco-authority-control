@@ -22,6 +22,7 @@ import { BibliographicRecordConsistencyButton } from "../authority-personal-form
 
 interface MarcEditorProps {
   showPrevAndNextButtons?: boolean;
+  showBibliographicRecordConsistencyButton?: boolean;
   onPrevious?: () => void;
   onNext?: () => void;
   previousDisabled?: boolean;
@@ -45,6 +46,7 @@ type EditorMode = "form" | "text";
 
 export default function MarcEditor({
   showPrevAndNextButtons,
+  showBibliographicRecordConsistencyButton,
   onPrevious,
   onNext,
   previousDisabled = false,
@@ -192,7 +194,9 @@ export default function MarcEditor({
               </button>{" "}
             </>
           )}
-          <BibliographicRecordConsistencyButton />
+          {showBibliographicRecordConsistencyButton && (
+            <BibliographicRecordConsistencyButton />
+          )}
         </div>
         <div>
           <button className="btn btn-light-warning">중복조사</button>{" "}

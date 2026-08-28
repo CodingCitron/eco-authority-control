@@ -459,13 +459,16 @@ export default function AuthorityPersonalForm({
                 bold
                 last
               />
-              <div className="row g-2 align-items-center mb-2">
-                <div className="col-md-2">
+            </Outline>
+
+            <div className="col-12">
+              <div className="row g-2 align-items-center justify-content-between mb-2">
+                <div className="col-md-3">
                   <label
                     className="form-label mb-0 fw-bold"
                     htmlFor="p-historyVis"
                   >
-                    이력사항 공개구분
+                    이력사항 공개구분(368)
                   </label>
                 </div>
                 <div className="col-md-3">
@@ -485,7 +488,7 @@ export default function AuthorityPersonalForm({
                   </span>
                 </div>
               </div>
-            </Outline>
+            </div>
 
             <div className="col-12">
               <div className="d-flex align-items-center justify-content-between mb-2">
