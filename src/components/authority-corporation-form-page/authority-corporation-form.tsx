@@ -187,6 +187,23 @@ export default function AuthorityCorporationForm({
             </Outline>
 
             <Outline>
+              <div className="row g-2 align-items-center mb-2">
+                <div className="col-md-2">
+                  <span className="form-label fw-bold mb-0 text-nowrap">
+                    참조표목(551)
+                  </span>
+                </div>
+                <div className="col">
+                  <button
+                    type="button"
+                    className="btn btn-secondary w-100"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modal5XX"
+                  >
+                    참조표목조회(5XX) 추가
+                  </button>
+                </div>
+              </div>
               <div className="row g-2 align-items-start">
                 <div className="col-md-2">
                   <label
