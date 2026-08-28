@@ -2,7 +2,10 @@ import { useState, type ButtonHTMLAttributes, type MouseEvent } from "react";
 import { Alert, Button, Modal } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { deleteAuthorityRecord } from "@/api/authority-delete";
+import {
+  fetchDeleteAuthorityRecord,
+  fetchDeleteAuthorityRecords,
+} from "@/api/authority-delete";
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search";
 import BaseModal from "@/components/ui/base-modal";
 import { useSearchPage } from "./authority-search-page-context";
@@ -86,20 +89,97 @@ export default function AuthorityDeleteModal({
 }
 
 export function AuthorityDeleteModalBody({ onHide }: { onHide: () => void }) {
-  const { selectedRecordKeys } = useSearchPage();
+  const queryClient = useQueryClient();
+  const { selectedRecordKeys, clearSelectedRecordKeys } = useSearchPage();
+
+  const {
+    mutate,
+    data: deleteResults,
+    isPending,
+    isError,
+    reset,
+  } = useMutation({
+    mutationFn: () => fetchDeleteAuthorityRecords([...selectedRecordKeys]),
+    onSuccess: async (results) => {
+      await queryClient.invalidateQueries({
+        queryKey: authoritySearchQueryKeys.all,
+      });
+
+      const deletedItems = results.data.items;
+      const isEveryRecordDeleted =
+        deletedItems.length === selectedRecordKeys.length &&
+        deletedItems.every((item) => item.deleted);
+      if (!isEveryRecordDeleted) {
+        return;
+      }
+
+      const deletedCount = selectedRecordKeys.length;
+      clearSelectedRecordKeys();
+      window.alert(`전거자료 ${deletedCount}건을 삭제했습니다.`);
+      onHide();
+    },
+  });
+
+  const handleHide = () => {
+    if (!isPending) {
+      reset();
+      onHide();
+    }
+  };
+
+  const deletedCount =
+    deleteResults?.data.items.filter((item) => item.deleted).length ?? 0;
+  const incompleteDeleteCount = deleteResults
+    ? Math.max(selectedRecordKeys.length - deletedCount, 0)
+    : 0;
 
   return (
     <>
-      <Modal.Header closeButton>
+      <Modal.Header
+        closeVariant="white"
+        className="bg-primary text-white"
+        closeButton={!isPending}
+        onHide={handleHide}
+      >
         <Modal.Title as="h2" className="h5 fw-bold">
           전거자료 일괄 삭제
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p className="mb-0">일괄 삭제 기능 준비 중</p>
+        {isError && (
+          <Alert variant="danger" role="alert">
+            선택한 전거자료를 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.
+          </Alert>
+        )}
+        {incompleteDeleteCount > 0 && (
+          <Alert variant="warning" role="alert">
+            선택한 전거자료 중 {incompleteDeleteCount}건이 삭제되지 않았습니다.
+            검색 결과를 확인해 주세요.
+          </Alert>
+        )}
+
+        <p className="mb-2">
+          선택한 전거자료 {selectedRecordKeys.length}건을 일괄 삭제하시겠습니까?
+        </p>
+        <p className="mb-0 text-danger small">
+          삭제한 전거자료는 복구할 수 없습니다.
+        </p>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
+      <Modal.Footer className="justify-content-center">
+        <Button
+          variant="danger"
+          className="px-4 fw-bold"
+          disabled={isPending}
+          onClick={() => mutate()}
+        >
+          {isPending ? "삭제 중..." : "일괄 삭제"}
+        </Button>
+        <Button
+          variant="secondary"
+          className="px-4 fw-bold"
+          disabled={isPending}
+          onClick={handleHide}
+        >
           취소
         </Button>
       </Modal.Footer>
@@ -115,7 +195,7 @@ export function AuthorityDeleteOneModalBody({
   const queryClient = useQueryClient();
 
   const { mutate, isPending, isError, reset } = useMutation({
-    mutationFn: deleteAuthorityRecord,
+    mutationFn: fetchDeleteAuthorityRecord,
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: authoritySearchQueryKeys.all,
@@ -152,6 +232,9 @@ export function AuthorityDeleteOneModalBody({
         )}
 
         <p className="mb-2">전거자료({controlNumber})를 삭제하시겠습니까?</p>
+        <p className="mb-0 text-danger small">
+          삭제한 전거자료는 복구할 수 없습니다.
+        </p>
       </Modal.Body>
 
       <Modal.Footer className="justify-content-center">

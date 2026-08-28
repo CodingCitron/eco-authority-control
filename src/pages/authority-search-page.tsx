@@ -48,7 +48,9 @@ export default function SearchPage() {
                 <AuthorityDeleteButton
                   showIcon
                   className="btn btn-light-danger btn-sm"
-                />
+                >
+                  일괄삭제
+                </AuthorityDeleteButton>
               </div>
               <div>
                 <Link
