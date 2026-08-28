@@ -91,45 +91,35 @@ export default function AuthorityPersonalFormPage({
       );
     },
     onSuccess: async (data: AuthorityDetailResponse) => {
+      const savedRecordKey = data.data.recKey;
+
+      queryClient.setQueryData(
+        authorityDetailKeys.detail(savedRecordKey),
+        data,
+      );
+
       await queryClient.invalidateQueries({
         queryKey: authoritySearchQueryKeys.all,
       });
 
-      if (currentRecordKey) {
-        await queryClient.invalidateQueries({
-          queryKey: authorityDetailKeys.detail(currentRecordKey),
-        });
-      }
-
-      console.log(data);
-
-      // 입력 reckey로 수정 페이지 이동 필요
       if (isCreatePage) {
-        const recKey = data.data.recKey;
-
-        // 캐시 업데이트
-
-        // 메시지 표시
-        alert("개인명 전거가 생성되었습니다.");
+        window.alert("개인명 전거가 생성되었습니다.");
 
         navigate(
           {
             pathname: "/personal/edit",
-            search: `${createSearchParams({
-              recKey: recKey,
-            })}`,
+            search: createSearchParams({
+              recKey: savedRecordKey,
+            }).toString(),
           },
           {
             replace: true,
           },
         );
-      } else {
-        // 현재 페이지 유지
-        // 캐시 업데이트
-
-        // 메시지 표시
-        alert("개인명 전거가 수정되었습니다.");
+        return;
       }
+
+      window.alert("개인명 전거가 수정되었습니다.");
     },
     onError: (error) => {
       console.log(error);

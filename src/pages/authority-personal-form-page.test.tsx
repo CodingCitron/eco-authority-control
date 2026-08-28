@@ -1,12 +1,15 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, useSearchParams } from "react-router";
+import { MemoryRouter, useLocation, useSearchParams } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fetchAuthorityCreate } from "@/api/authority-create";
 import { fetchAuthorityUpdate } from "@/api/authority-update";
-import { useAuthorityDetail } from "@/hooks/use-authority-detail";
+import {
+  authorityDetailKeys,
+  useAuthorityDetail,
+} from "@/hooks/use-authority-detail";
 
 import AuthorityPersonalFormPage from "./authority-personal-form-page";
 
@@ -16,6 +19,17 @@ function CurrentSearchParamProbe() {
   return (
     <output data-testid="current-search-param">
       {searchParams.get("current") ?? "없음"}
+    </output>
+  );
+}
+
+function CurrentLocationProbe() {
+  const location = useLocation();
+
+  return (
+    <output data-testid="current-location">
+      {location.pathname}
+      {location.search}
     </output>
   );
 }
@@ -281,12 +295,44 @@ describe("AuthorityPersonalFormPage", () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
-    vi.mocked(fetchAuthorityCreate).mockResolvedValue({} as never);
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const createResponse = {
+      data: {
+        recKey: "created-record",
+        acType: "0",
+        acControlNo: "AUTH0002",
+        acRegionCode: "1",
+        activityField: null,
+        hanjaName: null,
+        headingName: "김소월",
+        birthDeathDate: null,
+        firstInputDate: "2026-08-28T10:00:00.000Z",
+        firstWorker: "creator",
+        lastUpdateDate: "2026-08-28T10:00:00.000Z",
+        lastWorker: "creator",
+        sourceControlNo: null,
+        sourceDataFound: null,
+        record: {
+          leader: "00000nz  a2200000n  4500",
+          controlFields: [],
+          dataFields: [
+            {
+              tag: "100",
+              ind1: "1",
+              ind2: " ",
+              subfields: [{ code: "a", value: "김소월" }],
+            },
+          ],
+        },
+      },
+    };
+    vi.mocked(fetchAuthorityCreate).mockResolvedValue(createResponse);
 
     render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
           <AuthorityPersonalFormPage mode="create" />
+          <CurrentLocationProbe />
         </MemoryRouter>
       </QueryClientProvider>,
     );
@@ -322,6 +368,18 @@ describe("AuthorityPersonalFormPage", () => {
       });
     });
     expect(fetchAuthorityUpdate).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith("개인명 전거가 생성되었습니다.");
+      expect(screen.getByTestId("current-location")).toHaveTextContent(
+        "/personal/edit?recKey=created-record",
+      );
+    });
+    expect(
+      queryClient.getQueryData(
+        authorityDetailKeys.detail("created-record"),
+      ),
+    ).toEqual(createResponse);
+    alertSpy.mockRestore();
   });
 
   it("백엔드 MARC 검증 오류를 레코드 뷰의 행 추가 영역에 표시한다", async () => {
@@ -409,6 +467,7 @@ describe("AuthorityPersonalFormPage", () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
     const leader = "00000nz  a2200000n  4500";
     const detailResponse = {
       data: {
@@ -481,5 +540,12 @@ describe("AuthorityPersonalFormPage", () => {
       });
     });
     expect(fetchAuthorityCreate).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith("개인명 전거가 수정되었습니다.");
+    });
+    expect(
+      queryClient.getQueryData(authorityDetailKeys.detail("record-1")),
+    ).toEqual(detailResponse);
+    alertSpy.mockRestore();
   });
 });

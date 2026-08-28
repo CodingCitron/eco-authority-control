@@ -223,141 +223,137 @@ export default function AuthorityPersonalForm({
               </div>
             </div>
 
-            <div className="col-12">
-              <div className="box-group border rounded p-3">
-                <SimpleInputRow
-                  id="p-ref400"
-                  label="참조표목(400)"
-                  name="referenceHeading"
-                  register={register}
-                  bold
-                  showAdd={false}
-                />
-                <SimpleInputRow
-                  id="p-ref400hanja"
-                  label="한자명(400)"
-                  name="referenceHanja"
-                  register={register}
-                  addTarget="references"
-                  addAriaLabel="참조표목(400) 추가"
-                  onAdd={addToMarcRecord}
-                />
-                <SimpleInputRow
-                  id="p-ref400roman"
-                  label="원어명(400)"
-                  name="referenceOriginalName"
-                  register={register}
-                  addTarget="referenceOriginalName"
-                  onAdd={addToMarcRecord}
-                  last
-                />
-              </div>
-            </div>
+            <Outline>
+              <SimpleInputRow
+                id="p-ref400"
+                label="참조표목(400)"
+                name="referenceHeading"
+                register={register}
+                bold
+                showAdd={false}
+              />
+              <SimpleInputRow
+                id="p-ref400hanja"
+                label="한자명(400)"
+                name="referenceHanja"
+                register={register}
+                addTarget="references"
+                addAriaLabel="참조표목(400) 추가"
+                onAdd={addToMarcRecord}
+              />
+              <SimpleInputRow
+                id="p-ref400roman"
+                label="원어명(400)"
+                name="referenceOriginalName"
+                register={register}
+                addTarget="referenceOriginalName"
+                onAdd={addToMarcRecord}
+                last
+              />
+            </Outline>
 
-            <div className="col-12">
-              <div className="box-group border rounded p-3">
-                <SimpleInputRow
-                  id="p-other368"
-                  label="기타속성(368)"
-                  name="otherAttribute"
-                  register={register}
-                  addTarget="otherAttribute"
-                  onAdd={addToMarcRecord}
-                  bold
-                />
-                <div className="row g-2 align-items-center mb-2">
-                  <div className="col-md-2">
-                    <label
-                      className="form-label mb-0 fw-bold"
-                      htmlFor="p-placeType370"
-                    >
-                      관련장소(370)
-                    </label>
-                  </div>
-                  <div className="col-md-2">
-                    <label className="visually-hidden" htmlFor="p-placeType370">
-                      관련장소(370) 유형
-                    </label>
-                    <select
-                      className="form-select form-select-sm"
-                      id="p-placeType370"
-                      {...register("placeType")}
-                    >
-                      <option value="">선택</option>
-                      <option value="birth">출생지</option>
-                      <option value="death">사망지</option>
-                      <option value="activity">활동지</option>
-                      <option value="residence">거주지</option>
-                    </select>
-                  </div>
-                  <div className="col">
-                    <label className="visually-hidden" htmlFor="p-place370">
-                      관련장소(370) 입력
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="p-place370"
-                      {...register("place")}
-                    />
-                  </div>
-                  <DateRangeInputs
-                    idPrefix="p-place370"
-                    label="관련장소 관련일자"
-                    fromName="placeDateFrom"
-                    toName="placeDateTo"
-                    register={register}
-                  />
-                  <AddButton
-                    ariaLabel="관련장소 추가"
-                    onClick={() => addToMarcRecord("place")}
+            <Outline>
+              <SimpleInputRow
+                id="p-other368"
+                label="기타속성(368)"
+                name="otherAttribute"
+                register={register}
+                addTarget="otherAttribute"
+                onAdd={addToMarcRecord}
+                bold
+              />
+              <div className="row g-2 align-items-center mb-2">
+                <div className="col-md-2">
+                  <label
+                    className="form-label mb-0 fw-bold"
+                    htmlFor="p-placeType370"
+                  >
+                    관련장소(370)
+                  </label>
+                </div>
+                <div className="col-md-2">
+                  <label className="visually-hidden" htmlFor="p-placeType370">
+                    관련장소(370) 유형
+                  </label>
+                  <select
+                    className="form-select form-select-sm"
+                    id="p-placeType370"
+                    {...register("placeType")}
+                  >
+                    <option value="">선택</option>
+                    <option value="birth">출생지</option>
+                    <option value="death">사망지</option>
+                    <option value="activity">활동지</option>
+                    <option value="residence">거주지</option>
+                  </select>
+                </div>
+                <div className="col">
+                  <label className="visually-hidden" htmlFor="p-place370">
+                    관련장소(370) 입력
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="p-place370"
+                    {...register("place")}
                   />
                 </div>
+                <DateRangeInputs
+                  idPrefix="p-place370"
+                  label="관련장소 관련일자"
+                  fromName="placeDateFrom"
+                  toName="placeDateTo"
+                  register={register}
+                />
+                <AddButton
+                  ariaLabel="관련장소 추가"
+                  onClick={() => addToMarcRecord("place")}
+                />
+              </div>
 
-                <div className="row g-2 align-items-center">
-                  <div className="col-md-2">
-                    <label
-                      className="form-label mb-0 fw-bold"
-                      htmlFor="p-addrType371"
-                    >
-                      주소(371)
-                    </label>
-                  </div>
-                  <div className="col-md-2">
-                    <label className="visually-hidden" htmlFor="p-addrType371">
-                      주소(371) 유형
-                    </label>
-                    <select
-                      className="form-select form-select-sm"
-                      id="p-addrType371"
-                      {...register("addressType")}
-                    >
-                      <option value="">선택</option>
-                      <option value="a">주소($a)</option>
-                      <option value="b">도시($b)</option>
-                      <option value="d">국가($d)</option>
-                      <option value="e">우편번호($e)</option>
-                      <option value="m">이메일($m)</option>
-                    </select>
-                  </div>
-                  <div className="col">
-                    <label className="visually-hidden" htmlFor="p-addr371">
-                      주소(371) 입력
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="p-addr371"
-                      {...register("address")}
-                    />
-                  </div>
-                  <AddButton
-                    ariaLabel="주소 추가"
-                    onClick={() => addToMarcRecord("address")}
+              <div className="row g-2 align-items-center">
+                <div className="col-md-2">
+                  <label
+                    className="form-label mb-0 fw-bold"
+                    htmlFor="p-addrType371"
+                  >
+                    주소(371)
+                  </label>
+                </div>
+                <div className="col-md-2">
+                  <label className="visually-hidden" htmlFor="p-addrType371">
+                    주소(371) 유형
+                  </label>
+                  <select
+                    className="form-select form-select-sm"
+                    id="p-addrType371"
+                    {...register("addressType")}
+                  >
+                    <option value="">선택</option>
+                    <option value="a">주소($a)</option>
+                    <option value="b">도시($b)</option>
+                    <option value="d">국가($d)</option>
+                    <option value="e">우편번호($e)</option>
+                    <option value="m">이메일($m)</option>
+                  </select>
+                </div>
+                <div className="col">
+                  <label className="visually-hidden" htmlFor="p-addr371">
+                    주소(371) 입력
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="p-addr371"
+                    {...register("address")}
                   />
                 </div>
+                <AddButton
+                  ariaLabel="주소 추가"
+                  onClick={() => addToMarcRecord("address")}
+                />
               </div>
-            </div>
+            </Outline>
 
             <Outline>
               <RelatedDateRow
