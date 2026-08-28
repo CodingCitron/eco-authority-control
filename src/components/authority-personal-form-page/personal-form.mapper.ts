@@ -166,8 +166,8 @@ function getGender(value: string): PersonalGender {
 export function mapAuthorityDetailToPersonalFormValues(
   detail: AuthorityDetailData,
 ): PersonalAuthorityFormValues {
-  const field100 = findMarcFieldByTag(detail.record.data_fields, "100");
-  const fields046 = detail.record.data_fields.filter(
+  const field100 = findMarcFieldByTag(detail.record.dataFields, "100");
+  const fields046 = detail.record.dataFields.filter(
     (field) => field.tag === "046",
   );
   const headingDates = splitBirthDeathDate(
@@ -191,7 +191,7 @@ export function mapAuthorityDetailToPersonalFormValues(
     ...dates,
     gender: getGender(
       getMarcSubfieldValue(
-        findMarcFieldByTag(detail.record.data_fields, "375"),
+        findMarcFieldByTag(detail.record.dataFields, "375"),
         "a",
       ),
     ),

@@ -36,11 +36,11 @@ export const authorityDetailDataSchema = z.object({
   lastWorker: z.string().nullish(),
   record: z.object({
     leader: z.string(),
-    control_fields: z.array(authorityControlFieldSchema),
-    data_fields: z.array(authorityDataFieldSchema),
+    controlFields: z.array(authorityControlFieldSchema),
+    dataFields: z.array(authorityDataFieldSchema),
   }),
-  sourceControlNo: z.string(),
-  sourceDataFound: z.string(),
+  sourceControlNo: z.string().nullish(),
+  sourceDataFound: z.string().nullish(),
 });
 
 export type AuthorityControlField = z.infer<typeof authorityControlFieldSchema>;

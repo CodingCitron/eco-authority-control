@@ -50,13 +50,13 @@ export default function MarcRecordPreview({
         <span className="marc-tag">LDR</span>
         {record.leader}
       </div>
-      {sort(record.control_fields).map((field) => (
+      {sort(record.controlFields).map((field) => (
         <div className="marc-line" key={`${field.tag}-${field.value}`}>
           <span className="marc-tag">{field.tag}</span>
           {field.value}
         </div>
       ))}
-      {sort(record.data_fields).map((field, index) => (
+      {sort(record.dataFields).map((field, index) => (
         <div className="marc-line" key={`${field.tag}-${index}`}>
           <span className="marc-tag">{field.tag}</span>
           {field.ind1}

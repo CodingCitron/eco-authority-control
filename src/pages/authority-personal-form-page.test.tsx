@@ -27,9 +27,8 @@ vi.mock("@/api/authority-update", () => ({
   fetchAuthorityUpdate: vi.fn(),
 }));
 vi.mock("@/hooks/use-authority-detail", async (importOriginal) => {
-  const actual = await importOriginal<
-    typeof import("@/hooks/use-authority-detail")
-  >();
+  const actual =
+    await importOriginal<typeof import("@/hooks/use-authority-detail")>();
 
   return {
     ...actual,
@@ -53,9 +52,7 @@ describe("AuthorityPersonalFormPage", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter
-          initialEntries={[
-            "/personal/edit?recKeys=1226277,1238369,1238510",
-          ]}
+          initialEntries={["/personal/edit?recKeys=1226277,1238369,1238510"]}
         >
           <AuthorityPersonalFormPage mode="edit" />
           <CurrentSearchParamProbe />
@@ -79,9 +76,7 @@ describe("AuthorityPersonalFormPage", () => {
     await user.click(getNextButton());
 
     await waitFor(() => {
-      expect(screen.getByTestId("current-search-param")).toHaveTextContent(
-        "1",
-      );
+      expect(screen.getByTestId("current-search-param")).toHaveTextContent("1");
       expect(useAuthorityDetail).toHaveBeenLastCalledWith("1238369", {
         enabled: true,
       });
@@ -92,9 +87,7 @@ describe("AuthorityPersonalFormPage", () => {
     await user.click(getNextButton());
 
     await waitFor(() => {
-      expect(screen.getByTestId("current-search-param")).toHaveTextContent(
-        "2",
-      );
+      expect(screen.getByTestId("current-search-param")).toHaveTextContent("2");
       expect(useAuthorityDetail).toHaveBeenLastCalledWith("1238510", {
         enabled: true,
       });
@@ -105,9 +98,7 @@ describe("AuthorityPersonalFormPage", () => {
     await user.click(getPreviousButton());
 
     await waitFor(() => {
-      expect(screen.getByTestId("current-search-param")).toHaveTextContent(
-        "1",
-      );
+      expect(screen.getByTestId("current-search-param")).toHaveTextContent("1");
       expect(useAuthorityDetail).toHaveBeenLastCalledWith("1238369", {
         enabled: true,
       });
@@ -264,13 +255,9 @@ describe("AuthorityPersonalFormPage", () => {
       name: "메시지 2건",
     });
     expect(messageToggle).toHaveAttribute("aria-expanded", "true");
-    expect(
-      screen.getByRole("button", { name: "MARC 행 추가" }),
-    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "MARC 행 추가" })).toBeVisible();
 
-    await user.click(
-      screen.getByRole("button", { name: "오류 메시지 닫기" }),
-    );
+    await user.click(screen.getByRole("button", { name: "오류 메시지 닫기" }));
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(messageToggle).toHaveAttribute("aria-expanded", "false");
 
@@ -289,9 +276,7 @@ describe("AuthorityPersonalFormPage", () => {
     await waitFor(() => {
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
-    expect(
-      screen.getByRole("button", { name: "메시지 없음" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "메시지 없음" })).toBeDisabled();
   });
 
   it("수정 버튼을 누르면 recKey와 기존 Leader를 개인명 수정 API에 전달한다", async () => {
@@ -300,38 +285,39 @@ describe("AuthorityPersonalFormPage", () => {
       defaultOptions: { queries: { retry: false } },
     });
     const leader = "00000nz  a2200000n  4500";
-    vi.mocked(fetchAuthorityUpdate).mockResolvedValue({});
-    vi.mocked(useAuthorityDetail).mockReturnValue({
+    const detailResponse = {
       data: {
-        data: {
-          recKey: "record-1",
-          acType: "0",
-          acControlNo: "AUTH0001",
-          acRegionCode: "1",
-          activityField: "문학",
-          hanjaName: "金素月",
-          headingName: "김소월",
-          birthDeathDate: "1902-1934",
-          firstInputDate: "2026-08-25T10:00:00.000Z",
-          firstWorker: "creator",
-          lastUpdateDate: "2026-08-26T10:00:00.000Z",
-          lastWorker: "editor",
-          sourceControlNo: "",
-          sourceDataFound: "",
-          record: {
-            leader,
-            control_fields: [{ tag: "001", value: "AUTH0001" }],
-            data_fields: [
-              {
-                tag: "100",
-                ind1: "1",
-                ind2: " ",
-                subfields: [{ code: "a", value: "김소월" }],
-              },
-            ],
-          },
+        recKey: "record-1",
+        acType: "0",
+        acControlNo: "AUTH0001",
+        acRegionCode: "1",
+        activityField: "문학",
+        hanjaName: "金素月",
+        headingName: "김소월",
+        birthDeathDate: "1902-1934",
+        firstInputDate: "2026-08-25T10:00:00.000Z",
+        firstWorker: "creator",
+        lastUpdateDate: "2026-08-26T10:00:00.000Z",
+        lastWorker: "editor",
+        sourceControlNo: "",
+        sourceDataFound: "",
+        record: {
+          leader,
+          controlFields: [{ tag: "001", value: "AUTH0001" }],
+          dataFields: [
+            {
+              tag: "100",
+              ind1: "1",
+              ind2: " ",
+              subfields: [{ code: "a", value: "김소월" }],
+            },
+          ],
         },
       },
+    };
+    vi.mocked(fetchAuthorityUpdate).mockResolvedValue(detailResponse);
+    vi.mocked(useAuthorityDetail).mockReturnValue({
+      data: detailResponse,
     } as never);
 
     render(

@@ -1,6 +1,9 @@
 import { apiClient } from "@/lib/axios";
+
 import type { AuthorityYesNo } from "@/types/authority.types";
 import type { MarcEditorRecord } from "@/types/marc-editor.types";
+
+import { authorityDetailResponseSchema } from "./authority-detail";
 
 export interface AuthorityUpdateQueryParams {
   recKey: string;
@@ -22,5 +25,5 @@ export async function fetchAuthorityUpdate({
   ...params
 }: AuthorityUpdateQueryParams) {
   const { data } = await apiClient.put<unknown>(`/ac/${recKey}`, params);
-  return data;
+  return authorityDetailResponseSchema.parse(data);
 }

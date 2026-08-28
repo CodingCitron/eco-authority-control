@@ -1,6 +1,6 @@
 // 개인명 등록/수정
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router";
+import { createSearchParams, useNavigate, useSearchParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -31,6 +31,7 @@ import {
 } from "@/hooks/use-authority-detail";
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search";
 import type { MarcEditorSaveError, MarcField } from "@/types/marc-editor.types";
+import type { AuthorityDetailResponse } from "@/api/authority-detail";
 
 export type AuthorityPersonalFormMode = "create" | "edit";
 
@@ -41,6 +42,7 @@ interface AuthorityPersonalFormPageProps {
 export default function AuthorityPersonalFormPage({
   mode,
 }: AuthorityPersonalFormPageProps) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [fontSize, setFontSize] = useState(defaultFontSize);
   const [editorSessionVersion, setEditorSessionVersion] = useState(0);
@@ -88,7 +90,7 @@ export default function AuthorityPersonalFormPage({
         buildAuthorityUpdateParams(currentRecordKey, saveData),
       );
     },
-    onSuccess: async () => {
+    onSuccess: async (data: AuthorityDetailResponse) => {
       await queryClient.invalidateQueries({
         queryKey: authoritySearchQueryKeys.all,
       });
@@ -98,6 +100,36 @@ export default function AuthorityPersonalFormPage({
           queryKey: authorityDetailKeys.detail(currentRecordKey),
         });
       }
+
+      console.log(data);
+
+      // 입력 reckey로 수정 페이지 이동 필요
+      if (isCreatePage) {
+        const recKey = data.data.recKey;
+
+        // 캐시 업데이트
+
+        // 메시지 표시
+
+        navigate(
+          {
+            pathname: "/personal/edit",
+            search: `${createSearchParams({
+              recKey: recKey,
+            })}`,
+          },
+          {
+            replace: true,
+          },
+        );
+      } else {
+        // 현재 페이지 유지
+        // 캐시 업데이트
+        // 메시지 표시
+      }
+    },
+    onError: (error) => {
+      console.log(error);
     },
   });
   const resetSaveMutation = saveMutation.reset;
@@ -112,12 +144,12 @@ export default function AuthorityPersonalFormPage({
     }
 
     return [
-      ...authorityDetail.data.record.control_fields.map((field) => ({
+      ...authorityDetail.data.record.controlFields.map((field) => ({
         type: "control" as const,
         tag: field.tag,
         value: field.value,
       })),
-      ...authorityDetail.data.record.data_fields.map((field) => ({
+      ...authorityDetail.data.record.dataFields.map((field) => ({
         type: "data" as const,
         tag: field.tag,
         indicator1: field.ind1,

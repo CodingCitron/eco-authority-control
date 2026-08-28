@@ -115,13 +115,13 @@ export function AuthoritySplitModalBody({
           recKey: "",
           record: {
             ...sourceDetail.record,
-            control_fields: sourceDetail.record.control_fields.map(
+            controlFields: sourceDetail.record.controlFields.map(
               (controlField) =>
                 controlField.tag === "001"
                   ? { ...controlField, value: data.data }
                   : controlField,
             ),
-            data_fields: [...sourceDetail.record.data_fields],
+            dataFields: [...sourceDetail.record.dataFields],
           },
         },
       });
