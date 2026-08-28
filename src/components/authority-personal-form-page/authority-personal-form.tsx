@@ -242,15 +242,16 @@ export default function AuthorityPersonalForm({
                   label="한자명(400)"
                   name="referenceHanja"
                   register={register}
-                  showAdd={false}
+                  addTarget="references"
+                  addAriaLabel="참조표목(400) 추가"
+                  onAdd={addToMarcRecord}
                 />
                 <SimpleInputRow
                   id="p-ref400roman"
                   label="원어명(400)"
                   name="referenceOriginalName"
                   register={register}
-                  addTarget="references"
-                  addAriaLabel="참조표목(400) 추가"
+                  addTarget="referenceOriginalName"
                   onAdd={addToMarcRecord}
                   last
                 />

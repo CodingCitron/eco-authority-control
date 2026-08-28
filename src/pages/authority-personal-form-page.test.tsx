@@ -43,6 +43,43 @@ afterEach(() => {
 });
 
 describe("AuthorityPersonalFormPage", () => {
+  it("참조표목·한자명과 원어명을 각각 별도의 400 필드로 추가한다", async () => {
+    const user = userEvent.setup();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AuthorityPersonalFormPage mode="create" />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    await user.type(screen.getByLabelText("참조표목(400)"), "김소월");
+    await user.type(screen.getByLabelText("한자명(400)"), "金素月");
+    await user.type(screen.getByLabelText("원어명(400)"), "Kim, Sowol");
+
+    await user.click(
+      screen.getByRole("button", { name: "참조표목(400) 추가" }),
+    );
+
+    let referenceRows = screen.getAllByLabelText("400 행");
+    expect(referenceRows).toHaveLength(1);
+    expect(referenceRows[0]).toHaveTextContent("$a 김소월");
+    expect(referenceRows[0]).toHaveTextContent("$g 金素月");
+    expect(referenceRows[0]).not.toHaveTextContent("Kim, Sowol");
+
+    await user.click(
+      screen.getByRole("button", { name: "원어명(400) 추가" }),
+    );
+
+    referenceRows = screen.getAllByLabelText("400 행");
+    expect(referenceRows).toHaveLength(2);
+    expect(referenceRows[1]).toHaveTextContent("$a Kim, Sowol");
+  });
+
   it("기타속성을 368 $c 필드로 MARC 레코드에 추가한다", async () => {
     const user = userEvent.setup();
     const queryClient = new QueryClient({

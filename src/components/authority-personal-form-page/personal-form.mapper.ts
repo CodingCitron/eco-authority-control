@@ -208,6 +208,7 @@ export type PersonalMarcAddTarget =
   | "heading"
   | "birthDeathDate"
   | "references"
+  | "referenceOriginalName"
   | "place"
   | "address"
   | "otherAttribute"
@@ -248,7 +249,7 @@ export function addPersonalFormValuesToMarcFields(
       );
     }
     case "references": {
-      const fieldsWithHeading = appendMarcDataField(
+      return appendMarcDataField(
         fields,
         createMarcDataField(
           "400",
@@ -259,16 +260,16 @@ export function addPersonalFormValuesToMarcFields(
           "1",
         ),
       );
-
+    }
+    case "referenceOriginalName":
       return appendMarcDataField(
-        fieldsWithHeading,
+        fields,
         createMarcDataField(
           "400",
           [createMarcSubfield("a", values.referenceOriginalName)],
           "1",
         ),
       );
-    }
     case "place":
       return appendMarcDataField(
         fields,
