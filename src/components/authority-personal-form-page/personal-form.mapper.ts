@@ -36,6 +36,7 @@ export interface PersonalAuthorityFormValues {
   placeDateTo: string;
   addressType: string;
   address: string;
+  otherAttribute: string;
   activityField: string;
   activityFieldDateFrom: string;
   activityFieldDateTo: string;
@@ -79,6 +80,7 @@ export function createEmptyPersonalAuthorityFormValues(): PersonalAuthorityFormV
     placeDateTo: "",
     addressType: "",
     address: "",
+    otherAttribute: "",
     activityField: "",
     activityFieldDateFrom: "",
     activityFieldDateTo: "",
@@ -208,6 +210,7 @@ export type PersonalMarcAddTarget =
   | "references"
   | "place"
   | "address"
+  | "otherAttribute"
   | "activityField"
   | "organization"
   | "occupation"
@@ -283,6 +286,13 @@ export function addPersonalFormValuesToMarcFields(
         fields,
         createMarcDataField("371", [
           createMarcSubfield(values.addressType, values.address),
+        ]),
+      );
+    case "otherAttribute":
+      return appendMarcDataField(
+        fields,
+        createMarcDataField("368", [
+          createMarcSubfield("c", values.otherAttribute),
         ]),
       );
     case "activityField":

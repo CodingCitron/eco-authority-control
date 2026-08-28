@@ -32,20 +32,16 @@ export default function AuthorityPersonalForm({
       defaultValues: initialValues ?? createEmptyPersonalAuthorityFormValues(),
     });
   const { setVariableFields, setAuthorityCreateMetadata } = useMarcEditor();
-  const [
-    region,
-    biographyPrivateYn,
-    copyrightConsent,
-    copyrightConsentDate,
-  ] = useWatch({
-    control,
-    name: [
-      "region",
-      "biographyPrivateYn",
-      "copyrightConsent",
-      "copyrightConsentDate",
-    ],
-  });
+  const [region, biographyPrivateYn, copyrightConsent, copyrightConsentDate] =
+    useWatch({
+      control,
+      name: [
+        "region",
+        "biographyPrivateYn",
+        "copyrightConsent",
+        "copyrightConsentDate",
+      ],
+    });
 
   const addToMarcRecord = (target: PersonalMarcAddTarget) => {
     const values = getValues();
@@ -145,7 +141,7 @@ export default function AuthorityPersonalForm({
                     className="form-label fw-bold mb-0 text-nowrap"
                     htmlFor="fldHeading"
                   >
-                    채택표목
+                    채택표목(100)
                   </label>
                 </div>
                 <div className="col">
@@ -184,7 +180,7 @@ export default function AuthorityPersonalForm({
                     className="form-label fw-bold mb-0 text-nowrap"
                     htmlFor="p-birthDate"
                   >
-                    생몰년
+                    생몰년(100)
                   </label>
                 </div>
                 <div className="col">
@@ -243,14 +239,14 @@ export default function AuthorityPersonalForm({
                 />
                 <SimpleInputRow
                   id="p-ref400hanja"
-                  label="한자명"
+                  label="한자명(400)"
                   name="referenceHanja"
                   register={register}
                   showAdd={false}
                 />
                 <SimpleInputRow
                   id="p-ref400roman"
-                  label="원어명"
+                  label="원어명(400)"
                   name="referenceOriginalName"
                   register={register}
                   addTarget="references"
@@ -263,6 +259,15 @@ export default function AuthorityPersonalForm({
 
             <div className="col-12">
               <div className="box-group border rounded p-3">
+                <SimpleInputRow
+                  id="p-other368"
+                  label="기타속성(368)"
+                  name="otherAttribute"
+                  register={register}
+                  addTarget="otherAttribute"
+                  onAdd={addToMarcRecord}
+                  bold
+                />
                 <div className="row g-2 align-items-center mb-2">
                   <div className="col-md-2">
                     <label

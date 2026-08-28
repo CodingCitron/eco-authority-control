@@ -43,6 +43,33 @@ afterEach(() => {
 });
 
 describe("AuthorityPersonalFormPage", () => {
+  it("기타속성을 368 $c 필드로 MARC 레코드에 추가한다", async () => {
+    const user = userEvent.setup();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AuthorityPersonalFormPage mode="create" />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    await user.type(
+      screen.getByLabelText("기타속성(368)"),
+      "대한민국 문화예술인",
+    );
+    await user.click(
+      screen.getByRole("button", { name: "기타속성(368) 추가" }),
+    );
+
+    expect(screen.getByLabelText("368 행")).toHaveTextContent(
+      "$c 대한민국 문화예술인",
+    );
+  });
+
   it("수정 화면의 이전·다음 버튼으로 recKeys의 current 인덱스를 이동한다", async () => {
     const user = userEvent.setup();
     const queryClient = new QueryClient({
@@ -143,15 +170,15 @@ describe("AuthorityPersonalFormPage", () => {
       </QueryClientProvider>,
     );
 
-    await user.type(screen.getByLabelText("채택표목"), "김소월");
+    await user.type(screen.getByLabelText("채택표목(100)"), "김소월");
     await user.click(screen.getByRole("button", { name: "채택표목 추가" }));
 
-    expect(screen.getByLabelText("채택표목")).toHaveValue("김소월");
+    expect(screen.getByLabelText("채택표목(100)")).toHaveValue("김소월");
     expect(screen.getByLabelText("100 행")).toBeVisible();
 
     await user.click(screen.getByRole("button", { name: "화면 초기화" }));
 
-    expect(screen.getByLabelText("채택표목")).toHaveValue("");
+    expect(screen.getByLabelText("채택표목(100)")).toHaveValue("");
     expect(screen.queryByLabelText("100 행")).not.toBeInTheDocument();
   });
 
@@ -171,7 +198,7 @@ describe("AuthorityPersonalFormPage", () => {
     );
 
     await user.selectOptions(screen.getByLabelText("전거지역구분"), "1");
-    await user.type(screen.getByLabelText("채택표목"), "김소월");
+    await user.type(screen.getByLabelText("채택표목(100)"), "김소월");
     await user.click(screen.getByRole("button", { name: "채택표목 추가" }));
     await user.click(screen.getByRole("button", { name: "저장" }));
 
