@@ -206,7 +206,6 @@ export function mapAuthorityDetailToPersonalFormValues(
 
 export type PersonalMarcAddTarget =
   | "heading"
-  | "birthDeathDate"
   | "references"
   | "referenceOriginalName"
   | "place"
@@ -241,19 +240,13 @@ export function addPersonalFormValuesToMarcFields(
   values: PersonalAuthorityFormValues,
 ) {
   switch (target) {
-    case "heading":
+    case "heading": {
+      const date = formatBirthDeathDate(values.birthDate, values.deathDate);
       return updatePersonalHeading(fields, [
         { code: "a", value: values.heading },
         { code: "g", value: values.hanjaName },
+        { code: "d", value: date },
       ]);
-    case "birthDeathDate": {
-      const date = formatBirthDeathDate(values.birthDate, values.deathDate);
-      return updateBirthDeathFields(
-        fields,
-        values.birthDate,
-        values.deathDate,
-        date,
-      );
     }
     case "references": {
       return appendMarcDataField(
@@ -355,95 +348,6 @@ export function addPersonalFormValuesToMarcFields(
         createMarcDataField("670", [createMarcSubfield("a", values.source)]),
       );
   }
-}
-
-/** 기존 레코드의 생몰년 표현 방식은 보존하고, 신규 값은 분리된 046으로 만든다. */
-function updateBirthDeathFields(
-  fields: MarcField[],
-  birthDate: string,
-  deathDate: string,
-  headingDate: string,
-) {
-  const hasHeadingDate = fields.some(
-    (field) =>
-      field.type === "data" &&
-      field.tag === "100" &&
-      field.subfields.some(({ code }) => code === "d"),
-  );
-  const hasCodedDate = fields.some(
-    (field) =>
-      field.type === "data" &&
-      field.tag === "046" &&
-      field.subfields.some(({ code }) => code === "f" || code === "g"),
-  );
-  let nextFields = hasHeadingDate
-    ? updatePersonalHeading(fields, [{ code: "d", value: headingDate }])
-    : fields;
-
-  // 046을 사용하던 레코드와 신규 레코드는 출생일·사망일을 각각 갱신/추가한다.
-  if (hasCodedDate || !hasHeadingDate) {
-    nextFields = upsertCodedDateField(nextFields, "f", birthDate);
-    nextFields = upsertCodedDateField(nextFields, "g", deathDate);
-  }
-
-  return nextFields;
-}
-
-function upsertCodedDateField(
-  fields: MarcField[],
-  code: "f" | "g",
-  value: string,
-) {
-  const dateSubfield = createMarcSubfield(code, value);
-  if (!dateSubfield) {
-    return sortMarcFields(
-      fields.flatMap((field): MarcField[] => {
-        if (
-          field.type !== "data" ||
-          field.tag !== "046" ||
-          !field.subfields.some((subfield) => subfield.code === code)
-        ) {
-          return [field];
-        }
-
-        const nextField = replaceMarcDataFieldSubfields(field, [
-          { code, value: "" },
-        ]);
-        return nextField ? [nextField] : [];
-      }),
-    );
-  }
-
-  const fieldIndex = fields.findIndex(
-    (field) =>
-      field.type === "data" &&
-      field.tag === "046" &&
-      field.subfields.some((subfield) => subfield.code === code),
-  );
-
-  if (fieldIndex < 0) {
-    return appendMarcDataField(
-      fields,
-      createMarcDataField("046", [dateSubfield]),
-    );
-  }
-
-  const currentField = fields[fieldIndex];
-  if (currentField.type !== "data") {
-    return fields;
-  }
-
-  const nextField = replaceMarcDataFieldSubfields(currentField, [
-    { code, value: dateSubfield.value },
-  ]);
-  return sortMarcFields(
-    fields.flatMap((field, index): MarcField[] => {
-      if (index !== fieldIndex) {
-        return [field];
-      }
-      return nextField ? [nextField] : [];
-    }),
-  );
 }
 
 function updatePersonalHeading(

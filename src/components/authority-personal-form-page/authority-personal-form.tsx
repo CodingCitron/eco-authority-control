@@ -166,10 +166,6 @@ export default function AuthorityPersonalForm({
                     />
                   </div>
                 </div>
-                <AddButton
-                  ariaLabel="채택표목 추가"
-                  onClick={() => addToMarcRecord("heading")}
-                />
               </div>
             </div>
 
@@ -221,8 +217,8 @@ export default function AuthorityPersonalForm({
                   </div>
                 </div>
                 <AddButton
-                  ariaLabel="생몰년 추가"
-                  onClick={() => addToMarcRecord("birthDeathDate")}
+                  ariaLabel="채택표목 및 생몰년(100) 추가"
+                  onClick={() => addToMarcRecord("heading")}
                 />
               </div>
             </div>

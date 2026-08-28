@@ -43,6 +43,37 @@ afterEach(() => {
 });
 
 describe("AuthorityPersonalFormPage", () => {
+  it("채택표목·한자명·생몰년을 하나의 100 필드로 추가한다", async () => {
+    const user = userEvent.setup();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AuthorityPersonalFormPage mode="create" />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    await user.type(screen.getByLabelText("채택표목(100)"), "김소월");
+    await user.type(screen.getByLabelText("한자명"), "金素月");
+    await user.type(screen.getByLabelText("출생일"), "1902");
+    await user.type(screen.getByLabelText("사망일"), "1934");
+    await user.click(
+      screen.getByRole("button", {
+        name: "채택표목 및 생몰년(100) 추가",
+      }),
+    );
+
+    const headingRow = screen.getByLabelText("100 행");
+    expect(headingRow).toHaveTextContent("$a 김소월");
+    expect(headingRow).toHaveTextContent("$g 金素月");
+    expect(headingRow).toHaveTextContent("$d 1902-1934");
+    expect(screen.queryByLabelText("046 행")).not.toBeInTheDocument();
+  });
+
   it("선택한 성별을 375 $a 필드로 추가한다", async () => {
     const user = userEvent.setup();
     const queryClient = new QueryClient({
@@ -230,7 +261,11 @@ describe("AuthorityPersonalFormPage", () => {
     );
 
     await user.type(screen.getByLabelText("채택표목(100)"), "김소월");
-    await user.click(screen.getByRole("button", { name: "채택표목 추가" }));
+    await user.click(
+      screen.getByRole("button", {
+        name: "채택표목 및 생몰년(100) 추가",
+      }),
+    );
 
     expect(screen.getByLabelText("채택표목(100)")).toHaveValue("김소월");
     expect(screen.getByLabelText("100 행")).toBeVisible();
@@ -258,7 +293,11 @@ describe("AuthorityPersonalFormPage", () => {
 
     await user.selectOptions(screen.getByLabelText("전거지역구분"), "1");
     await user.type(screen.getByLabelText("채택표목(100)"), "김소월");
-    await user.click(screen.getByRole("button", { name: "채택표목 추가" }));
+    await user.click(
+      screen.getByRole("button", {
+        name: "채택표목 및 생몰년(100) 추가",
+      }),
+    );
     await user.click(screen.getByRole("button", { name: "저장" }));
 
     await waitFor(() => {
