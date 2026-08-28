@@ -2,6 +2,7 @@ import z from "zod";
 
 const baseRowSchema = z.object({
   recKey: z.string(),
+  acRegionCode: z.string().nullish(),
   acRegionDesc: z.string().nullish(),
   headingName: z.string().nullish(),
   acControlNo: z.string(),

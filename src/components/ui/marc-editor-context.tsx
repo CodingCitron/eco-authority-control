@@ -187,9 +187,7 @@ function writePosition(
 
 /** 편집된 값을 40자리 008 문자열로 변환하며 편집하지 않은 위치는 보존한다. */
 export function formatControlField008(data: ControlField008) {
-  console.log(data);
   const fieldRule = getControlField008Rule();
-  console.log(fieldRule);
   const characters = (data.sourceValue ?? "")
     .padEnd(fieldRule.length, " ")
     .slice(0, fieldRule.length)

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { fetchAuthoritySettings } from "@/api/authority-settings";
+import queryClient from "@/lib/query-client";
 
 export const authoritySettingsQueryKeys = {
   all: ["authority-settings"] as const,
@@ -13,4 +14,23 @@ export function useAuthoritySettings() {
     queryFn: ({ signal }) => fetchAuthoritySettings(signal),
     staleTime: 1000 * 60 * 60,
   });
+}
+
+export async function getRegionDesc(regionCode: string) {
+  try {
+    const data = await queryClient.query({
+      queryKey: authoritySettingsQueryKeys.all,
+      queryFn: () => fetchAuthoritySettings(),
+    });
+
+    if (regionCode in data?.data.REGION_CODE) {
+      return data.data.REGION_CODE[regionCode];
+    }
+
+    return regionCode;
+  } catch (error) {
+    console.error(error);
+
+    return regionCode;
+  }
 }

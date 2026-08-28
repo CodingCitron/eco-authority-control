@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import {
   useForm,
   useWatch,
@@ -359,182 +359,177 @@ export default function AuthorityPersonalForm({
               </div>
             </div>
 
-            <div className="col-12">
-              <div className="box-group border rounded p-3">
-                <RelatedDateRow
-                  idPrefix="p-field372"
-                  label="분야(372)"
-                  valueName="activityField"
-                  fromName="activityFieldDateFrom"
-                  toName="activityFieldDateTo"
-                  register={register}
-                  addTarget="activityField"
-                  onAdd={addToMarcRecord}
-                />
-                <RelatedDateRow
-                  idPrefix="p-org373"
-                  label="단체(373)"
-                  valueName="organization"
-                  fromName="organizationDateFrom"
-                  toName="organizationDateTo"
-                  register={register}
-                  addTarget="organization"
-                  onAdd={addToMarcRecord}
-                />
-                <RelatedDateRow
-                  idPrefix="p-job374"
-                  label="직업(374)"
-                  valueName="occupation"
-                  fromName="occupationDateFrom"
-                  toName="occupationDateTo"
-                  register={register}
-                  addTarget="occupation"
-                  onAdd={addToMarcRecord}
-                />
+            <Outline>
+              <RelatedDateRow
+                idPrefix="p-field372"
+                label="분야(372)"
+                valueName="activityField"
+                fromName="activityFieldDateFrom"
+                toName="activityFieldDateTo"
+                register={register}
+                addTarget="activityField"
+                onAdd={addToMarcRecord}
+              />
+              <RelatedDateRow
+                idPrefix="p-org373"
+                label="단체(373)"
+                valueName="organization"
+                fromName="organizationDateFrom"
+                toName="organizationDateTo"
+                register={register}
+                addTarget="organization"
+                onAdd={addToMarcRecord}
+              />
+              <RelatedDateRow
+                idPrefix="p-job374"
+                label="직업(374)"
+                valueName="occupation"
+                fromName="occupationDateFrom"
+                toName="occupationDateTo"
+                register={register}
+                addTarget="occupation"
+                onAdd={addToMarcRecord}
+              />
 
-                <div className="row g-2 align-items-center mb-2">
-                  <div className="col-md-2">
-                    <span className="form-label mb-0 fw-bold">성별(375)</span>
-                  </div>
-                  <div className="col d-flex align-items-center gap-3">
-                    {[
-                      ["unknown", "모름"],
-                      ["male", "남성"],
-                      ["female", "여성"],
-                    ].map(([value, label]) => (
-                      <div className="form-check mb-0" key={value}>
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          id={`gender_${value}`}
-                          value={value}
-                          {...register("gender")}
-                        />
-                        <label
-                          className="form-check-label"
-                          htmlFor={`gender_${value}`}
-                        >
-                          {label}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  <AddButton
-                    ariaLabel="성별(375) 추가"
-                    onClick={() => addToMarcRecord("gender")}
-                  />
+              <div className="row g-2 align-items-center mb-2">
+                <div className="col-md-2">
+                  <span className="form-label mb-0 fw-bold">성별(375)</span>
                 </div>
-
-                <SimpleInputRow
-                  id="p-lang377"
-                  label="관련언어(377)"
-                  name="language"
-                  register={register}
-                  addTarget="language"
-                  onAdd={addToMarcRecord}
-                  bold
-                />
-
-                <div className="row g-2 align-items-center mb-2">
-                  <div className="col-md-2">
-                    <label
-                      className="form-label mb-0 fw-bold"
-                      htmlFor="p-historyVis"
-                    >
-                      이력사항 공개구분
-                    </label>
-                  </div>
-                  <div className="col-md-3">
-                    <select
-                      className="form-select form-select-sm"
-                      id="p-historyVis"
-                      {...register("biographyPrivateYn")}
-                    >
-                      <option value="">선택</option>
-                      <option value="N">외부(공개)</option>
-                      <option value="Y">내부(비공개)</option>
-                    </select>
-                  </div>
-                  <div className="col-auto">
-                    <span className="badge text-bg-primary fw-light">
-                      전거관리시스템 전용 · 홈페이지/반출 시 제거
-                    </span>
-                  </div>
+                <div className="col d-flex align-items-center gap-3">
+                  {[
+                    ["unknown", "모름"],
+                    ["male", "남성"],
+                    ["female", "여성"],
+                  ].map(([value, label]) => (
+                    <div className="form-check mb-0" key={value}>
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        id={`gender_${value}`}
+                        value={value}
+                        {...register("gender")}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`gender_${value}`}
+                      >
+                        {label}
+                      </label>
+                    </div>
+                  ))}
                 </div>
-
-                <SimpleInputRow
-                  id="p-edu667"
-                  label="학력(667)"
-                  name="education"
-                  register={register}
-                  // placeholder="$a"
-                  addTarget="education"
-                  onAdd={addToMarcRecord}
-                  bold
-                />
-                <SimpleInputRow
-                  id="p-bio678"
-                  label="전기(678)"
-                  name="biography"
-                  register={register}
-                  addTarget="biography"
-                  onAdd={addToMarcRecord}
-                  bold
-                />
-                <SimpleInputRow
-                  id="p-source670"
-                  label="정보원(670)"
-                  name="source"
-                  register={register}
-                  addTarget="source"
-                  onAdd={addToMarcRecord}
-                  bold
-                  last
+                <AddButton
+                  ariaLabel="성별(375) 추가"
+                  onClick={() => addToMarcRecord("gender")}
                 />
               </div>
-            </div>
 
-            <div className="col-12">
-              <div className="box-group border rounded p-3">
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                  <span className="fw-bold">저작권 포괄동의 관리</span>
+              <SimpleInputRow
+                id="p-lang377"
+                label="관련언어(377)"
+                name="language"
+                register={register}
+                addTarget="language"
+                onAdd={addToMarcRecord}
+                bold
+              />
+
+              <SimpleInputRow
+                id="p-edu667"
+                label="학력(667)"
+                name="education"
+                register={register}
+                // placeholder="$a"
+                addTarget="education"
+                onAdd={addToMarcRecord}
+                bold
+              />
+              <SimpleInputRow
+                id="p-bio678"
+                label="전기(678)"
+                name="biography"
+                register={register}
+                addTarget="biography"
+                onAdd={addToMarcRecord}
+                bold
+              />
+              <SimpleInputRow
+                id="p-source670"
+                label="정보원(670)"
+                name="source"
+                register={register}
+                addTarget="source"
+                onAdd={addToMarcRecord}
+                bold
+                last
+              />
+              <div className="row g-2 align-items-center mb-2">
+                <div className="col-md-2">
+                  <label
+                    className="form-label mb-0 fw-bold"
+                    htmlFor="p-historyVis"
+                  >
+                    이력사항 공개구분
+                  </label>
+                </div>
+                <div className="col-md-3">
+                  <select
+                    className="form-select form-select-sm"
+                    id="p-historyVis"
+                    {...register("biographyPrivateYn")}
+                  >
+                    <option value="">선택</option>
+                    <option value="N">외부(공개)</option>
+                    <option value="Y">내부(비공개)</option>
+                  </select>
+                </div>
+                <div className="col-auto">
                   <span className="badge text-bg-primary fw-light">
                     전거관리시스템 전용 · 홈페이지/반출 시 제거
                   </span>
                 </div>
-                <div className="row g-2 align-items-center">
-                  <div className="col-md-3">
-                    <div className="form-check mb-0">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="copyrightConsent"
-                        {...register("copyrightConsent")}
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor="copyrightConsent"
-                      >
-                        포괄동의여부
-                      </label>
-                    </div>
-                  </div>
-                  <div className="col-md-2">
+              </div>
+            </Outline>
+
+            <div className="col-12">
+              <div className="d-flex align-items-center justify-content-between mb-2">
+                <span className="fw-bold">저작권 포괄동의 관리</span>
+                <span className="badge text-bg-primary fw-light">
+                  전거관리시스템 전용 · 홈페이지/반출 시 제거
+                </span>
+              </div>
+              <div className="row g-2 align-items-center">
+                <div className="col-md-3">
+                  <div className="form-check mb-0">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="copyrightConsent"
+                      {...register("copyrightConsent")}
+                    />
                     <label
-                      className="form-label mb-0 fw-bold"
-                      htmlFor="copyrightConsentDate"
+                      className="form-check-label"
+                      htmlFor="copyrightConsent"
                     >
-                      동의일시
+                      포괄동의여부
                     </label>
                   </div>
-                  <div className="col-md-4">
-                    <input
-                      type="datetime-local"
-                      className="form-control"
-                      id="copyrightConsentDate"
-                      {...register("copyrightConsentDate")}
-                    />
-                  </div>
+                </div>
+                <div className="col-md-2">
+                  <label
+                    className="form-label mb-0 fw-bold"
+                    htmlFor="copyrightConsentDate"
+                  >
+                    동의일시
+                  </label>
+                </div>
+                <div className="col-md-4">
+                  <input
+                    type="datetime-local"
+                    className="form-control"
+                    id="copyrightConsentDate"
+                    {...register("copyrightConsentDate")}
+                  />
                 </div>
               </div>
             </div>
@@ -775,6 +770,14 @@ function AuditFields({ register }: RegisteredFieldProps) {
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+function Outline({ children }: { children: ReactNode }) {
+  return (
+    <div className="col-12">
+      <div className="box-group border rounded p-3">{children}</div>
     </div>
   );
 }

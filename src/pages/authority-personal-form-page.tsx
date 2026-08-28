@@ -110,6 +110,7 @@ export default function AuthorityPersonalFormPage({
         // 캐시 업데이트
 
         // 메시지 표시
+        alert("개인명 전거가 생성되었습니다.");
 
         navigate(
           {
@@ -125,7 +126,9 @@ export default function AuthorityPersonalFormPage({
       } else {
         // 현재 페이지 유지
         // 캐시 업데이트
+
         // 메시지 표시
+        alert("개인명 전거가 수정되었습니다.");
       }
     },
     onError: (error) => {
