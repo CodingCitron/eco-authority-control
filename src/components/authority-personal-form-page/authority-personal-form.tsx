@@ -253,15 +253,6 @@ export default function AuthorityPersonalForm({
             </Outline>
 
             <Outline>
-              <SimpleInputRow
-                id="p-other368"
-                label="기타속성(368)"
-                name="otherAttribute"
-                register={register}
-                addTarget="otherAttribute"
-                onAdd={addToMarcRecord}
-                bold
-              />
               <div className="row g-2 align-items-center mb-2">
                 <div className="col-md-2">
                   <label
@@ -455,6 +446,15 @@ export default function AuthorityPersonalForm({
                 name="source"
                 register={register}
                 addTarget="source"
+                onAdd={addToMarcRecord}
+                bold
+              />
+              <SimpleInputRow
+                id="p-other368"
+                label="기타속성(368)"
+                name="otherAttribute"
+                register={register}
+                addTarget="otherAttribute"
                 onAdd={addToMarcRecord}
                 bold
                 last

@@ -43,12 +43,12 @@ const router = createBrowserRouter([
           {
             // 단체명 등록
             path: "corporation/new",
-            element: <AuthorityCorporationFormPage />,
+            element: <AuthorityCorporationFormPage mode="create" />,
           },
           {
             // 단체명 수정
             path: "corporation/edit",
-            element: <AuthorityCorporationFormPage />,
+            element: <AuthorityCorporationFormPage mode="edit" />,
           },
           {
             // 지리명 등록
