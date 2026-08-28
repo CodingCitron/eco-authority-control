@@ -14,6 +14,7 @@ import {
   type CorporationAuthorityFormValues,
   type CorporationMarcAddTarget,
 } from "./corporation-form.mapper";
+import { AuthorityReferenceHeadingSearchButton } from "../ui/authority-reference-heading-search-modal";
 
 type TextFieldName = FieldPathByValue<CorporationAuthorityFormValues, string>;
 
@@ -194,14 +195,7 @@ export default function AuthorityCorporationForm({
                   </span>
                 </div>
                 <div className="col">
-                  <button
-                    type="button"
-                    className="btn btn-secondary w-100"
-                    data-bs-toggle="modal"
-                    data-bs-target="#modal5XX"
-                  >
-                    참조표목조회(5XX) 추가
-                  </button>
+                  <AuthorityReferenceHeadingSearchButton />
                 </div>
               </div>
               <div className="row g-2 align-items-start">
