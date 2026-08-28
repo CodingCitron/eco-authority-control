@@ -1,0 +1,52 @@
+pipeline {
+    agent any
+
+    options {
+        retry(2)
+    }
+
+    environment {
+        DEPLOY_HOST  = '192.168.1.157'
+        DEPLOY_USER  = 'eco'
+        DEPLOY_PATH  = 'C:/Users/ECO/Workspace/authortiy_control_frontend'
+        SSH_KEY      = 'C:/Users/ECO/.ssh/id_ed25519'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo "브랜치: ${env.GIT_BRANCH}"
+                echo "커밋: ${env.GIT_COMMIT}"
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                expression { env.GIT_BRANCH ==~ /.*main/ }
+            }
+            steps {
+                script {
+                    def ssh = "ssh -o StrictHostKeyChecking=no -i %SSH_KEY% %DEPLOY_USER%@%DEPLOY_HOST%"
+
+                    // 1. git pull
+                    bat "${ssh} \"cd /d %DEPLOY_PATH% && git pull origin main\""
+
+                    // 2. 의존성 설치
+                    bat "${ssh} \"cd /d %DEPLOY_PATH% && pnpm install\""
+
+                    // 3. 빌드
+                    bat "${ssh} \"cd /d %DEPLOY_PATH% && pnpm build\""
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '빌드 성공'
+        }
+        failure {
+            echo '빌드 실패 - 로그 확인 필요'
+        }
+    }
+}
