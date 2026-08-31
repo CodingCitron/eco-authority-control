@@ -44,6 +44,13 @@ export interface MarcEditorSaveData {
 
 type EditorMode = "form" | "text";
 
+interface MarcEditorWorkspaceProps {
+  title?: string;
+  saveError?: MarcEditorSaveError;
+  saveErrorKey?: string | number;
+  fontSize: string;
+}
+
 export default function MarcEditor({
   showPrevAndNextButtons,
   showBibliographicRecordConsistencyButton,
@@ -59,15 +66,78 @@ export default function MarcEditor({
   saveErrorKey,
   fontSize,
 }: MarcEditorProps) {
+  const { leaderData, variableFields, authorityCreateMetadata } =
+    useMarcEditor();
+
+  const handleSave = () => {
+    onSave({
+      leaderData,
+      authorityCreateMetadata,
+      record: buildMarcRecord(variableFields),
+    });
+  };
+
+  return (
+    <div className="card shadow-sm marc-editor-card">
+      <MarcEditorWorkspace
+        fontSize={fontSize}
+        saveError={saveError}
+        saveErrorKey={saveErrorKey}
+      />
+      <div className="card-footer bg-white d-flex justify-content-between">
+        <div>
+          {showPrevAndNextButtons && (
+            <>
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                disabled={previousDisabled}
+                onClick={onPrevious}
+              >
+                이전
+              </button>{" "}
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                disabled={nextDisabled}
+                onClick={onNext}
+              >
+                다음
+              </button>{" "}
+            </>
+          )}
+          {showBibliographicRecordConsistencyButton && (
+            <BibliographicRecordConsistencyButton />
+          )}
+        </div>
+        <div>
+          <button className="btn btn-light-warning">중복조사</button>{" "}
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={isSaving || saveDisabled}
+            onClick={handleSave}
+          >
+            {isSaving ? `${saveButtonText} 중...` : saveButtonText}
+          </button>{" "}
+          <button className="btn btn-secondary">취소</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** MARC 행 편집과 고정길이 편집 영역만 제공한다. */
+export function MarcEditorWorkspace({
+  title = "MARC 레코드 뷰",
+  saveError,
+  saveErrorKey,
+  fontSize,
+}: MarcEditorWorkspaceProps) {
   const [mode, setMode] = useState<EditorMode>("form");
   const recordScrollRef = useRef<HTMLDivElement>(null);
   const shouldFocusAddedRowRef = useRef(false);
-  const {
-    leaderData,
-    variableFields,
-    authorityCreateMetadata,
-    setVariableFields,
-  } = useMarcEditor();
+  const { variableFields, setVariableFields } = useMarcEditor();
 
   const addVariableField = () => {
     shouldFocusAddedRowRef.current = true;
@@ -120,18 +190,10 @@ export default function MarcEditor({
     );
   };
 
-  const handleSave = () => {
-    onSave({
-      leaderData,
-      authorityCreateMetadata,
-      record: buildMarcRecord(variableFields),
-    });
-  };
-
   return (
-    <div className="card shadow-sm marc-editor-card">
+    <>
       <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
-        <span>MARC 레코드 뷰</span>
+        <span>{title}</span>
         <div className="d-flex gap-2">
           <button
             type="button"
@@ -172,46 +234,7 @@ export default function MarcEditor({
       ) : (
         <MarcEditorToolbar onAddRow={addVariableField} />
       )}
-      <div className="card-footer bg-white d-flex justify-content-between">
-        <div>
-          {showPrevAndNextButtons && (
-            <>
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                disabled={previousDisabled}
-                onClick={onPrevious}
-              >
-                이전
-              </button>{" "}
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                disabled={nextDisabled}
-                onClick={onNext}
-              >
-                다음
-              </button>{" "}
-            </>
-          )}
-          {showBibliographicRecordConsistencyButton && (
-            <BibliographicRecordConsistencyButton />
-          )}
-        </div>
-        <div>
-          <button className="btn btn-light-warning">중복조사</button>{" "}
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={isSaving || saveDisabled}
-            onClick={handleSave}
-          >
-            {isSaving ? `${saveButtonText} 중...` : saveButtonText}
-          </button>{" "}
-          <button className="btn btn-secondary">취소</button>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 
