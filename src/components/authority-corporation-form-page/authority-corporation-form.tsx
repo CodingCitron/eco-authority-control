@@ -191,7 +191,7 @@ export default function AuthorityCorporationForm({
                 </div>
                 <div className="col">
                   <AuthorityReferenceHeadingSearchButton
-                    onCopy={(referenceFields) =>
+                    onConfirm={(referenceFields) =>
                       setVariableFields((fields) =>
                         sortMarcFields([...fields, ...referenceFields]),
                       )

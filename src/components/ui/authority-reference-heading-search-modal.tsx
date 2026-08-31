@@ -4,7 +4,6 @@ import { Button, Modal } from "react-bootstrap";
 import type { AuthoritySearchQueryParams } from "@/api/authority-search";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import { useAuthoritySearch } from "@/hooks/use-authority-search";
-import type { AuthorityDataField } from "@/types/authority-detail.types";
 import {
   authorityTypeLabels,
   type AuthoritySearchType,
@@ -19,8 +18,7 @@ import BaseModal from "./base-modal";
 import MarcFontSizeSelect, { defaultFontSize } from "./marc-font-size-select";
 import OverflowTooltip from "./overflow-tooltip";
 import MarcRecordPreview from "./record-preview";
-import clsx from "clsx";
-import { css } from "styled-system/css";
+import type { AuthorityDetailResponse } from "@/api/authority-detail";
 
 const referenceSearchDefaultParams: AuthoritySearchQueryParams = {
   acType: "1",
@@ -30,19 +28,55 @@ const referenceSearchDefaultParams: AuthoritySearchQueryParams = {
   display: "10",
 };
 
-function getReferenceFieldDescription(field: AuthorityDataField) {
+function getReferenceFieldDescription(field: Pick<MarcDataField, "subfields">) {
   return field.subfields
     .filter(({ code }) => code === "a" || code === "b")
     .map(({ value }) => value)
     .join(" ");
 }
 
+function create5XXReferenceFields(
+  acType: AuthoritySearchType,
+  record: AuthorityDetailResponse["data"]["record"],
+  relationCode: AuthorityReferenceRelationCode,
+) {
+  // 0 - 개인명: 100
+  // 1 - 단체명: 110
+  // 5 - 지리명: 151
+  // 4 - 주제명: 150
+  const targetTag = {
+    0: "100",
+    1: "110",
+    5: "151",
+    4: "150",
+  }[acType];
+
+  console.log(record);
+
+  const controlNumber = record.controlFields.find(
+    (field) => field.tag === "001",
+  )?.value;
+
+  // dataField.find
+  const field = record.dataFields.find((field) => field.tag === targetTag);
+  const subfield = field?.subfields ?? [];
+
+  // 서브 필드와 조합해서
+  // $wb$a단순부작위[單純不作爲]$0KAS201206266 이런 모양으로 만들어야 함
+  // $wb는
+
+  // 적용 없음은 $w가 없나?
+  // `$w${relationCode}`
+
+  console.log(acType, field, relationCode);
+}
+
 interface AuthorityReferenceHeadingSearchProps {
-  onCopy: (fields: MarcDataField[]) => void;
+  onConfirm: (fields: MarcDataField[]) => void;
 }
 
 export function AuthorityReferenceHeadingSearchButton({
-  onCopy,
+  onConfirm,
 }: AuthorityReferenceHeadingSearchProps) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -62,7 +96,7 @@ export function AuthorityReferenceHeadingSearchButton({
       <AuthorityReferenceHeadingSearchModal
         show={modalIsOpen}
         onHide={() => setModalIsOpen(false)}
-        onCopy={onCopy}
+        onConfirm={onConfirm}
       />
     </>
   );
@@ -71,7 +105,7 @@ export function AuthorityReferenceHeadingSearchButton({
 export function AuthorityReferenceHeadingSearchModal({
   show,
   onHide,
-  onCopy,
+  onConfirm,
 }: AuthorityReferenceHeadingSearchProps & {
   show: boolean;
   onHide: () => void;
@@ -80,7 +114,7 @@ export function AuthorityReferenceHeadingSearchModal({
     <BaseModal show={show} onHide={onHide}>
       <AuthorityReferenceHeadingSearchModalBody
         onHide={onHide}
-        onCopy={onCopy}
+        onConfirm={onConfirm}
       />
     </BaseModal>
   );
@@ -88,7 +122,7 @@ export function AuthorityReferenceHeadingSearchModal({
 
 export function AuthorityReferenceHeadingSearchModalBody({
   onHide,
-  onCopy,
+  onConfirm,
 }: AuthorityReferenceHeadingSearchProps & {
   onHide: () => void;
 }) {
@@ -100,7 +134,10 @@ export function AuthorityReferenceHeadingSearchModalBody({
   const [fontSize, setFontSize] = useState(defaultFontSize);
   const [relationCode, setRelationCode] =
     useState<AuthorityReferenceRelationCode>("");
-  const [selectedReferenceIndexes, setSelectedReferenceIndexes] = useState(
+  const [temporaryReferenceFields, setTemporaryReferenceFields] = useState<
+    MarcDataField[]
+  >([]);
+  const [selectedTemporaryIndexes, setSelectedTemporaryIndexes] = useState(
     new Set<number>(),
   );
 
@@ -125,10 +162,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
   const records = searchResult?.items ?? [];
   const currentPage = searchResult?.page ?? Number(searchParams?.page ?? 1);
   const totalPages = Math.max(searchResult?.totalPages ?? 1, 1);
-  const referenceFields =
-    detailResponse?.data.record.dataFields.filter(
-      (field) => field.tag === "510",
-    ) ?? [];
+
   const detailMessage = !selectedRecordKey
     ? "검색 결과에서 전거를 선택해 주세요."
     : isDetailError
@@ -152,7 +186,6 @@ export function AuthorityReferenceHeadingSearchModalBody({
       searchParams?.page === nextParams.page;
 
     setSelectedRecordKey("");
-    setSelectedReferenceIndexes(new Set());
     if (isSameSearch) {
       void refetch();
       return;
@@ -167,30 +200,27 @@ export function AuthorityReferenceHeadingSearchModalBody({
     }
 
     setSelectedRecordKey("");
-    setSelectedReferenceIndexes(new Set());
     setSearchParams({ ...searchParams, page: String(page) });
   };
 
   const handleCopyToReferenceField = () => {
-    const copiedFields = referenceFields.flatMap((field, index) => {
-      if (!selectedReferenceIndexes.has(index)) {
-        return [];
-      }
+    const copiedFields = create5XXReferenceFields(
+      authorityType,
+      detailResponse?.data.record,
+      relationCode,
+    );
 
-      const copiedField = copyAuthorityReferenceField(field, relationCode);
-      return copiedField ? [copiedField] : [];
-    });
+    return;
+    // if (copiedFields.length === 0) {
+    //   return;
+    // }
 
-    if (copiedFields.length === 0) {
-      return;
-    }
-
-    onCopy(copiedFields);
-    setSelectedReferenceIndexes(new Set());
+    // setTemporaryReferenceFields((fields) => [...fields, ...copiedFields]);
+    // setSelectedTemporaryIndexes(new Set());
   };
 
-  const toggleReferenceField = (index: number) => {
-    setSelectedReferenceIndexes((indexes) => {
+  const toggleTemporaryReferenceField = (index: number) => {
+    setSelectedTemporaryIndexes((indexes) => {
       const nextIndexes = new Set(indexes);
       if (nextIndexes.has(index)) {
         nextIndexes.delete(index);
@@ -201,6 +231,20 @@ export function AuthorityReferenceHeadingSearchModalBody({
     });
   };
 
+  const handleDeleteTemporaryReferenceFields = () => {
+    setTemporaryReferenceFields((fields) =>
+      fields.filter((_, index) => !selectedTemporaryIndexes.has(index)),
+    );
+    setSelectedTemporaryIndexes(new Set());
+  };
+
+  const handleConfirm = () => {
+    if (temporaryReferenceFields.length > 0) {
+      onConfirm(temporaryReferenceFields);
+    }
+    onHide();
+  };
+
   const handleReset = () => {
     setAuthorityType("1");
     setSearchKeyword("");
@@ -208,7 +252,8 @@ export function AuthorityReferenceHeadingSearchModalBody({
     setSelectedRecordKey("");
     setFontSize(defaultFontSize);
     setRelationCode("");
-    setSelectedReferenceIndexes(new Set());
+    setTemporaryReferenceFields([]);
+    setSelectedTemporaryIndexes(new Set());
   };
 
   return (
@@ -336,10 +381,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
                           id={inputId}
                           name="refSelect"
                           checked={isSelected}
-                          onChange={() => {
-                            setSelectedRecordKey(record.recKey);
-                            setSelectedReferenceIndexes(new Set());
-                          }}
+                          onChange={() => setSelectedRecordKey(record.recKey)}
                         />
                       </td>
                       <td>
@@ -513,7 +555,9 @@ export function AuthorityReferenceHeadingSearchModalBody({
               <button
                 className="btn btn-success btn-sm"
                 type="button"
-                disabled={isDetailFetching || isDetailError}
+                disabled={
+                  !selectedRecordKey || isDetailFetching || isDetailError
+                }
                 onClick={handleCopyToReferenceField}
               >
                 5XX로 복사
@@ -531,37 +575,14 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 </tr>
               </thead>
               <tbody>
-                {!selectedRecordKey && (
+                {temporaryReferenceFields.length === 0 && (
                   <tr>
                     <td colSpan={5} className="py-3 text-secondary">
-                      검색 결과에서 전거를 선택해 주세요.
+                      복사한 510 필드가 없습니다.
                     </td>
                   </tr>
                 )}
-                {selectedRecordKey && isDetailFetching && (
-                  <tr>
-                    <td colSpan={5} className="py-3 text-secondary">
-                      510 필드를 불러오는 중입니다.
-                    </td>
-                  </tr>
-                )}
-                {selectedRecordKey && isDetailError && (
-                  <tr>
-                    <td colSpan={5} className="py-3 text-danger">
-                      510 필드를 불러오지 못했습니다.
-                    </td>
-                  </tr>
-                )}
-                {selectedRecordKey &&
-                  detailResponse &&
-                  referenceFields.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-3 text-secondary">
-                        선택한 전거에 510 필드가 없습니다.
-                      </td>
-                    </tr>
-                  )}
-                {referenceFields.map((field, index) => {
+                {temporaryReferenceFields.map((field, index) => {
                   const inputId = `c-5xxRow-${index}`;
                   const description = getReferenceFieldDescription(field);
 
@@ -577,13 +598,16 @@ export function AuthorityReferenceHeadingSearchModalBody({
                         <input
                           type="checkbox"
                           id={inputId}
-                          checked={selectedReferenceIndexes.has(index)}
-                          onChange={() => toggleReferenceField(index)}
+                          checked={selectedTemporaryIndexes.has(index)}
+                          onChange={() => toggleTemporaryReferenceField(index)}
                         />
                       </td>
                       <td className="fw-bold text-primary">{field.tag}</td>
                       <td className="font-monospace">
-                        {`${field.ind1}${field.ind2}`.replaceAll(" ", "\\")}
+                        {`${field.indicator1}${field.indicator2}`.replaceAll(
+                          " ",
+                          "\\",
+                        )}
                       </td>
                       <td className="text-start">
                         {field.subfields.map((subfield, subfieldIndex) => (
@@ -601,6 +625,16 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 })}
               </tbody>
             </table>
+            <div className="text-end">
+              <button
+                className="btn btn-sm btn-outline-danger"
+                type="button"
+                disabled={selectedTemporaryIndexes.size === 0}
+                onClick={handleDeleteTemporaryReferenceFields}
+              >
+                삭제
+              </button>
+            </div>
           </div>
         </div>
       </Modal.Body>
@@ -609,7 +643,11 @@ export function AuthorityReferenceHeadingSearchModalBody({
           화면 초기화
         </Button>
         <div>
-          <Button className="px-4 fw-bold" variant="primary" onClick={onHide}>
+          <Button
+            className="px-4 fw-bold"
+            variant="primary"
+            onClick={handleConfirm}
+          >
             확인
           </Button>{" "}
           <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
