@@ -235,94 +235,90 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 찾기
               </button>
             </form>
-            <div className="border-bottom mb-3">
-              <table className="table table-bordered table-sm text-center align-middle mb-0">
-                <caption className="visually-hidden">
-                  전거 검색 결과 목록
-                </caption>
-                <thead className="table-light">
+            <table className="table table-bordered table-sm text-center align-middle">
+              <caption className="visually-hidden">전거 검색 결과 목록</caption>
+              <thead className="table-light">
+                <tr>
+                  <th scope="col">No</th>
+                  <th scope="col">선택</th>
+                  <th scope="col">전거유형</th>
+                  <th scope="col">전거제어번호</th>
+                  <th scope="col">채택표목</th>
+                </tr>
+              </thead>
+              <tbody>
+                {!searchParams && (
                   <tr>
-                    <th scope="col">No</th>
-                    <th scope="col">선택</th>
-                    <th scope="col">전거유형</th>
-                    <th scope="col">전거제어번호</th>
-                    <th scope="col">채택표목</th>
+                    <td colSpan={5} className="py-4 text-secondary">
+                      검색어를 입력한 후 찾기를 눌러 주세요.
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {!searchParams && (
+                )}
+                {searchParams && isFetching && records.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-secondary">
+                      검색 중입니다.
+                    </td>
+                  </tr>
+                )}
+                {searchParams && isError && (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-danger">
+                      전거 검색 결과를 불러오지 못했습니다.
+                    </td>
+                  </tr>
+                )}
+                {searchParams &&
+                  !isFetching &&
+                  !isError &&
+                  records.length === 0 && (
                     <tr>
                       <td colSpan={5} className="py-4 text-secondary">
-                        검색어를 입력한 후 찾기를 눌러 주세요.
+                        검색 결과가 없습니다.
                       </td>
                     </tr>
                   )}
-                  {searchParams && isFetching && records.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="py-4 text-secondary">
-                        검색 중입니다.
-                      </td>
-                    </tr>
-                  )}
-                  {searchParams && isError && (
-                    <tr>
-                      <td colSpan={5} className="py-4 text-danger">
-                        전거 검색 결과를 불러오지 못했습니다.
-                      </td>
-                    </tr>
-                  )}
-                  {searchParams &&
-                    !isFetching &&
-                    !isError &&
-                    records.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="py-4 text-secondary">
-                          검색 결과가 없습니다.
-                        </td>
-                      </tr>
-                    )}
-                  {records.map((record, index) => {
-                    const inputId = `c-refSelect-${record.recKey}`;
-                    const headingName = record.headingName ?? "";
-                    const isSelected = selectedRecordKey === record.recKey;
+                {records.map((record, index) => {
+                  const inputId = `c-refSelect-${record.recKey}`;
+                  const headingName = record.headingName ?? "";
+                  const isSelected = selectedRecordKey === record.recKey;
 
-                    return (
-                      <tr key={record.recKey}>
-                        <td>
-                          {(currentPage - 1) * (searchResult?.display ?? 10) +
-                            index +
-                            1}
-                        </td>
-                        <td>
-                          <label className="visually-hidden" htmlFor={inputId}>
-                            {headingName || record.acControlNo} 선택
-                          </label>
-                          <input
-                            type="radio"
-                            id={inputId}
-                            name="refSelect"
-                            checked={isSelected}
-                            onChange={() => {
-                              setSelectedRecordKey(record.recKey);
-                              setSelectedReferenceIndexes(new Set());
-                            }}
-                          />
-                        </td>
-                        <td>{authorityTypeLabels[record.acType]}</td>
-                        <td>{record.acControlNo}</td>
-                        <td
-                          className={`text-start${
-                            isSelected ? " text-primary fw-bold" : ""
-                          }`}
-                        >
-                          {headingName}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                  return (
+                    <tr key={record.recKey}>
+                      <td>
+                        {(currentPage - 1) * (searchResult?.display ?? 10) +
+                          index +
+                          1}
+                      </td>
+                      <td>
+                        <label className="visually-hidden" htmlFor={inputId}>
+                          {headingName || record.acControlNo} 선택
+                        </label>
+                        <input
+                          type="radio"
+                          id={inputId}
+                          name="refSelect"
+                          checked={isSelected}
+                          onChange={() => {
+                            setSelectedRecordKey(record.recKey);
+                            setSelectedReferenceIndexes(new Set());
+                          }}
+                        />
+                      </td>
+                      <td>{authorityTypeLabels[record.acType]}</td>
+                      <td>{record.acControlNo}</td>
+                      <td
+                        className={`text-start${
+                          isSelected ? " text-primary fw-bold" : ""
+                        }`}
+                      >
+                        {headingName}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
             <div className="d-flex justify-content-center align-items-center gap-2">
               <button
                 className="btn btn-sm btn-outline-secondary"
