@@ -57,6 +57,36 @@ afterEach(() => {
 });
 
 describe("AuthorityPersonalFormPage", () => {
+  it("settings API의 전거지역 코드를 입력 옵션으로 표시한다", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <AuthorityPersonalFormPage mode="create" />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    const regionSelect = screen.getByLabelText("전거지역구분");
+    expect(regionSelect).toBeDisabled();
+    expect(
+      await screen.findByRole("option", { name: "2 : 중국" }),
+    ).toBeInTheDocument();
+    expect(regionSelect).toBeEnabled();
+    expect(
+      screen.queryByRole("option", { name: "0 : 전체" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "3 : 일본" })).toHaveValue(
+      "3",
+    );
+    expect(screen.getByRole("option", { name: "4 : 기타" })).toHaveValue(
+      "4",
+    );
+  });
+
   it("채택표목·한자명·생몰년을 하나의 100 필드로 추가한다", async () => {
     const user = userEvent.setup();
     const queryClient = new QueryClient({
@@ -337,6 +367,7 @@ describe("AuthorityPersonalFormPage", () => {
       </QueryClientProvider>,
     );
 
+    await screen.findByRole("option", { name: "1 : 한국" });
     await user.selectOptions(screen.getByLabelText("전거지역구분"), "1");
     await user.type(screen.getByLabelText("채택표목(100)"), "김소월");
     await user.click(screen.getByLabelText("비공개"));

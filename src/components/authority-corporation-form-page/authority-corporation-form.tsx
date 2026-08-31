@@ -6,6 +6,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 
+import AuthorityRegionSelect from "@/components/ui/authority-region-select";
 import { useMarcEditor } from "@/components/ui/marc-editor-context";
 
 import {
@@ -87,19 +88,12 @@ export default function AuthorityCorporationForm({
                   </label>
                 </div>
                 <div className="col">
-                  <select
-                    className="form-select"
+                  <AuthorityRegionSelect
                     id="c-region"
+                    fallbackValue={initialValues?.region}
+                    excludeAllOption
                     {...register("region")}
-                  >
-                    <option value="">선택</option>
-                    <option value="1">1 : 한국</option>
-                    {initialValues?.region && initialValues.region !== "1" && (
-                      <option value={initialValues.region}>
-                        {initialValues.region}
-                      </option>
-                    )}
-                  </select>
+                  />
                 </div>
               </div>
             </div>

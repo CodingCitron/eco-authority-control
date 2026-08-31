@@ -214,6 +214,7 @@ describe("AuthorityCorporationFormPage", () => {
     vi.mocked(fetchAuthorityCreate).mockResolvedValue(response);
     renderCreatePage(queryClient);
 
+    await screen.findByRole("option", { name: "1 : 한국" });
     await user.selectOptions(screen.getByLabelText("전거지역구분"), "1");
     await user.type(screen.getByLabelText("채택표목(110)"), "헌법재판연구원");
     await user.click(

@@ -6,6 +6,7 @@ export const authoritySettingsMockData = {
     CONTAINS: "양단절단",
   },
   REGION_CODE: {
+    "0": "전체",
     "1": "한국",
     "2": "중국",
     "3": "일본",
