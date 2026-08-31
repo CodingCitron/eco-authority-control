@@ -1,13 +1,25 @@
-import { useEffect, useState } from "react";
+import { useState, type SetStateAction } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import clsx from "clsx";
 
 import { authorityTypeLabels } from "@/types/authority.types";
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
+import type {
+  AuthorityCreateMetadata,
+  MarcField,
+} from "@/types/marc-editor.types";
 
 import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
+import { sortMarcFields } from "@/lib/marc/marc-field.utils";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
+import { MarcEditorWorkspace } from "@/components/ui/marc-editor";
+import {
+  formatLeaderData,
+  MarcEditorContext,
+  parseLeaderData,
+  type LeaderData,
+} from "@/components/ui/marc-editor-context";
 import MarcFontSizeSelect, {
   defaultFontSize,
 } from "@/components/ui/marc-font-size-select";
@@ -35,6 +47,72 @@ const MERGE_TABLE_HEADS = [
   "채택표목",
   "정보원",
 ];
+
+interface MasterEditorState {
+  recordKey: string;
+  leaderData: LeaderData;
+  variableFields: MarcField[];
+  authorityCreateMetadata: AuthorityCreateMetadata;
+}
+
+function createEditorFields(record: AuthorityDetailData["record"]): MarcField[] {
+  return sortMarcFields([
+    ...record.controlFields.map((field) => ({
+      type: "control" as const,
+      tag: field.tag,
+      value: field.value,
+    })),
+    ...record.dataFields.map((field) => ({
+      type: "data" as const,
+      tag: field.tag,
+      indicator1: field.ind1,
+      indicator2: field.ind2,
+      subfields: field.subfields.map((subfield) => ({ ...subfield })),
+    })),
+  ]);
+}
+
+function createMasterEditorState(
+  detail: AuthorityDetailData,
+): MasterEditorState {
+  return {
+    recordKey: detail.recKey,
+    leaderData: parseLeaderData(detail.record.leader),
+    variableFields: createEditorFields(detail.record),
+    authorityCreateMetadata: {},
+  };
+}
+
+function createEditedMasterDetail(
+  detail: AuthorityDetailData,
+  editorState: MasterEditorState,
+): AuthorityDetailData {
+  const controlFields: AuthorityDetailData["record"]["controlFields"] = [];
+  const dataFields: AuthorityDetailData["record"]["dataFields"] = [];
+
+  editorState.variableFields.forEach((field) => {
+    if (field.type === "control") {
+      controlFields.push({ tag: field.tag, value: field.value });
+      return;
+    }
+
+    dataFields.push({
+      tag: field.tag,
+      ind1: field.indicator1,
+      ind2: field.indicator2,
+      subfields: field.subfields.map((subfield) => ({ ...subfield })),
+    });
+  });
+
+  return {
+    ...detail,
+    record: {
+      leader: formatLeaderData(editorState.leaderData),
+      controlFields,
+      dataFields,
+    },
+  };
+}
 
 export function AuthorityMergeButton() {
   const { selectedRecordKeys } = useSearchPage();
@@ -90,27 +168,29 @@ export default function AuthorityMergeModal({
   );
 }
 
-function AuthorityMergeModalBody({
+export function AuthorityMergeModalBody({
   show,
   onHide,
   onPreview,
   onMerge,
 }: AuthorityMergeModalProps) {
   const [masterRecordKey, setMasterRecordKey] = useState<string>();
+  const [masterEditorState, setMasterEditorState] =
+    useState<MasterEditorState>();
+  const [mergedPairKey, setMergedPairKey] = useState<string>();
 
   const [masterFontSize, setMasterFontSize] = useState(defaultFontSize);
   const [targetFontSize, setTargetFontSize] = useState(defaultFontSize);
 
   const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 
-  useEffect(() => {
-    if (show) {
-      setMasterRecordKey(data[0]?.recKey);
-    }
-  }, [data, show]);
-
   const firstRecordKey = data[0]?.recKey;
   const secondRecordKey = data[1]?.recKey;
+  const selectedMasterRecordKey = data.some(
+    (record) => record.recKey === masterRecordKey,
+  )
+    ? masterRecordKey
+    : firstRecordKey;
 
   const { data: firstResponse, isError: isFirstError } = useAuthorityDetail(
     firstRecordKey,
@@ -129,7 +209,8 @@ function AuthorityMergeModalBody({
   const firstDetail = firstResponse?.data;
   const secondDetail = secondResponse?.data;
   const isFirstMaster =
-    masterRecordKey === undefined || masterRecordKey === firstRecordKey;
+    selectedMasterRecordKey === undefined ||
+    selectedMasterRecordKey === firstRecordKey;
   const master = isFirstMaster ? firstDetail : secondDetail;
   const target = isFirstMaster ? secondDetail : firstDetail;
   const isMasterError =
@@ -147,6 +228,90 @@ function AuthorityMergeModalBody({
   const isRecordFetchComplete = !isLoading && !isError;
   const canMerge =
     data.length === 2 && master !== undefined && target !== undefined;
+  const activeMasterEditorState = master
+    ? masterEditorState?.recordKey === master.recKey
+      ? masterEditorState
+      : createMasterEditorState(master)
+    : undefined;
+  const currentPairKey =
+    master && target ? `${master.recKey}:${target.recKey}` : undefined;
+  const hasMarcMerged =
+    currentPairKey !== undefined && currentPairKey === mergedPairKey;
+
+  const updateMasterEditorState = (
+    update: (current: MasterEditorState) => MasterEditorState,
+  ) => {
+    if (!master) {
+      return;
+    }
+
+    setMasterEditorState((current) => {
+      const activeState =
+        current?.recordKey === master.recKey
+          ? current
+          : createMasterEditorState(master);
+      return update(activeState);
+    });
+  };
+
+  const setMasterLeaderData = (leaderData: LeaderData) => {
+    updateMasterEditorState((current) => ({ ...current, leaderData }));
+  };
+
+  const setMasterVariableFields = (
+    nextFields: SetStateAction<MarcField[]>,
+  ) => {
+    updateMasterEditorState((current) => ({
+      ...current,
+      variableFields:
+        typeof nextFields === "function"
+          ? nextFields(current.variableFields)
+          : nextFields,
+    }));
+  };
+
+  const setMasterAuthorityCreateMetadata = (
+    nextMetadata: SetStateAction<AuthorityCreateMetadata>,
+  ) => {
+    updateMasterEditorState((current) => ({
+      ...current,
+      authorityCreateMetadata:
+        typeof nextMetadata === "function"
+          ? nextMetadata(current.authorityCreateMetadata)
+          : nextMetadata,
+    }));
+  };
+
+  const selectMasterRecord = (recordKey: string) => {
+    setMasterRecordKey(recordKey);
+    setMasterEditorState(undefined);
+    setMergedPairKey(undefined);
+  };
+
+  const mergeMarcDataFields = () => {
+    if (!master || !target || !activeMasterEditorState || !currentPairKey) {
+      return;
+    }
+
+    const targetDataFields = target.record.dataFields.map((field) => ({
+      type: "data" as const,
+      tag: field.tag,
+      indicator1: field.ind1,
+      indicator2: field.ind2,
+      subfields: field.subfields.map((subfield) => ({ ...subfield })),
+    }));
+    const mergedEditorState: MasterEditorState = {
+      ...activeMasterEditorState,
+      variableFields: sortMarcFields([
+        ...activeMasterEditorState.variableFields,
+        ...targetDataFields,
+      ]),
+    };
+
+    setMasterEditorState(mergedEditorState);
+    setMergedPairKey(currentPairKey);
+    onPreview?.(createEditedMasterDetail(master, mergedEditorState), target);
+  };
 
   return (
     <>
@@ -212,7 +377,8 @@ function AuthorityMergeModalBody({
                 </thead>
                 <tbody>
                   {data.map((record, index) => {
-                    const isChecked = masterRecordKey === record.recKey;
+                    const isChecked =
+                      selectedMasterRecordKey === record.recKey;
                     const authorityTypeLabel =
                       authorityTypeLabels[record.acType];
                     const headingName = record.headingName ?? "";
@@ -222,7 +388,7 @@ function AuthorityMergeModalBody({
                       <tr
                         key={record.recKey}
                         role="button"
-                        onClick={() => setMasterRecordKey(record.recKey)}
+                        onClick={() => selectMasterRecord(record.recKey)}
                       >
                         <td>{index + 1}</td>
                         <td>
@@ -231,7 +397,7 @@ function AuthorityMergeModalBody({
                             name="merge-master"
                             aria-label={`${headingName}을 통합 주자료로 선택`}
                             checked={isChecked}
-                            onChange={() => setMasterRecordKey(record.recKey)}
+                            onChange={() => selectMasterRecord(record.recKey)}
                           />
                         </td>
                         <td>
@@ -291,10 +457,30 @@ function AuthorityMergeModalBody({
                       통합 주자료의 상세 정보를 불러오지 못했습니다. 잠시 후
                       다시 시도해주세요.
                     </p>
+                  ) : master && activeMasterEditorState ? (
+                    <MarcEditorContext.Provider
+                      value={{
+                        leaderData: activeMasterEditorState.leaderData,
+                        variableFields: activeMasterEditorState.variableFields,
+                        authorityCreateMetadata:
+                          activeMasterEditorState.authorityCreateMetadata,
+                        setLeaderData: setMasterLeaderData,
+                        setVariableFields: setMasterVariableFields,
+                        setAuthorityCreateMetadata:
+                          setMasterAuthorityCreateMetadata,
+                      }}
+                    >
+                      <div className="card shadow-sm">
+                        <MarcEditorWorkspace
+                          title="통합주자료 MARC"
+                          fontSize={`${masterFontSize}px`}
+                        />
+                      </div>
+                    </MarcEditorContext.Provider>
                   ) : (
                     <MarcRecordPreview
-                      detail={master}
                       fontSize={`${masterFontSize}px`}
+                      message="통합 주자료를 불러오는 중입니다."
                       className="bg-white"
                     />
                   )}
@@ -343,22 +529,21 @@ function AuthorityMergeModalBody({
         <Button
           className="px-4 fw-bold"
           variant="outline-primary"
-          disabled={!canMerge}
-          onClick={() => {
-            if (master && target) {
-              onPreview?.(master, target);
-            }
-          }}
+          disabled={!canMerge || hasMarcMerged}
+          onClick={mergeMarcDataFields}
         >
-          MARC 통합
+          {hasMarcMerged ? "MARC 통합 완료" : "MARC 통합"}
         </Button>
         <Button
           className="px-4 fw-bold"
           variant="primary"
-          disabled={!canMerge}
+          disabled={!canMerge || !hasMarcMerged}
           onClick={() => {
-            if (master && target) {
-              onMerge?.(master, target);
+            if (master && target && activeMasterEditorState) {
+              onMerge?.(
+                createEditedMasterDetail(master, activeMasterEditorState),
+                target,
+              );
             }
           }}
         >
