@@ -6,19 +6,19 @@ import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import { useAuthoritySearch } from "@/hooks/use-authority-search";
 import {
   authorityTypeLabels,
+  isValidAcType,
   type AuthoritySearchType,
 } from "@/types/authority.types";
 import type { MarcDataField } from "@/types/marc-editor.types";
 
 import {
-  copyAuthorityReferenceField,
+  create5XXReferenceFields,
   type AuthorityReferenceRelationCode,
 } from "./authority-reference-heading.mapper";
 import BaseModal from "./base-modal";
 import MarcFontSizeSelect, { defaultFontSize } from "./marc-font-size-select";
 import OverflowTooltip from "./overflow-tooltip";
 import MarcRecordPreview from "./record-preview";
-import type { AuthorityDetailResponse } from "@/api/authority-detail";
 
 const referenceSearchDefaultParams: AuthoritySearchQueryParams = {
   acType: "1",
@@ -33,42 +33,6 @@ function getReferenceFieldDescription(field: Pick<MarcDataField, "subfields">) {
     .filter(({ code }) => code === "a" || code === "b")
     .map(({ value }) => value)
     .join(" ");
-}
-
-function create5XXReferenceFields(
-  acType: AuthoritySearchType,
-  record: AuthorityDetailResponse["data"]["record"],
-  relationCode: AuthorityReferenceRelationCode,
-) {
-  // 0 - 개인명: 100
-  // 1 - 단체명: 110
-  // 5 - 지리명: 151
-  // 4 - 주제명: 150
-  const targetTag = {
-    0: "100",
-    1: "110",
-    5: "151",
-    4: "150",
-  }[acType];
-
-  console.log(record);
-
-  const controlNumber = record.controlFields.find(
-    (field) => field.tag === "001",
-  )?.value;
-
-  // dataField.find
-  const field = record.dataFields.find((field) => field.tag === targetTag);
-  const subfield = field?.subfields ?? [];
-
-  // 서브 필드와 조합해서
-  // $wb$a단순부작위[單純不作爲]$0KAS201206266 이런 모양으로 만들어야 함
-  // $wb는
-
-  // 적용 없음은 $w가 없나?
-  // `$w${relationCode}`
-
-  console.log(acType, field, relationCode);
 }
 
 interface AuthorityReferenceHeadingSearchProps {
@@ -204,19 +168,24 @@ export function AuthorityReferenceHeadingSearchModalBody({
   };
 
   const handleCopyToReferenceField = () => {
+    const selectedAuthorityType = detailResponse?.data.acType;
+    if (!isValidAcType(selectedAuthorityType)) {
+      return;
+    }
+
     const copiedFields = create5XXReferenceFields(
-      authorityType,
+      selectedAuthorityType,
       detailResponse?.data.record,
       relationCode,
+      "510",
     );
 
-    return;
-    // if (copiedFields.length === 0) {
-    //   return;
-    // }
+    if (copiedFields.length === 0) {
+      return;
+    }
 
-    // setTemporaryReferenceFields((fields) => [...fields, ...copiedFields]);
-    // setSelectedTemporaryIndexes(new Set());
+    setTemporaryReferenceFields((fields) => [...fields, ...copiedFields]);
+    setSelectedTemporaryIndexes(new Set());
   };
 
   const toggleTemporaryReferenceField = (index: number) => {
@@ -578,7 +547,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 {temporaryReferenceFields.length === 0 && (
                   <tr>
                     <td colSpan={5} className="py-3 text-secondary">
-                      복사한 510 필드가 없습니다.
+                      복사한 5XX 필드가 없습니다.
                     </td>
                   </tr>
                 )}

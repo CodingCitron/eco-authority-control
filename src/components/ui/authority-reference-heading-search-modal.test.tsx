@@ -37,10 +37,10 @@ vi.mock("@/hooks/use-authority-detail", () => ({
         acControlNo: "KAC000000001",
         record: {
           leader: "",
-          controlFields: [],
+          controlFields: [{ tag: "001", value: "KAC000000001" }],
           dataFields: [
             {
-              tag: "510",
+              tag: "110",
               ind1: " ",
               ind2: " ",
               subfields: [
@@ -94,6 +94,7 @@ describe("AuthorityReferenceHeadingSearchModalBody", () => {
         subfields: expect.arrayContaining([
           { code: "a", value: "한국" },
           { code: "b", value: "문화부" },
+          { code: "0", value: "KAC000000001" },
         ]),
       }),
     ]);
@@ -115,6 +116,6 @@ describe("AuthorityReferenceHeadingSearchModalBody", () => {
     await user.click(screen.getByRole("checkbox", { name: /510 한국 문화부 선택/ }));
     await user.click(screen.getByRole("button", { name: "삭제" }));
 
-    expect(screen.getByText("복사한 510 필드가 없습니다.")).toBeInTheDocument();
+    expect(screen.getByText("복사한 5XX 필드가 없습니다.")).toBeInTheDocument();
   });
 });

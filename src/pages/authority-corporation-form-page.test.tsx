@@ -123,16 +123,6 @@ describe("AuthorityCorporationFormPage", () => {
       const detailResponse = recKey
         ? createDetailResponse(recKey)
         : undefined;
-      detailResponse?.data.record.dataFields.push({
-        tag: "510",
-        ind1: " ",
-        ind2: " ",
-        subfields: [
-          { code: "w", value: "a" },
-          { code: "a", value: "한국도서관협회" },
-          { code: "0", value: "KAB199900000004" },
-        ],
-      });
 
       return {
         data: detailResponse,
@@ -179,25 +169,33 @@ describe("AuthorityCorporationFormPage", () => {
     );
     expect(recordPreview).toHaveStyle({ fontSize: "22px" });
 
-    const referenceFieldCheckbox = within(dialog).getByLabelText(
-      "510 한국도서관협회 선택",
-    );
-    const referenceSourceRow = referenceFieldCheckbox.closest("tr");
-    expect(referenceSourceRow).toHaveTextContent("$wa");
-    expect(referenceSourceRow).toHaveTextContent("$a한국도서관협회");
-    expect(referenceSourceRow).toHaveTextContent("$0KAB199900000004");
     expect(screen.queryByLabelText("510 행")).not.toBeInTheDocument();
 
-    await user.click(referenceFieldCheckbox);
     await user.click(within(dialog).getByLabelText("이후(b)"));
     await user.click(
       within(dialog).getByRole("button", { name: "5XX로 복사" }),
     );
 
+    const temporaryReferenceFieldCheckbox = within(dialog).getByLabelText(
+      "510 한국헌법재판소. 헌법재판연구원 선택",
+    );
+    const temporaryReferenceFieldRow =
+      temporaryReferenceFieldCheckbox.closest("tr");
+    expect(temporaryReferenceFieldRow).toHaveTextContent("$wb");
+    expect(temporaryReferenceFieldRow).toHaveTextContent(
+      "$a한국헌법재판소.",
+    );
+    expect(temporaryReferenceFieldRow).toHaveTextContent("$b헌법재판연구원");
+    expect(temporaryReferenceFieldRow).toHaveTextContent("$0KAB202600001");
+    expect(screen.queryByLabelText("510 행")).not.toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "확인" }));
+
     const referenceFieldRow = await screen.findByLabelText("510 행");
     expect(referenceFieldRow).toHaveTextContent("$w b");
-    expect(referenceFieldRow).toHaveTextContent("$a 한국도서관협회");
-    expect(referenceFieldRow).toHaveTextContent("$0 KAB199900000004");
+    expect(referenceFieldRow).toHaveTextContent("$a 한국헌법재판소.");
+    expect(referenceFieldRow).toHaveTextContent("$b 헌법재판연구원");
+    expect(referenceFieldRow).toHaveTextContent("$0 KAB202600001");
   });
 
   it("단체명 폼의 각 항목을 MARC 레코드에 추가한다", async () => {
