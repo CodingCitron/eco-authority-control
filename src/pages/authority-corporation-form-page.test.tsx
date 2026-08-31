@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -99,7 +105,7 @@ function renderCreatePage(queryClient = new QueryClient()) {
 }
 
 describe("AuthorityCorporationFormPage", () => {
-  it("참조표목조회 없이 빈 단체명 입력 화면을 표시한다", () => {
+  it("빈 단체명 입력 화면과 참조표목조회 버튼을 표시한다", () => {
     renderCreatePage();
 
     expect(screen.getByRole("heading")).toHaveTextContent(
@@ -107,8 +113,57 @@ describe("AuthorityCorporationFormPage", () => {
     );
     expect(screen.getByLabelText("채택표목(110)")).toHaveValue("");
     expect(
-      screen.queryByRole("button", { name: /참조표목조회/ }),
+      screen.getByRole("button", { name: "참조표목조회(5XX) 추가" }),
+    ).toBeVisible();
+  });
+
+  it("참조표목조회 모달에서 단체명 전거를 검색한다", async () => {
+    const user = userEvent.setup();
+    vi.mocked(useAuthorityDetail).mockImplementation((recKey) => {
+      return {
+        data: recKey ? createDetailResponse(recKey) : undefined,
+      } as never;
+    });
+    renderCreatePage();
+
+    await user.click(
+      screen.getByRole("button", { name: "참조표목조회(5XX) 추가" }),
+    );
+
+    const dialog = await screen.findByRole("dialog");
+    await user.type(within(dialog).getByLabelText("검색어"), "국립");
+    await user.click(within(dialog).getByRole("button", { name: "찾기" }));
+
+    const resultRadio = await within(dialog).findByRole("radio", {
+        name: "국립중앙도서관 선택",
+      });
+    expect(resultRadio).toBeVisible();
+    expect(within(dialog).getByText("KAC199900000002")).toBeVisible();
+    expect(
+      within(dialog).queryByText("한국도서관협회"),
     ).not.toBeInTheDocument();
+
+    await user.click(resultRadio);
+
+    await waitFor(() => {
+      expect(useAuthorityDetail).toHaveBeenLastCalledWith(
+        "927615830492716",
+        { enabled: true },
+      );
+    });
+    expect(within(dialog).getByText("LDR").parentElement).toHaveTextContent(
+      "00000nz a2200000n 4500",
+    );
+
+    const recordPreview = within(dialog)
+      .getByText("LDR")
+      .closest(".marc-record-view");
+    expect(recordPreview).toHaveStyle({ fontSize: "16px" });
+    await user.selectOptions(
+      within(dialog).getByLabelText("참조표목 상세 글자크기"),
+      "22",
+    );
+    expect(recordPreview).toHaveStyle({ fontSize: "22px" });
   });
 
   it("단체명 폼의 각 항목을 MARC 레코드에 추가한다", async () => {

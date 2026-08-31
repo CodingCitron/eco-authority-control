@@ -1,7 +1,23 @@
-import { useState } from "react";
+import { useState, type SubmitEvent } from "react";
 import { Button, Modal } from "react-bootstrap";
 
+import type { AuthoritySearchQueryParams } from "@/api/authority-search";
+import { useAuthorityDetail } from "@/hooks/use-authority-detail";
+import { useAuthoritySearch } from "@/hooks/use-authority-search";
+import { authorityTypeLabels } from "@/types/authority.types";
+
 import BaseModal from "./base-modal";
+import MarcFontSizeSelect, {
+  defaultFontSize,
+} from "./marc-font-size-select";
+import MarcRecordPreview from "./record-preview";
+
+const referenceSearchDefaultParams: AuthoritySearchQueryParams = {
+  acType: "1",
+  searchType: "CONTAINS",
+  page: "1",
+  display: "10",
+};
 
 export function AuthorityReferenceHeadingSearchButton() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -46,6 +62,71 @@ export function AuthorityReferenceHeadingSearchModalBody({
 }: {
   onHide: () => void;
 }) {
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchParams, setSearchParams] =
+    useState<AuthoritySearchQueryParams>();
+  const [selectedRecordKey, setSelectedRecordKey] = useState("");
+  const [fontSize, setFontSize] = useState(defaultFontSize);
+
+  const {
+    data: searchResponse,
+    isFetching,
+    isError,
+    refetch,
+  } = useAuthoritySearch(searchParams ?? referenceSearchDefaultParams, {
+    enabled: searchParams !== undefined,
+  });
+
+  const {
+    data: detailResponse,
+    isFetching: isDetailFetching,
+    isError: isDetailError,
+  } = useAuthorityDetail(selectedRecordKey, {
+    enabled: Boolean(selectedRecordKey),
+  });
+
+  const searchResult = searchResponse?.data;
+  const records = searchResult?.items ?? [];
+  const currentPage = searchResult?.page ?? Number(searchParams?.page ?? 1);
+  const totalPages = Math.max(searchResult?.totalPages ?? 1, 1);
+  const detailMessage = !selectedRecordKey
+    ? "검색 결과에서 전거를 선택해 주세요."
+    : isDetailError
+      ? "선택한 전거의 상세 정보를 불러오지 못했습니다."
+      : isDetailFetching
+        ? "선택한 전거의 상세 정보를 불러오는 중입니다."
+        : "선택한 전거의 상세 정보가 없습니다.";
+
+  const handleSearch = (event: SubmitEvent) => {
+    event.preventDefault();
+
+    const normalizedKeyword = searchKeyword.trim();
+    const nextParams: AuthoritySearchQueryParams = {
+      ...referenceSearchDefaultParams,
+      ...(normalizedKeyword && { searchKeyword: normalizedKeyword }),
+    };
+    const isSameSearch =
+      searchParams?.searchKeyword === nextParams.searchKeyword &&
+      searchParams?.page === nextParams.page;
+
+    setSelectedRecordKey("");
+    if (isSameSearch) {
+      void refetch();
+      return;
+    }
+
+    setSearchParams(nextParams);
+  };
+
+  const moveToPage = (page: number) => {
+    if (!searchParams || page < 1 || page > totalPages) {
+      return;
+    }
+
+    setSelectedRecordKey("");
+    setSearchParams({ ...searchParams, page: String(page) });
+  };
+
   return (
     <>
       <Modal.Header
@@ -60,7 +141,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
       <Modal.Body>
         <div className="row g-3">
           <div className="col-lg-5">
-            <div className="input-group mb-3">
+            <form className="input-group mb-3" onSubmit={handleSearch}>
               <span className="input-group-text fw-bold" aria-hidden="true">
                 검색어
               </span>
@@ -71,12 +152,17 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 type="text"
                 className="form-control"
                 id="c-5xxSearch"
-                value="문화체육부"
+                value={searchKeyword}
+                onChange={(event) => setSearchKeyword(event.target.value)}
               />
-              <button className="btn btn-primary" type="button">
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={isFetching}
+              >
                 찾기
               </button>
-            </div>
+            </form>
             <table className="table table-bordered table-sm text-center align-middle">
               <caption className="visually-hidden">전거 검색 결과 목록</caption>
               <thead className="table-light">
@@ -89,75 +175,73 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>
-                    <label className="visually-hidden" htmlFor="c-refSelect1">
-                      공보처 선택
-                    </label>
-                    <input type="radio" id="c-refSelect1" name="refSelect" />
-                  </td>
-                  <td>단체명</td>
-                  <td>KAB201100002</td>
-                  <td className="text-start">공보처</td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>
-                    <label className="visually-hidden" htmlFor="c-refSelect2">
-                      공보부 선택
-                    </label>
-                    <input type="radio" id="c-refSelect2" name="refSelect" />
-                  </td>
-                  <td>단체명</td>
-                  <td>KAB201400005</td>
-                  <td className="text-start">공보부</td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td>
-                    <label className="visually-hidden" htmlFor="c-refSelect3">
-                      문화체육관광부 선택
-                    </label>
-                    <input type="radio" id="c-refSelect3" name="refSelect" />
-                  </td>
-                  <td>단체명</td>
-                  <td>KAB201300002</td>
-                  <td className="text-start">문화체육관광부</td>
-                </tr>
-                <tr>
-                  <td>4</td>
-                  <td>
-                    <label className="visually-hidden" htmlFor="c-refSelect4">
-                      한국.문화관광부 선택
-                    </label>
-                    <input
-                      type="radio"
-                      id="c-refSelect4"
-                      name="refSelect"
-                      checked
-                    />
-                  </td>
-                  <td>단체명</td>
-                  <td>KAB201206266</td>
-                  <td className="text-start text-primary fw-bold">
-                    한국.문화관광부
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>6</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
+                {!searchParams && (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-secondary">
+                      검색어를 입력한 후 찾기를 눌러 주세요.
+                    </td>
+                  </tr>
+                )}
+                {searchParams && isFetching && records.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-secondary">
+                      검색 중입니다.
+                    </td>
+                  </tr>
+                )}
+                {searchParams && isError && (
+                  <tr>
+                    <td colSpan={5} className="py-4 text-danger">
+                      전거 검색 결과를 불러오지 못했습니다.
+                    </td>
+                  </tr>
+                )}
+                {searchParams &&
+                  !isFetching &&
+                  !isError &&
+                  records.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-4 text-secondary">
+                        검색 결과가 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                {records.map((record, index) => {
+                  const inputId = `c-refSelect-${record.recKey}`;
+                  const headingName = record.headingName ?? "";
+                  const isSelected = selectedRecordKey === record.recKey;
+
+                  return (
+                    <tr key={record.recKey}>
+                      <td>
+                        {(currentPage - 1) * (searchResult?.display ?? 10) +
+                          index +
+                          1}
+                      </td>
+                      <td>
+                        <label className="visually-hidden" htmlFor={inputId}>
+                          {headingName || record.acControlNo} 선택
+                        </label>
+                        <input
+                          type="radio"
+                          id={inputId}
+                          name="refSelect"
+                          checked={isSelected}
+                          onChange={() => setSelectedRecordKey(record.recKey)}
+                        />
+                      </td>
+                      <td>{authorityTypeLabels[record.acType]}</td>
+                      <td>{record.acControlNo}</td>
+                      <td
+                        className={`text-start${
+                          isSelected ? " text-primary fw-bold" : ""
+                        }`}
+                      >
+                        {headingName}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             <div className="d-flex justify-content-center align-items-center gap-2">
@@ -165,6 +249,8 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
                 aria-label="첫 페이지"
+                disabled={!searchParams || isFetching || currentPage <= 1}
+                onClick={() => moveToPage(1)}
               >
                 <i className="bi bi-chevron-double-left" aria-hidden="true"></i>
               </button>
@@ -172,14 +258,22 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
                 aria-label="이전 페이지"
+                disabled={!searchParams || isFetching || currentPage <= 1}
+                onClick={() => moveToPage(currentPage - 1)}
               >
                 <i className="bi bi-chevron-left" aria-hidden="true"></i>
               </button>
-              <span className="border rounded px-3 py-1">1/1</span>
+              <span className="border rounded px-3 py-1">
+                {currentPage}/{totalPages}
+              </span>
               <button
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
                 aria-label="다음 페이지"
+                disabled={
+                  !searchParams || isFetching || currentPage >= totalPages
+                }
+                onClick={() => moveToPage(currentPage + 1)}
               >
                 <i className="bi bi-chevron-right" aria-hidden="true"></i>
               </button>
@@ -187,6 +281,10 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
                 aria-label="마지막 페이지"
+                disabled={
+                  !searchParams || isFetching || currentPage >= totalPages
+                }
+                onClick={() => moveToPage(totalPages)}
               >
                 <i
                   className="bi bi-chevron-double-right"
@@ -203,64 +301,23 @@ export function AuthorityReferenceHeadingSearchModalBody({
               <span className="fw-bold" aria-hidden="true">
                 글자크기
               </span>
-              <select
-                className="form-select form-select-sm w-auto"
+              <MarcFontSizeSelect
                 id="c-5xxFontSize"
-              >
-                <option>22 px</option>
-              </select>
+                aria-label="참조표목 상세 글자크기"
+                className="form-select-sm w-auto"
+                value={fontSize}
+                onChange={setFontSize}
+              />
               <button className="btn btn-sm btn-outline-dark">
                 한자 -&gt; 한글
               </button>
             </div>
-            <div
-              className="form-control marc-textarea font-monospace bg-light mb-2"
-              style={{
-                minHeight: "220px;",
-              }}
-            >
-              <div className="marc-line marc-line-control">
-                <span className="marc-tag">001</span> KAB201206266
-              </div>
-              <div className="marc-line marc-line-control">
-                <span className="marc-tag">005</span> 20200918145415
-              </div>
-              <div className="marc-line marc-line-control">
-                <span className="marc-tag">008</span> 120224 b aznnnaabn a aaa{" "}
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">046</span>{" "}
-                <span className="marc-sf">$s</span>20110101
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">110</span>{" "}
-                <span className="marc-sf">$a</span>한국.
-                <span className="marc-sf">$b</span>문화관광부
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">368</span>{" "}
-                <span className="marc-sf">$a</span>정부기관
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">370</span>{" "}
-                <span className="marc-sf">$a</span>한국(국명)[韓國]{" "}
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">372</span>{" "}
-                <span className="marc-sf">$a</span>사회문화[社會文化]{" "}
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">377</span>{" "}
-                <span className="marc-sf">$i</span>한국어{" "}
-                <span className="marc-eof">%</span>
-              </div>
-            </div>
+            <MarcRecordPreview
+              detail={detailResponse?.data}
+              fontSize={`${fontSize}px`}
+              className="form-control bg-light mb-2"
+              message={detailMessage}
+            />
             <div className="d-flex justify-content-between align-items-center bg-light p-2 border mb-2">
               <div className="d-flex gap-2">
                 <div className="form-check form-check-inline mb-0">
@@ -269,7 +326,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
                     type="radio"
                     name="btnradio"
                     id="btnradio0"
-                    checked
+                    defaultChecked
                   />
                   <label className="form-check-label" htmlFor="btnradio0">
                     적용안함
