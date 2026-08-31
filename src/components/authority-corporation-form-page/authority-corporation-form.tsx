@@ -8,6 +8,7 @@ import {
 
 import AuthorityRegionSelect from "@/components/ui/authority-region-select";
 import { useMarcEditor } from "@/components/ui/marc-editor-context";
+import { sortMarcFields } from "@/lib/marc/marc-field.utils";
 
 import {
   addCorporationFormValuesToMarcFields,
@@ -185,11 +186,17 @@ export default function AuthorityCorporationForm({
               <div className="row g-2 align-items-center mb-2">
                 <div className="col-md-2">
                   <span className="form-label fw-bold mb-0 text-nowrap">
-                    참조표목(551)
+                    참조표목(510)
                   </span>
                 </div>
                 <div className="col">
-                  <AuthorityReferenceHeadingSearchButton />
+                  <AuthorityReferenceHeadingSearchButton
+                    onCopy={(referenceFields) =>
+                      setVariableFields((fields) =>
+                        sortMarcFields([...fields, ...referenceFields]),
+                      )
+                    }
+                  />
                 </div>
               </div>
               <div className="row g-2 align-items-start">

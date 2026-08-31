@@ -120,8 +120,22 @@ describe("AuthorityCorporationFormPage", () => {
   it("참조표목조회 모달에서 단체명 전거를 검색한다", async () => {
     const user = userEvent.setup();
     vi.mocked(useAuthorityDetail).mockImplementation((recKey) => {
+      const detailResponse = recKey
+        ? createDetailResponse(recKey)
+        : undefined;
+      detailResponse?.data.record.dataFields.push({
+        tag: "510",
+        ind1: " ",
+        ind2: " ",
+        subfields: [
+          { code: "w", value: "a" },
+          { code: "a", value: "한국도서관협회" },
+          { code: "0", value: "KAB199900000004" },
+        ],
+      });
+
       return {
-        data: recKey ? createDetailResponse(recKey) : undefined,
+        data: detailResponse,
       } as never;
     });
     renderCreatePage();
@@ -135,8 +149,8 @@ describe("AuthorityCorporationFormPage", () => {
     await user.click(within(dialog).getByRole("button", { name: "찾기" }));
 
     const resultRadio = await within(dialog).findByRole("radio", {
-        name: "국립중앙도서관 선택",
-      });
+      name: "국립중앙도서관 선택",
+    });
     expect(resultRadio).toBeVisible();
     expect(within(dialog).getByText("KAC199900000002")).toBeVisible();
     expect(
@@ -164,6 +178,26 @@ describe("AuthorityCorporationFormPage", () => {
       "22",
     );
     expect(recordPreview).toHaveStyle({ fontSize: "22px" });
+
+    const referenceFieldCheckbox = within(dialog).getByLabelText(
+      "510 한국도서관협회 선택",
+    );
+    const referenceSourceRow = referenceFieldCheckbox.closest("tr");
+    expect(referenceSourceRow).toHaveTextContent("$wa");
+    expect(referenceSourceRow).toHaveTextContent("$a한국도서관협회");
+    expect(referenceSourceRow).toHaveTextContent("$0KAB199900000004");
+    expect(screen.queryByLabelText("510 행")).not.toBeInTheDocument();
+
+    await user.click(referenceFieldCheckbox);
+    await user.click(within(dialog).getByLabelText("이후(b)"));
+    await user.click(
+      within(dialog).getByRole("button", { name: "5XX로 복사" }),
+    );
+
+    const referenceFieldRow = await screen.findByLabelText("510 행");
+    expect(referenceFieldRow).toHaveTextContent("$w b");
+    expect(referenceFieldRow).toHaveTextContent("$a 한국도서관협회");
+    expect(referenceFieldRow).toHaveTextContent("$0 KAB199900000004");
   });
 
   it("단체명 폼의 각 항목을 MARC 레코드에 추가한다", async () => {
