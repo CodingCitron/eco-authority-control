@@ -423,6 +423,40 @@ body {
   white-space: normal;
 }
 
+.authority-reference-search-results {
+  max-height: min(20rem, 50vh);
+  overflow: auto;
+}
+
+.authority-reference-search-table {
+  width: 100%;
+  min-width: 27rem;
+  table-layout: fixed;
+}
+
+.authority-reference-search-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.authority-reference-search-no {
+  width: 2.5rem;
+}
+
+.authority-reference-search-select {
+  width: 3.25rem;
+}
+
+.authority-reference-search-type {
+  width: 4.75rem;
+}
+
+.authority-reference-search-control-no {
+  width: 8rem;
+}
+
 /* 전거 통합 요약 테이블의 '통합 주자료' 헤더가 좁은 열에서 줄바꿈되지 않게 한다. */
 #mergeSummaryTable th {
   white-space: nowrap;

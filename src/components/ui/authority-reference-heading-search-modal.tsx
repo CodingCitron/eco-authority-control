@@ -5,7 +5,10 @@ import type { AuthoritySearchQueryParams } from "@/api/authority-search";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import { useAuthoritySearch } from "@/hooks/use-authority-search";
 import type { AuthorityDataField } from "@/types/authority-detail.types";
-import { authorityTypeLabels } from "@/types/authority.types";
+import {
+  authorityTypeLabels,
+  type AuthoritySearchType,
+} from "@/types/authority.types";
 import type { MarcDataField } from "@/types/marc-editor.types";
 
 import {
@@ -14,10 +17,14 @@ import {
 } from "./authority-reference-heading.mapper";
 import BaseModal from "./base-modal";
 import MarcFontSizeSelect, { defaultFontSize } from "./marc-font-size-select";
+import OverflowTooltip from "./overflow-tooltip";
 import MarcRecordPreview from "./record-preview";
+import clsx from "clsx";
+import { css } from "styled-system/css";
 
 const referenceSearchDefaultParams: AuthoritySearchQueryParams = {
   acType: "1",
+  acRegionCode: "0",
   searchType: "CONTAINS",
   page: "1",
   display: "10",
@@ -85,6 +92,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
 }: AuthorityReferenceHeadingSearchProps & {
   onHide: () => void;
 }) {
+  const [authorityType, setAuthorityType] = useState<AuthoritySearchType>("1");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchParams, setSearchParams] =
     useState<AuthoritySearchQueryParams>();
@@ -135,9 +143,11 @@ export function AuthorityReferenceHeadingSearchModalBody({
     const normalizedKeyword = searchKeyword.trim();
     const nextParams: AuthoritySearchQueryParams = {
       ...referenceSearchDefaultParams,
+      acType: authorityType,
       ...(normalizedKeyword && { searchKeyword: normalizedKeyword }),
     };
     const isSameSearch =
+      searchParams?.acType === nextParams.acType &&
       searchParams?.searchKeyword === nextParams.searchKeyword &&
       searchParams?.page === nextParams.page;
 
@@ -170,6 +180,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
       const copiedField = copyAuthorityReferenceField(field, relationCode);
       return copiedField ? [copiedField] : [];
     });
+
     if (copiedFields.length === 0) {
       return;
     }
@@ -191,6 +202,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
   };
 
   const handleReset = () => {
+    setAuthorityType("1");
     setSearchKeyword("");
     setSearchParams(undefined);
     setSelectedRecordKey("");
@@ -214,6 +226,23 @@ export function AuthorityReferenceHeadingSearchModalBody({
         <div className="row g-3">
           <div className="col-lg-5">
             <form className="input-group mb-3" onSubmit={handleSearch}>
+              <label className="visually-hidden" htmlFor="c-5xxAuthorityType">
+                전거유형
+              </label>
+              <select
+                className="form-select flex-grow-0 w-auto"
+                id="c-5xxAuthorityType"
+                value={authorityType}
+                onChange={(event) =>
+                  setAuthorityType(event.target.value as AuthoritySearchType)
+                }
+              >
+                {Object.entries(authorityTypeLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
               <span className="input-group-text fw-bold" aria-hidden="true">
                 검색어
               </span>
@@ -235,8 +264,16 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 찾기
               </button>
             </form>
-            <table className="table table-bordered table-sm text-center align-middle">
+
+            <table className="authority-reference-search-table position-relative table table-bordered table-sm text-center align-middle mb-3">
               <caption className="visually-hidden">전거 검색 결과 목록</caption>
+              <colgroup>
+                <col className="authority-reference-search-no" />
+                <col className="authority-reference-search-select" />
+                <col className="authority-reference-search-type" />
+                <col className="authority-reference-search-control-no" />
+                <col />
+              </colgroup>
               <thead className="table-light">
                 <tr>
                   <th scope="col">No</th>
@@ -305,14 +342,26 @@ export function AuthorityReferenceHeadingSearchModalBody({
                           }}
                         />
                       </td>
-                      <td>{authorityTypeLabels[record.acType]}</td>
-                      <td>{record.acControlNo}</td>
+                      <td>
+                        <OverflowTooltip
+                          text={authorityTypeLabels[record.acType]}
+                        >
+                          {authorityTypeLabels[record.acType]}
+                        </OverflowTooltip>
+                      </td>
+                      <td>
+                        <OverflowTooltip text={record.acControlNo}>
+                          {record.acControlNo}
+                        </OverflowTooltip>
+                      </td>
                       <td
                         className={`text-start${
                           isSelected ? " text-primary fw-bold" : ""
                         }`}
                       >
-                        {headingName}
+                        <OverflowTooltip text={headingName}>
+                          {headingName}
+                        </OverflowTooltip>
                       </td>
                     </tr>
                   );
@@ -464,11 +513,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
               <button
                 className="btn btn-success btn-sm"
                 type="button"
-                disabled={
-                  selectedReferenceIndexes.size === 0 ||
-                  isDetailFetching ||
-                  isDetailError
-                }
+                disabled={isDetailFetching || isDetailError}
                 onClick={handleCopyToReferenceField}
               >
                 5XX로 복사

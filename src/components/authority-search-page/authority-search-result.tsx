@@ -438,7 +438,7 @@ export default function AuthoritySearchResult() {
 
   if (!isSearched) {
     return (
-      <div className="pt-2">
+      <div className="d-flex flex-column align-items-center justify-content-center pt-2">
         <p>찾기 버튼을 클릭하면 전거를 검색할 수 있습니다.</p>
       </div>
     );
@@ -446,7 +446,7 @@ export default function AuthoritySearchResult() {
 
   if (isLoading) {
     return (
-      <div className="pt-2">
+      <div className="d-flex flex-column align-items-center justify-content-center pt-2">
         <p>전거 데이터를 불러오는 중입니다.</p>
       </div>
     );
@@ -454,11 +454,13 @@ export default function AuthoritySearchResult() {
 
   if (isError) {
     return (
-      <div className="pt-2">
-        전거 데이터를 불러오지 못했습니다.
-        <button type="button" className="btn btn-outline-secondary">
-          다시 시도
-        </button>
+      <div className="d-flex flex-column align-items-center justify-content-center pt-2 gap-1">
+        <p>전거 데이터를 불러오지 못했습니다.</p>
+        <div>
+          <button type="button" className="btn btn-outline-secondary">
+            다시 시도
+          </button>
+        </div>
       </div>
     );
   }
