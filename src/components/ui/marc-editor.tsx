@@ -18,6 +18,7 @@ import type {
 } from "@/types/marc-editor.types";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 import { useMarcEditor, type LeaderData } from "./marc-editor-context";
+import MarcTagCombobox from "./marc-tag-combobox";
 import { BibliographicRecordConsistencyButton } from "../authority-personal-form-page/bibliographic-record-consistency-modal";
 
 interface MarcEditorProps {
@@ -219,6 +220,9 @@ export function MarcEditorWorkspace({
               field={field}
               key={`${field.type}-${field.tag}-${index}`}
               mode={mode}
+              usedTags={variableFields
+                .filter((_, fieldIndex) => fieldIndex !== index)
+                .map((otherField) => otherField.tag)}
               onChange={(nextField) => updateVariableField(index, nextField)}
               onRemove={() => removeVariableField(index)}
             />
@@ -360,12 +364,20 @@ function formatActualValue(value: unknown) {
 interface MarcRowProps {
   field: MarcField;
   mode: EditorMode;
+  usedTags: readonly string[];
   onChange: (field: MarcField) => void;
   onRemove: () => void;
 }
 
-function MarcRow({ field, mode, onChange, onRemove }: MarcRowProps) {
+function MarcRow({
+  field,
+  mode,
+  usedTags,
+  onChange,
+  onRemove,
+}: MarcRowProps) {
   const skipBlurCommitRef = useRef(false);
+  const contentInputRef = useRef<HTMLInputElement>(null);
   const [formFocusTarget, setFormFocusTarget] = useState<"tag" | "content">(
     "content",
   );
@@ -494,19 +506,16 @@ function MarcRow({ field, mode, onChange, onRemove }: MarcRowProps) {
             />
           ) : (
             <div className="d-flex align-items-center gap-1">
-              <input
-                type="text"
-                className="form-control form-control-sm marc-row-input marc-row-tag-input font-monospace"
-                aria-label="MARC 태그"
+              <MarcTagCombobox
                 autoFocus={formFocusTarget === "tag"}
-                inputMode="numeric"
-                maxLength={3}
-                placeholder="태그"
                 value={tagDraft}
-                onChange={(event) => setTagDraft(event.target.value)}
+                usedTags={usedTags}
+                onChange={setTagDraft}
+                onSelect={() => contentInputRef.current?.focus()}
                 onKeyDown={handleInputKeyDown}
               />
               <input
+                ref={contentInputRef}
                 type="text"
                 className="form-control form-control-sm marc-row-input font-monospace"
                 aria-label="MARC 지시기와 서브필드"

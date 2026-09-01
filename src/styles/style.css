@@ -351,12 +351,44 @@ body {
   box-shadow: none;
 }
 
+.marc-tag-combobox {
+  position: relative;
+  flex: 0 1 12rem;
+  width: 30%;
+  min-width: 7.5rem;
+}
+
 .marc-row-tag-input {
-  flex: 0 0 12%;
-  width: 12%;
-  min-width: 4.5rem;
+  width: 100%;
   color: #de3412;
   font-weight: 700;
+}
+
+.marc-tag-suggestions {
+  position: absolute;
+  z-index: 1080;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  width: min(28rem, 75vw);
+  max-height: 18rem;
+  overflow-y: auto;
+  white-space: normal;
+  word-break: keep-all;
+}
+
+.marc-tag-option {
+  padding: 0.5rem 0.75rem;
+  font-family: var(--bs-body-font-family);
+}
+
+.marc-tag-option-code {
+  flex: 0 0 2.5rem;
+  color: #de3412;
+  font-family: var(--bs-font-monospace);
+}
+
+.marc-tag-option.active .marc-tag-option-code {
+  color: inherit;
 }
 
 /* 그리드 헤더 정렬 */
