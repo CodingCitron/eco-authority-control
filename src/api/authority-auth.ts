@@ -2,27 +2,36 @@ import z from "zod";
 
 import { apiClient } from "@/lib/axios";
 
+export const STORAGE_TOKEN_KEY = "authority-control:access-token";
+
 // 로그인 api 작성
-interface SignInQueryParams {
+export interface SignInQueryParams {
   id: string;
   password: string;
 }
 
+export const profileSchema = z.object({
+  userId: z.string(),
+  name: z.string(),
+  userClassCode: z.string(),
+});
+
+export const tokenSchema = z.object({
+  tokenType: z.string(),
+  accessToken: z.string(),
+});
+
+export type Profile = z.infer<typeof profileSchema>;
+export type Token = z.infer<typeof tokenSchema>;
+
 export const SignInResponseSchema = z.object({
   data: z.object({
-    user: z.object({
-      userId: z.string(),
-      name: z.string(),
-      userClassCode: z.string(),
-    }),
-    tokenType: z.string(),
-    accessToken: z.string(),
+    user: profileSchema,
+    ...tokenSchema.shape,
   }),
 });
 
 export type SignInResponse = z.infer<typeof SignInResponseSchema>;
-
-export const STORAGE_TOKEN_KEY = "";
 
 export async function fetchSignIn(params: SignInQueryParams) {
   const { data } = await apiClient.post<unknown>("/ac/auth/login", params);
@@ -32,8 +41,7 @@ export async function fetchSignIn(params: SignInQueryParams) {
 // 리프레시 토큰 api
 export const RefreshAccessTokenResponseSchema = z.object({
   data: z.object({
-    tokenType: z.string(),
-    accessToken: z.string(),
+    ...tokenSchema.shape,
   }),
 });
 
