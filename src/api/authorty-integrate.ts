@@ -7,11 +7,11 @@ import type { MarcEditorRecord } from "@/types/marc-editor.types";
 export interface AuthorityIntegrateRequestQueryParams {
   sourceRecKey: string;
   targetRecKey: string;
-  acRegionCode: string;
-  birthDeathDatePrivateYn: AuthorityYesNo;
-  biographyPrivateYn: AuthorityYesNo;
-  copyrightBlanketAgreeYn: AuthorityYesNo;
-  copyrightBlanketAgreeDate: string;
+  acRegionCode?: string;
+  birthDeathDatePrivateYn?: AuthorityYesNo;
+  biographyPrivateYn?: AuthorityYesNo;
+  copyrightBlanketAgreeYn?: AuthorityYesNo;
+  copyrightBlanketAgreeDate?: string;
   record: MarcEditorRecord & {
     leader: string;
   };
