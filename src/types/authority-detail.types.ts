@@ -48,7 +48,27 @@ export const authorityDetailDataSchema = z.object({
   sourceDataFound: z.string().nullish(),
 });
 
+/** 전거 통합 결과 */
+export const authorityIntegrateResultSchema = z.object({
+  sourceRecKey: z.string(),
+  integrated: z.boolean(),
+  target: z.object({
+    birthDeathDatePrivateYn: z.enum(authorityYesNoValues).nullish(),
+    biographyPrivateYn: z.enum(authorityYesNoValues).nullish(),
+    copyrightBlanketAgreeYn: z.enum(authorityYesNoValues).nullish(),
+    copyrightBlanketAgreeDate: z.string(),
+    record: z.object({
+      leader: z.string(),
+      controlFields: z.array(authorityControlFieldSchema),
+      dataFields: z.array(authorityDataFieldSchema),
+    }),
+  }),
+});
+
 export type AuthorityControlField = z.infer<typeof authorityControlFieldSchema>;
 export type AuthoritySubfield = z.infer<typeof authoritySubfieldSchema>;
 export type AuthorityDataField = z.infer<typeof authorityDataFieldSchema>;
 export type AuthorityDetailData = z.infer<typeof authorityDetailDataSchema>;
+export type AuthorityIntegrateResult = z.infer<
+  typeof authorityIntegrateResultSchema
+>;
