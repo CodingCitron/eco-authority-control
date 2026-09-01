@@ -39,19 +39,19 @@ export async function fetchSignIn(params: SignInQueryParams) {
 }
 
 // 리프레시 토큰 api
-export const RefreshAccessTokenResponseSchema = z.object({
+export const refreshAccessTokenResponseSchema = z.object({
   data: z.object({
     ...tokenSchema.shape,
   }),
 });
 
 export type RefreshAccessTokenResponse = z.infer<
-  typeof RefreshAccessTokenResponseSchema
+  typeof refreshAccessTokenResponseSchema
 >;
 
 export async function fetchRefreshAccessToken() {
   const { data } = await apiClient.post<unknown>("/ac/auth/refresh");
-  return RefreshAccessTokenResponseSchema.parse(data);
+  return refreshAccessTokenResponseSchema.parse(data);
 }
 
 // 로그아웃 api - 리프레시 토큰 제거
@@ -59,10 +59,16 @@ export async function fetchLogout() {
   await apiClient.post("/ac/auth/logout");
 }
 
-// 프로필 api
+export const profileResponseSchema = z.object({
+  data: profileSchema,
+});
+
+export type ProfileResponse = z.infer<typeof profileResponseSchema>;
+
+// 프로필 api, 프로필 요청 및 토큰 유효성 검증
 export async function fetchProfile() {
-  const { data } = await apiClient.get<unknown>("/ac/auth/me");
-  return data;
+  const { data } = await apiClient.get<unknown>("/ac/auth/profile");
+  return profileResponseSchema.parse(data);
 }
 
 // 로그인 시
