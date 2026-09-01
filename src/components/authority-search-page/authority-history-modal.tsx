@@ -58,11 +58,27 @@ export default function AuthorityHistoryModal({
 export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
   const { data } = useAuthoritySearchByRecordKeys();
 
-  const reckey = data[0].recKey;
+  const {
+    recKey,
+    acType,
+    acRegionCode,
+    firstWorker,
+    firstInputDate,
+    headingName,
+    activityField,
+  } = data[0];
 
-  const { data: history } = useAuthorityHistory({
+  // 최초입력자, 전거표시기호, 전거지역구분, 최초입력일, 채택표목
+
+  const {
+    data: historyData,
+    isError,
+    isLoading,
+  } = useAuthorityHistory({
     recKey,
   });
+
+  console.log(history);
 
   return (
     <>
@@ -76,6 +92,16 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        {isLoading && (
+          <p className="mb-0">선택한 전거자료를 불러오는 중입니다.</p>
+        )}
+
+        {!isLoading && isError && (
+          <p className="mb-0">
+            선택한 전거자료를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+          </p>
+        )}
+
         <div className="row g-2 mb-3">
           <div className="col-md-6">
             <div className="row g-2 align-items-center mb-2">

@@ -496,7 +496,7 @@ body {
 
 #mergeSummaryTable th:first-child,
 #mergeSummaryTable td:first-child {
-  width: 6cqmin;
+  width: 6rem;
 }
 
 #mergeSummaryTable th:nth-child(2),

@@ -33,7 +33,9 @@ const emptyLeaderData: LeaderData = {
   raw: "",
 };
 
-function createEditorFields(record: AuthorityDetailData["record"]): MarcField[] {
+function createEditorFields(
+  record: AuthorityDetailData["record"],
+): MarcField[] {
   return sortMarcFields([
     ...record.controlFields.map((field) => ({
       type: "control" as const,
@@ -122,14 +124,14 @@ export function AuthoritySplitModalBody({
 
   const { data = [], isError, isLoading } = useAuthoritySearchByRecordKeys();
 
-  const reckey = data[0]?.recKey;
+  const recKey = data[0]?.recKey;
 
   const {
     data: detailData,
     isLoading: isDetailDataLoading,
     isError: isDetailDataError,
-  } = useAuthorityDetail(reckey, {
-    enabled: show && !!reckey,
+  } = useAuthorityDetail(recKey, {
+    enabled: show && !!recKey,
   });
 
   const isRecordFetchComplete = !isLoading && !isError;

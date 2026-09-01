@@ -4,3 +4,5 @@ export function isIncluded<T extends string>(
 ): value is T {
   return array.includes(value as T);
 }
+
+// activityField가 존재하는 지

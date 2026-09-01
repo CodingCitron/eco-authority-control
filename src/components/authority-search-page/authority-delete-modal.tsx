@@ -11,13 +11,13 @@ import BaseModal from "@/components/ui/base-modal";
 import { useSearchPage } from "./authority-search-page-context";
 
 interface AuthorityDeleteButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  reckey?: string;
+  recKey?: string;
   controlNumber?: string;
   showIcon?: boolean;
 }
 
 export function AuthorityDeleteButton({
-  reckey,
+  recKey,
   controlNumber,
   showIcon = false,
   onClick,
@@ -34,7 +34,7 @@ export function AuthorityDeleteButton({
       return;
     }
 
-    if (!reckey && selectedRecordKeys.length === 0) {
+    if (!recKey && selectedRecordKeys.length === 0) {
       alert("삭제할 전거자료를 선택해주세요.");
       return;
     }
@@ -50,7 +50,7 @@ export function AuthorityDeleteButton({
       </button>
 
       <AuthorityDeleteModal
-        reckey={reckey}
+        recKey={recKey}
         controlNumber={controlNumber}
         show={show}
         onHide={() => setShow(false)}
@@ -60,23 +60,23 @@ export function AuthorityDeleteButton({
 }
 
 interface AuthorityDeleteModalProps {
-  reckey?: string;
+  recKey?: string;
   controlNumber?: string;
   show: boolean;
   onHide: () => void;
 }
 
 export default function AuthorityDeleteModal({
-  reckey,
+  recKey,
   controlNumber,
   show,
   onHide,
 }: AuthorityDeleteModalProps) {
   return (
     <BaseModal size="lg" show={show} onHide={onHide}>
-      {reckey ? (
+      {recKey ? (
         <AuthorityDeleteOneModalBody
-          reckey={reckey}
+          recKey={recKey}
           controlNumber={controlNumber}
           show={show}
           onHide={onHide}
@@ -188,10 +188,10 @@ export function AuthorityDeleteModalBody({ onHide }: { onHide: () => void }) {
 }
 
 export function AuthorityDeleteOneModalBody({
-  reckey,
+  recKey,
   controlNumber,
   onHide,
-}: AuthorityDeleteModalProps & { reckey: string }) {
+}: AuthorityDeleteModalProps & { recKey: string }) {
   const queryClient = useQueryClient();
 
   const { mutate, isPending, isError, reset } = useMutation({
@@ -242,7 +242,7 @@ export function AuthorityDeleteOneModalBody({
           variant="danger"
           className="px-4 fw-bold"
           disabled={isPending}
-          onClick={() => mutate(reckey)}
+          onClick={() => mutate(recKey)}
         >
           {isPending ? "삭제 중..." : "삭제"}
         </Button>

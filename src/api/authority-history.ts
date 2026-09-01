@@ -14,14 +14,20 @@ export interface AuthorityHistoryQueryParams {
 
 export const authorityHistoryResponseSchema = z.object({
   data: z.object({
-    historyKey: z.string(),
-    recKey: z.string(),
-    operation: z.string(),
+    display: z.number(),
+    page: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
     items: z.array(
       z.object({
-        leader: z.string(),
-        controlFields: z.array(authorityControlFieldSchema),
-        dataFields: z.array(authorityDataFieldSchema),
+        recKey: z.string(),
+        historyKey: z.string(),
+        operation: z.string(),
+        record: z.object({
+          leader: z.string(),
+          controlFields: z.array(authorityControlFieldSchema),
+          dataFields: z.array(authorityDataFieldSchema),
+        }),
       }),
     ),
   }),

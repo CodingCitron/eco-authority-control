@@ -100,7 +100,7 @@ export const personalColumns: TableColumn<PersonalRow>[] = [
           수정
         </Link>{" "}
         <AuthorityDeleteButton
-          reckey={row.recKey}
+          recKey={row.recKey}
           controlNumber={row.acControlNo}
           className="btn btn-sm btn-light-danger py-0"
         >
@@ -185,7 +185,7 @@ export const corporationColumns: TableColumn<CorporationRow>[] = [
           수정
         </Link>{" "}
         <AuthorityDeleteButton
-          reckey={row.recKey}
+          recKey={row.recKey}
           controlNumber={row.acControlNo}
           type="button"
           className="btn btn-sm btn-light-danger py-0"
@@ -256,7 +256,7 @@ export const geographyColumns: TableColumn<GeographyRow>[] = [
           수정
         </Link>{" "}
         <AuthorityDeleteButton
-          reckey={row.recKey}
+          recKey={row.recKey}
           controlNumber={row.acControlNo}
           type="button"
           className="btn btn-sm btn-light-danger py-0"
@@ -333,7 +333,7 @@ export const subjectColumns: TableColumn<SubjectRow>[] = [
           수정
         </Link>{" "}
         <AuthorityDeleteButton
-          reckey={row.recKey}
+          recKey={row.recKey}
           controlNumber={row.acControlNo}
           type="button"
           className="btn btn-sm btn-light-danger py-0"
