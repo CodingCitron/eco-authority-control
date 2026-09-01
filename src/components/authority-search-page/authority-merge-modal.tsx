@@ -1,7 +1,14 @@
 import { useState, type SetStateAction } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
+import { css } from "styled-system/css";
 
+import {
+  fetchAuthorityIntegrate,
+  type AuthorityIntegrateRequestQueryParams,
+} from "@/api/authorty-integrate";
+import { getAuthoritySaveError } from "@/api/authority-save-error";
 import { authorityTypeLabels } from "@/types/authority.types";
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 import type {
@@ -9,7 +16,10 @@ import type {
   MarcField,
 } from "@/types/marc-editor.types";
 
-import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
+import {
+  authoritySearchQueryKeys,
+  useAuthoritySearchByRecordKeys,
+} from "@/hooks/use-authority-search";
 import {
   isMarcFieldRepeatable,
   sortMarcFields,
@@ -30,7 +40,6 @@ import BaseModal from "@/components/ui/base-modal";
 import OverflowTooltip from "@/components/ui/overflow-tooltip";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import MarcRecordPreview from "../ui/record-preview";
-import { css } from "styled-system/css";
 
 interface AuthorityMergeModalProps {
   show: boolean;
@@ -58,7 +67,15 @@ interface MasterEditorState {
   authorityCreateMetadata: AuthorityCreateMetadata;
 }
 
-function createEditorFields(record: AuthorityDetailData["record"]): MarcField[] {
+interface IntegrateMutationVariables {
+  params: AuthorityIntegrateRequestQueryParams;
+  master: AuthorityDetailData;
+  target: AuthorityDetailData;
+}
+
+function createEditorFields(
+  record: AuthorityDetailData["record"],
+): MarcField[] {
   return sortMarcFields([
     ...record.controlFields.map((field) => ({
       type: "control" as const,
@@ -82,7 +99,11 @@ function createMasterEditorState(
     recordKey: detail.recKey,
     leaderData: parseLeaderData(detail.record.leader),
     variableFields: createEditorFields(detail.record),
-    authorityCreateMetadata: {},
+    authorityCreateMetadata: {
+      acRegionCode: detail.acRegionCode ?? undefined,
+      birthDeathDatePrivateYn: detail.birthDeathDatePrivateYn ?? undefined,
+      biographyPrivateYn: detail.biographyPrivateYn ?? undefined,
+    },
   };
 }
 
@@ -117,8 +138,44 @@ function createEditedMasterDetail(
   };
 }
 
+function createAuthorityIntegrateParams(
+  master: AuthorityDetailData,
+  target: AuthorityDetailData,
+  metadata: AuthorityCreateMetadata,
+): AuthorityIntegrateRequestQueryParams {
+  const sourceRecKey = target.recKey;
+  const targetRecKey = master.recKey;
+
+  const copyrightBlanketAgreeDate = metadata.copyrightBlanketAgreeDate?.trim();
+
+  return {
+    // source는 통합 후 제거되고 target은 통합주자료로 남는다.
+    sourceRecKey,
+    targetRecKey,
+    acRegionCode: metadata.acRegionCode ?? master.acRegionCode ?? undefined,
+    birthDeathDatePrivateYn:
+      metadata.birthDeathDatePrivateYn ??
+      master.birthDeathDatePrivateYn ??
+      undefined,
+    biographyPrivateYn:
+      metadata.biographyPrivateYn ?? master.biographyPrivateYn ?? undefined,
+    copyrightBlanketAgreeYn: metadata.copyrightBlanketAgreeYn,
+    ...(copyrightBlanketAgreeDate && { copyrightBlanketAgreeDate }),
+    record: master.record,
+  };
+}
+
+function parsePositiveRecordKey(recordKey: string) {
+  const parsedRecordKey = Number(recordKey);
+  if (!Number.isSafeInteger(parsedRecordKey) || parsedRecordKey <= 0) {
+    throw new Error(`올바르지 않은 전거 레코드 키입니다: ${recordKey}`);
+  }
+
+  return parsedRecordKey;
+}
+
 export function AuthorityMergeButton() {
-  const { selectedRecordKeys } = useSearchPage();
+  const { selectedRecordKeys, clearSelectedRecordKeys } = useSearchPage();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -146,6 +203,7 @@ export function AuthorityMergeButton() {
       <AuthorityMergeModal
         show={modalIsOpen}
         onHide={() => setModalIsOpen(false)}
+        onMerge={() => clearSelectedRecordKeys()}
       />
     </>
   );
@@ -177,6 +235,8 @@ export function AuthorityMergeModalBody({
   onPreview,
   onMerge,
 }: AuthorityMergeModalProps) {
+  const queryClient = useQueryClient();
+
   const [masterRecordKey, setMasterRecordKey] = useState<string>();
   const [masterEditorState, setMasterEditorState] =
     useState<MasterEditorState>();
@@ -241,6 +301,26 @@ export function AuthorityMergeModalBody({
   const hasMarcMerged =
     currentPairKey !== undefined && currentPairKey === mergedPairKey;
 
+  const integrateMutation = useMutation({
+    mutationFn: ({ params }: IntegrateMutationVariables) =>
+      fetchAuthorityIntegrate(params),
+    onSuccess: async (result, variables) => {
+      if (!result.integrated) {
+        return;
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: authoritySearchQueryKeys.all,
+      });
+
+      window.alert("전거자료가 통합되었습니다.");
+      onMerge?.(variables.master, variables.target);
+      onHide();
+    },
+  });
+
+  const integrateSaveError = getAuthoritySaveError(integrateMutation.error);
+
   const updateMasterEditorState = (
     update: (current: MasterEditorState) => MasterEditorState,
   ) => {
@@ -261,9 +341,7 @@ export function AuthorityMergeModalBody({
     updateMasterEditorState((current) => ({ ...current, leaderData }));
   };
 
-  const setMasterVariableFields = (
-    nextFields: SetStateAction<MarcField[]>,
-  ) => {
+  const setMasterVariableFields = (nextFields: SetStateAction<MarcField[]>) => {
     updateMasterEditorState((current) => ({
       ...current,
       variableFields:
@@ -286,6 +364,11 @@ export function AuthorityMergeModalBody({
   };
 
   const selectMasterRecord = (recordKey: string) => {
+    if (integrateMutation.isPending) {
+      return;
+    }
+
+    integrateMutation.reset();
     setMasterRecordKey(recordKey);
     setMasterEditorState(undefined);
     setMergedPairKey(undefined);
@@ -295,6 +378,8 @@ export function AuthorityMergeModalBody({
     if (!master || !target || !activeMasterEditorState || !currentPairKey) {
       return;
     }
+
+    integrateMutation.reset();
 
     const targetDataFields = target.record.dataFields
       .filter((field) => isMarcFieldRepeatable(field.tag))
@@ -318,10 +403,35 @@ export function AuthorityMergeModalBody({
     onPreview?.(createEditedMasterDetail(master, mergedEditorState), target);
   };
 
+  const integrateAuthority = () => {
+    if (!master || !target || !activeMasterEditorState || !hasMarcMerged) {
+      return;
+    }
+
+    const editedMaster = createEditedMasterDetail(
+      master,
+      activeMasterEditorState,
+    );
+    try {
+      const params = createAuthorityIntegrateParams(
+        editedMaster,
+        target,
+        activeMasterEditorState.authorityCreateMetadata,
+      );
+      integrateMutation.mutate({
+        params,
+        master: editedMaster,
+        target,
+      });
+    } catch {
+      window.alert("통합할 전거자료의 레코드 키가 올바르지 않습니다.");
+    }
+  };
+
   return (
     <>
       <Modal.Header
-        closeButton
+        closeButton={!integrateMutation.isPending}
         closeVariant="white"
         className="bg-primary text-white"
       >
@@ -381,9 +491,8 @@ export function AuthorityMergeModalBody({
                   </tr>
                 </thead>
                 <tbody>
-                  {data.map((record, index) => {
-                    const isChecked =
-                      selectedMasterRecordKey === record.recKey;
+                  {data.map((record) => {
+                    const isChecked = selectedMasterRecordKey === record.recKey;
                     const authorityTypeLabel =
                       authorityTypeLabels[record.acType];
                     const headingName = record.headingName ?? "";
@@ -395,7 +504,7 @@ export function AuthorityMergeModalBody({
                         role="button"
                         onClick={() => selectMasterRecord(record.recKey)}
                       >
-                        <td>{index + 1}</td>
+                        <td>{record.recKey}</td>
                         <td>
                           <Form.Check
                             type="radio"
@@ -479,6 +588,8 @@ export function AuthorityMergeModalBody({
                         <MarcEditorWorkspace
                           title="통합주자료 MARC"
                           fontSize={`${masterFontSize}px`}
+                          saveError={integrateSaveError}
+                          saveErrorKey={integrateMutation.submittedAt}
                         />
                       </div>
                     </MarcEditorContext.Provider>
@@ -534,7 +645,7 @@ export function AuthorityMergeModalBody({
         <Button
           className="px-4 fw-bold"
           variant="outline-primary"
-          disabled={!canMerge || hasMarcMerged}
+          disabled={!canMerge || hasMarcMerged || integrateMutation.isPending}
           onClick={mergeMarcDataFields}
         >
           {hasMarcMerged ? "MARC 통합 완료" : "MARC 통합"}
@@ -542,19 +653,27 @@ export function AuthorityMergeModalBody({
         <Button
           className="px-4 fw-bold"
           variant="primary"
-          disabled={!canMerge || !hasMarcMerged}
-          onClick={() => {
-            if (master && target && activeMasterEditorState) {
-              onMerge?.(
-                createEditedMasterDetail(master, activeMasterEditorState),
-                target,
-              );
-            }
-          }}
+          disabled={!canMerge || !hasMarcMerged || integrateMutation.isPending}
+          onClick={integrateAuthority}
         >
-          통합
+          {integrateMutation.isPending ? "통합 중..." : "통합"}
         </Button>
-        <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
+        {integrateMutation.data?.integrated === false && (
+          <span className="small text-danger" role="alert">
+            전거자료를 통합하지 못했습니다. 다시 시도해주세요.
+          </span>
+        )}
+        {integrateMutation.isError && !integrateSaveError && (
+          <span className="small text-danger" role="alert">
+            전거자료 통합 중 오류가 발생했습니다.
+          </span>
+        )}
+        <Button
+          className="px-4 fw-bold"
+          variant="secondary"
+          disabled={integrateMutation.isPending}
+          onClick={onHide}
+        >
           닫기
         </Button>
       </Modal.Footer>

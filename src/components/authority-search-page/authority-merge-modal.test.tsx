@@ -1,13 +1,17 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { fetchAuthorityIntegrate } from "@/api/authorty-integrate";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
 
 import { AuthorityMergeModalBody } from "./authority-merge-modal";
 
 vi.mock("@/hooks/use-authority-search", () => ({
+  authoritySearchQueryKeys: { all: ["authority-search"] },
   useAuthoritySearchByRecordKeys: vi.fn(),
 }));
 
@@ -15,10 +19,17 @@ vi.mock("@/hooks/use-authority-detail", () => ({
   useAuthorityDetail: vi.fn(),
 }));
 
+vi.mock("@/api/authorty-integrate", () => ({
+  fetchAuthorityIntegrate: vi.fn(),
+}));
+
 const masterDetail = {
-  recKey: "master-record",
+  recKey: "1001",
   acType: "2",
   acControlNo: "KAB000000001",
+  acRegionCode: "10",
+  birthDeathDatePrivateYn: "N",
+  biographyPrivateYn: "Y",
   headingName: "통합 주자료",
   record: {
     leader: "00000nz  a2200000n  4500",
@@ -38,7 +49,7 @@ const masterDetail = {
 };
 
 const targetDetail = {
-  recKey: "target-record",
+  recKey: "1002",
   acType: "2",
   acControlNo: "KAB000000002",
   headingName: "통합 대상자료",
@@ -99,9 +110,24 @@ function mockMergeRecords() {
   }) as never);
 }
 
+function renderMergeModalBody(
+  props: ComponentProps<typeof AuthorityMergeModalBody>,
+) {
+  const queryClient = new QueryClient({
+    defaultOptions: { mutations: { retry: false } },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AuthorityMergeModalBody {...props} />
+    </QueryClientProvider>,
+  );
+}
+
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe("AuthorityMergeModalBody", () => {
@@ -109,16 +135,27 @@ describe("AuthorityMergeModalBody", () => {
     const user = userEvent.setup();
     const onPreview = vi.fn();
     const onMerge = vi.fn();
+    const onHide = vi.fn();
+    vi.spyOn(window, "alert").mockImplementation(() => {});
+    vi.mocked(fetchAuthorityIntegrate).mockResolvedValue({
+      sourceRecKey: targetDetail.recKey,
+      integrated: true,
+      target: {
+        birthDeathDatePrivateYn: "N",
+        biographyPrivateYn: "Y",
+        copyrightBlanketAgreeYn: "N",
+        copyrightBlanketAgreeDate: "",
+        record: masterDetail.record,
+      },
+    });
     mockMergeRecords();
 
-    render(
-      <AuthorityMergeModalBody
-        show
-        onHide={vi.fn()}
-        onPreview={onPreview}
-        onMerge={onMerge}
-      />,
-    );
+    renderMergeModalBody({
+      show: true,
+      onHide,
+      onPreview,
+      onMerge,
+    });
 
     const masterEditor = screen
       .getByText("통합주자료 MARC")
@@ -162,18 +199,39 @@ describe("AuthorityMergeModalBody", () => {
     ).toEqual(["110", "510", "670"]);
 
     await user.click(screen.getByRole("button", { name: "통합" }));
+    await waitFor(() =>
+      expect(fetchAuthorityIntegrate).toHaveBeenCalledTimes(1),
+    );
+    const integrateParams = vi.mocked(fetchAuthorityIntegrate).mock.calls[0]?.[0];
+    expect(integrateParams).toEqual(
+      expect.objectContaining({
+        sourceRecKey: 1002,
+        targetRecKey: 1001,
+        acRegionCode: "10",
+        birthDeathDatePrivateYn: "N",
+        biographyPrivateYn: "Y",
+      }),
+    );
+    expect(integrateParams?.record.controlFields).toEqual(
+      masterDetail.record.controlFields,
+    );
+    expect(integrateParams?.record.dataFields.map((field) => field.tag)).toEqual(
+      ["110", "510", "670"],
+    );
     await waitFor(() => expect(onMerge).toHaveBeenCalledTimes(1));
     expect(
       onMerge.mock.calls[0]?.[0].record.dataFields.map(
         (field: { tag: string }) => field.tag,
       ),
     ).toEqual(["110", "510", "670"]);
+    expect(window.alert).toHaveBeenCalledWith("전거자료가 통합되었습니다.");
+    expect(onHide).toHaveBeenCalledTimes(1);
   });
 
   it("통합주자료에서 고정필드와 MARC 행 편집 기능을 제공한다", () => {
     mockMergeRecords();
 
-    render(<AuthorityMergeModalBody show onHide={vi.fn()} />);
+    renderMergeModalBody({ show: true, onHide: vi.fn() });
 
     const masterEditor = screen
       .getByText("통합주자료 MARC")

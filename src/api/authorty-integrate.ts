@@ -20,9 +20,7 @@ export interface AuthorityIntegrateRequestQueryParams {
 export async function fetchAuthorityIntegrate(
   params: AuthorityIntegrateRequestQueryParams,
 ) {
-  const { data } = await apiClient.post<unknown>("/ac/integrate", {
-    params,
-  });
+  const { data } = await apiClient.post<unknown>("/ac/integrate", params);
 
   return authorityIntegrateResultSchema.parse(data);
 }
