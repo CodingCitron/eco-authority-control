@@ -146,7 +146,6 @@ function readPosition(value: string, start: number, length = 1) {
 
 /** 40자리 008 문자열을 편집 모달에서 사용하는 구조로 변환한다. */
 export function parseControlField008(value: string): ControlField008 {
-  console.log(value);
   const fieldRule = getControlField008Rule();
   const sourceValue = value
     .padEnd(fieldRule.length, " ")

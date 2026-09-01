@@ -48,9 +48,9 @@ export interface PersonalAuthorityFormValues {
   occupationDateTo: string;
   gender: PersonalGender;
   language: string;
+  biography: string;
   biographyPrivateYn: "" | AuthorityYesNo;
   education: string;
-  biography: string;
   source: string;
   copyrightConsent: boolean;
   copyrightConsentDate: string;
@@ -193,6 +193,7 @@ export function mapAuthorityDetailToPersonalFormValues(
     heading: detail.headingName ?? getMarcSubfieldValue(field100, "a"),
     hanjaName: detail.hanjaName ?? getMarcSubfieldValue(field100, "g"),
     ...dates,
+    biographyPrivateYn: detail.biographyPrivateYn ?? "N",
     birthDeathDatePrivateYn: detail.birthDeathDatePrivateYn ?? "N",
     gender: getGender(
       getMarcSubfieldValue(
