@@ -4,39 +4,32 @@ import { apiClient } from "@/lib/axios";
 
 export interface AuthorityStatisticsQueryParams {
   // 전거유형
+  acType?: string;
 
-  // 등록일자
-  from?: string;
-  to?: string;
+  // 등록일자 시작
+  createStart?: string;
+  // 등록일자 종료
+  createEnd?: string;
 
-  // 수정일자
+  // 수정일자 시작
+  editStart?: string;
+  // 수정일자 종료
+  editEnd?: string;
 
-  // 수정자
+  // 수정자 - 정확히 일치
+  lastWorker?: string;
 }
 
 export const authorityStatisticsResponseSchema = z.object({
   data: z.object({
-    from: z.string(),
-    to: z.string(),
-    total: z.number(),
     byType: z.array(
       z.object({
-        ac_type: z.string(),
+        acType: z.string(),
+        acTypeName: z.string(),
         count: z.number(),
       }),
     ),
-    byRegion: z.array(
-      z.object({
-        ac_region_code: z.string(),
-        count: z.number(),
-      }),
-    ),
-    operations: z.array(
-      z.object({
-        operation: z.string(),
-        count: z.number(),
-      }),
-    ),
+    total: z.number(),
   }),
 });
 

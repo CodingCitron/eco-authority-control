@@ -28,6 +28,12 @@ const emptyFormValues: FormValues = {
   editor: "",
 };
 
+const countFormatter = new Intl.NumberFormat("ko-KR");
+
+function formatStatisticsCount(count: number) {
+  return `${countFormatter.format(count)} 건`;
+}
+
 function getFormValues(searchParams: URLSearchParams): FormValues {
   const acType = searchParams.get("acType");
 
@@ -68,7 +74,7 @@ export default function AuthorityBuildStatusPage() {
     Object.entries(values).forEach(([name, value]) => {
       setValue(name as keyof FormValues, value);
     });
-  }, [searchParamsKey]);
+  }, [searchParamsKey, setValue]);
 
   const onSubmit = (values: FormValues) => {
     const params = new URLSearchParams();
@@ -168,7 +174,7 @@ export default function AuthorityBuildStatusPage() {
                 className="form-label mb-0 fw-bold ms-3 text-nowrap"
                 htmlFor="bs-modDateFrom"
               >
-                수정일자(삭제일자)
+                수정일자
               </label>
               <input
                 type="date"
@@ -225,26 +231,46 @@ export default function AuthorityBuildStatusPage() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>개인명</td>
-                <td>25,000 건</td>
-              </tr>
-              <tr>
-                <td>단체명</td>
-                <td>32,000 건</td>
-              </tr>
-              <tr>
-                <td>지리명</td>
-                <td>1,200 건</td>
-              </tr>
-              <tr>
-                <td>주제명</td>
-                <td>1,500 건</td>
-              </tr>
-              <tr className="table-light">
-                <td className="fw-bold">전체</td>
-                <td className="fw-bold">59,700 건</td>
-              </tr>
+              {!isSearched ? (
+                <tr>
+                  <td colSpan={2} className="text-muted" role="status">
+                    조회 조건을 설정한 후 조회해 주세요.
+                  </td>
+                </tr>
+              ) : isLoading ? (
+                <tr>
+                  <td colSpan={2} className="text-muted" role="status">
+                    구축현황을 불러오는 중입니다.
+                  </td>
+                </tr>
+              ) : isError ? (
+                <tr>
+                  <td colSpan={2} className="text-danger" role="alert">
+                    구축현황을 불러오지 못했습니다. 다시 시도해주세요.
+                  </td>
+                </tr>
+              ) : statistics ? (
+                <>
+                  {statistics.byType.map((item) => (
+                    <tr key={item.acType}>
+                      <td>{item.acTypeName}</td>
+                      <td>{formatStatisticsCount(item.count)}</td>
+                    </tr>
+                  ))}
+                  <tr className="table-light">
+                    <td className="fw-bold">전체</td>
+                    <td className="fw-bold">
+                      {formatStatisticsCount(statistics.total)}
+                    </td>
+                  </tr>
+                </>
+              ) : (
+                <tr>
+                  <td colSpan={2} className="text-muted" role="status">
+                    조회된 구축현황이 없습니다.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

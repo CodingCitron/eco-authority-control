@@ -27,8 +27,12 @@ export function getAuthorityStatisticsSearchState(
   const modDateTo = searchParams.get("modDateTo")?.trim();
   const editor = searchParams.get("editor")?.trim();
   const params: AuthorityStatisticsQueryParams = {
-    from: regDateFrom || undefined,
-    to: regDateTo || undefined,
+    ...(isValidAcType(acType) && { acType }),
+    ...(regDateFrom && { createStart: regDateFrom }),
+    ...(regDateTo && { createEnd: regDateTo }),
+    ...(modDateFrom && { editStart: modDateFrom }),
+    ...(modDateTo && { editEnd: modDateTo }),
+    ...(editor && { lastWorker: editor }),
   };
 
   return {
