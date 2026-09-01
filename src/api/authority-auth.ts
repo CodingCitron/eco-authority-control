@@ -1,5 +1,61 @@
+import z from "zod";
+
+import { apiClient } from "@/lib/axios";
+
 // 로그인 api 작성
-// 프로필 api 작성
+interface SignInQueryParams {
+  id: string;
+  password: string;
+}
+
+export const SignInResponseSchema = z.object({
+  data: z.object({
+    user: z.object({
+      userId: z.string(),
+      name: z.string(),
+      userClassCode: z.string(),
+    }),
+    tokenType: z.string(),
+    accessToken: z.string(),
+  }),
+});
+
+export type SignInResponse = z.infer<typeof SignInResponseSchema>;
+
+export const STORAGE_TOKEN_KEY = "";
+
+export async function fetchSignIn(params: SignInQueryParams) {
+  const { data } = await apiClient.post<unknown>("/ac/auth/login", params);
+  return SignInResponseSchema.parse(data);
+}
+
+// 리프레시 토큰 api
+export const RefreshAccessTokenResponseSchema = z.object({
+  data: z.object({
+    tokenType: z.string(),
+    accessToken: z.string(),
+  }),
+});
+
+export type RefreshAccessTokenResponse = z.infer<
+  typeof RefreshAccessTokenResponseSchema
+>;
+
+export async function fetchRefreshAccessToken() {
+  const { data } = await apiClient.post<unknown>("/ac/auth/refresh");
+  return RefreshAccessTokenResponseSchema.parse(data);
+}
+
+// 로그아웃 api - 리프레시 토큰 제거
+export async function fetchLogout() {
+  await apiClient.post("/ac/auth/logout");
+}
+
+// 프로필 api
+export async function fetchProfile() {
+  const { data } = await apiClient.get<unknown>("/ac/auth/me");
+  return data;
+}
 
 // 로그인 시
 // 토큰 로컬 스토리지에 저장
