@@ -50,6 +50,12 @@ const targetDetail = {
     ],
     dataFields: [
       {
+        tag: "110",
+        ind1: " ",
+        ind2: " ",
+        subfields: [{ code: "a", value: "통합 대상자료" }],
+      },
+      {
         tag: "510",
         ind1: " ",
         ind2: " ",
@@ -99,7 +105,7 @@ afterEach(() => {
 });
 
 describe("AuthorityMergeModalBody", () => {
-  it("대상자료의 데이터 필드만 통합주자료 편집기에 추가한다", async () => {
+  it("대상자료의 반복 가능한 데이터 필드만 통합주자료에 추가한다", async () => {
     const user = userEvent.setup();
     const onPreview = vi.fn();
     const onMerge = vi.fn();
@@ -131,6 +137,10 @@ describe("AuthorityMergeModalBody", () => {
     );
     expect(masterEditorScope.getByLabelText("670 행")).toHaveTextContent(
       "대상 정보원",
+    );
+    expect(masterEditorScope.getAllByLabelText("110 행")).toHaveLength(1);
+    expect(masterEditorScope.getByLabelText("110 행")).not.toHaveTextContent(
+      "통합 대상자료",
     );
     expect(masterEditorScope.getAllByLabelText("001 행")).toHaveLength(1);
     expect(masterEditorScope.getByLabelText("001 행")).toHaveTextContent(

@@ -10,7 +10,10 @@ import type {
 } from "@/types/marc-editor.types";
 
 import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
-import { sortMarcFields } from "@/lib/marc/marc-field.utils";
+import {
+  isMarcFieldRepeatable,
+  sortMarcFields,
+} from "@/lib/marc/marc-field.utils";
 
 import { useSearchPage } from "@/components/authority-search-page/authority-search-page-context";
 import { MarcEditorWorkspace } from "@/components/ui/marc-editor";
@@ -293,13 +296,15 @@ export function AuthorityMergeModalBody({
       return;
     }
 
-    const targetDataFields = target.record.dataFields.map((field) => ({
-      type: "data" as const,
-      tag: field.tag,
-      indicator1: field.ind1,
-      indicator2: field.ind2,
-      subfields: field.subfields.map((subfield) => ({ ...subfield })),
-    }));
+    const targetDataFields = target.record.dataFields
+      .filter((field) => isMarcFieldRepeatable(field.tag))
+      .map((field) => ({
+        type: "data" as const,
+        tag: field.tag,
+        indicator1: field.ind1,
+        indicator2: field.ind2,
+        subfields: field.subfields.map((subfield) => ({ ...subfield })),
+      }));
     const mergedEditorState: MasterEditorState = {
       ...activeMasterEditorState,
       variableFields: sortMarcFields([
