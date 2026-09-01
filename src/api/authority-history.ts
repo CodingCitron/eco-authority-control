@@ -1,6 +1,10 @@
 import z from "zod";
 
 import { apiClient } from "@/lib/axios";
+import {
+  authorityControlFieldSchema,
+  authorityDataFieldSchema,
+} from "@/types/authority-detail.types";
 
 export interface AuthorityHistoryQueryParams {
   recKey: string;
@@ -10,20 +14,32 @@ export interface AuthorityHistoryQueryParams {
 
 export const authorityHistoryResponseSchema = z.object({
   data: z.object({
-    page: z.number(),
-    display: z.number(),
-    total: z.number(),
-    totalPages: z.number(),
-    // items: z.array(authorityRecordSchema),
+    historyKey: z.string(),
+    recKey: z.string(),
+    operation: z.string(),
+    items: z.array(
+      z.object({
+        leader: z.string(),
+        controlFields: z.array(authorityControlFieldSchema),
+        dataFields: z.array(authorityDataFieldSchema),
+      }),
+    ),
   }),
 });
+
+export type AuthorityHistoryResponse = z.infer<
+  typeof authorityHistoryResponseSchema
+>;
 
 export default async function fetchAuthorityHistory(
   params: AuthorityHistoryQueryParams,
 ) {
-  const { data } = await apiClient.get<unknown>(`/ac/${params.recKey}/history`, {
-    params,
-  });
+  const { data } = await apiClient.get<unknown>(
+    `/ac/${params.recKey}/history`,
+    {
+      params,
+    },
+  );
 
   return authorityHistoryResponseSchema.parse(data);
 }

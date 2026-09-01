@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-import { useCurrentAuthoritySearch } from "@/hooks/use-authority-search";
+import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
 
 import BaseModal from "../ui/base-modal";
 import { useSearchPage } from "./authority-search-page-context";
+import { useAuthorityHistory } from "@/hooks/use-authority-history";
 
 export function AuthorityHistoryButton() {
   const { selectedRecordKeys } = useSearchPage();
@@ -55,21 +56,13 @@ export default function AuthorityHistoryModal({
 }
 
 export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
-  const { selectedRecordKeys } = useSearchPage();
+  const { data } = useAuthoritySearchByRecordKeys();
 
-  // 1. 검색된 data를 다 가져온다.
-  const { data } = useCurrentAuthoritySearch();
+  const reckey = data[0].recKey;
 
-  const contents = data?.data.items ?? [];
-
-  // 2. controlNumber의 index는 현재 선택된 값이다.
-  const currentIndex = contents.findIndex(
-    (item) => item.recKey === selectedRecordKeys[0],
-  );
-
-  // 3. 히스토리 호출 api 필요
-
-  // 4. 히스토리 오류 or 로딩 상태
+  const { data: history } = useAuthorityHistory({
+    recKey,
+  });
 
   return (
     <>
