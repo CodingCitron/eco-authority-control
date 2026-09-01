@@ -333,6 +333,7 @@ body {
 }
 
 .marc-row-editor {
+  position: relative;
   min-width: 0;
 }
 
@@ -388,6 +389,59 @@ body {
 }
 
 .marc-tag-option.active .marc-tag-option-code {
+  color: inherit;
+}
+
+.marc-content-combobox {
+  position: static;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.marc-content-guide {
+  position: absolute;
+  z-index: 1080;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  width: 100%;
+  max-height: 24rem;
+  overflow-y: auto;
+  white-space: normal;
+  word-break: keep-all;
+  font-family: var(--bs-body-font-family);
+}
+
+.marc-indicator-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: 0.5rem;
+}
+
+.marc-indicator-guide {
+  min-width: 0;
+}
+
+.marc-content-guide .btn-sm {
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
+}
+
+.marc-subfield-suggestions {
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.marc-subfield-option {
+  padding: 0.45rem 0.75rem;
+}
+
+.marc-subfield-option-code {
+  flex: 0 0 2.5rem;
+  color: #2b57e0;
+  font-family: var(--bs-font-monospace);
+}
+
+.marc-subfield-option.active .marc-subfield-option-code {
   color: inherit;
 }
 

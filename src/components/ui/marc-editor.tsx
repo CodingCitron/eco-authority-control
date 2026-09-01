@@ -6,7 +6,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
 } from "react";
-import { MarcError, parseLine } from "marc-eco";
+import { kormarcAuthorityRulePack, MarcError, parseLine } from "marc-eco";
 
 import { sortMarcFields } from "@/lib/marc/marc-field.utils";
 import type {
@@ -18,6 +18,7 @@ import type {
 } from "@/types/marc-editor.types";
 import { AuthorityFixedFieldEditButton } from "./authority-fixed-field-edit-modal";
 import { useMarcEditor, type LeaderData } from "./marc-editor-context";
+import MarcFieldContentGuide from "./marc-field-content-guide";
 import MarcTagCombobox from "./marc-tag-combobox";
 import { BibliographicRecordConsistencyButton } from "../authority-personal-form-page/bibliographic-record-consistency-modal";
 
@@ -511,18 +512,25 @@ function MarcRow({
                 value={tagDraft}
                 usedTags={usedTags}
                 onChange={setTagDraft}
-                onSelect={() => contentInputRef.current?.focus()}
+                onSelect={(selectedTag) => {
+                  setFormFocusTarget("content");
+                  if (
+                    kormarcAuthorityRulePack.controlFields[selectedTag] &&
+                    contentDraft === "\\\\"
+                  ) {
+                    setContentDraft("");
+                  }
+                  contentInputRef.current?.focus();
+                }}
                 onKeyDown={handleInputKeyDown}
               />
-              <input
-                ref={contentInputRef}
-                type="text"
-                className="form-control form-control-sm marc-row-input font-monospace"
-                aria-label="MARC 지시기와 서브필드"
-                autoFocus={formFocusTarget === "content"}
-                placeholder="1\\$a김소월"
+              <MarcFieldContentGuide
+                key={tagDraft.trim()}
+                inputRef={contentInputRef}
+                tag={tagDraft.trim()}
                 value={contentDraft}
-                onChange={(event) => setContentDraft(event.target.value)}
+                autoFocus={formFocusTarget === "content"}
+                onChange={setContentDraft}
                 onKeyDown={handleInputKeyDown}
               />
             </div>
