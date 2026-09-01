@@ -5,16 +5,10 @@ import {
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 import type { AuthoritySearchType } from "@/types/authority.types";
 import type { MarcDataField } from "@/types/marc-editor.types";
+import { authorityHeadingTags } from "@/utils/authority-record";
 
 export type AuthorityReferenceRelationCode = "" | "a" | "b" | "g" | "h";
 export type AuthorityReferenceFieldTag = "500" | "510" | "550" | "551";
-
-const headingTags: Record<AuthoritySearchType, string> = {
-  "0": "100",
-  "1": "110",
-  "5": "151",
-  "4": "150",
-};
 
 /** 검색 전거의 채택표목(1XX)을 현재 편집 전거용 5XX로 만든다. */
 export function create5XXReferenceFields(
@@ -27,7 +21,7 @@ export function create5XXReferenceFields(
     return [];
   }
 
-  const headingTag = headingTags[sourceAuthorityType];
+  const headingTag = authorityHeadingTags[sourceAuthorityType];
   const controlNumber = record.controlFields.find(
     (field) => field.tag === "001",
   )?.value;

@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import type { CSSProperties } from "react";
 import { css } from "styled-system/css";
 
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
@@ -11,16 +12,22 @@ function sort<T extends { tag: string }>(items: readonly T[]) {
 
 export default function MarcRecordPreview({
   detail,
+  record,
   fontSize,
   className,
   message,
+  style,
 }: {
   detail?: AuthorityDetailData;
+  record?: AuthorityDetailData["record"];
   fontSize: string;
   className?: string;
   message?: string;
+  style?: CSSProperties;
 }) {
-  if (!detail) {
+  const previewRecord = record ?? detail?.record;
+
+  if (!previewRecord) {
     return (
       <div
         className={clsx(
@@ -30,13 +37,14 @@ export default function MarcRecordPreview({
           }),
           className,
         )}
+        style={style}
       >
         {message || "상세 정보를 불러오는 중입니다."}
       </div>
     );
   }
 
-  const { record } = detail;
+  const { leader, controlFields, dataFields } = previewRecord;
 
   return (
     <div
@@ -44,19 +52,19 @@ export default function MarcRecordPreview({
         "marc-record-view font-monospace border rounded p-2",
         className,
       )}
-      style={{ fontSize }}
+      style={{ ...style, fontSize }}
     >
       <div className="marc-line">
         <span className="marc-tag">LDR</span>
-        {record.leader}
+        {leader}
       </div>
-      {sort(record.controlFields).map((field) => (
+      {sort(controlFields).map((field) => (
         <div className="marc-line" key={`${field.tag}-${field.value}`}>
           <span className="marc-tag">{field.tag}</span>
           {field.value}
         </div>
       ))}
-      {sort(record.dataFields).map((field, index) => (
+      {sort(dataFields).map((field, index) => (
         <div className="marc-line" key={`${field.tag}-${index}`}>
           <span className="marc-tag">{field.tag}</span>
           {field.ind1}

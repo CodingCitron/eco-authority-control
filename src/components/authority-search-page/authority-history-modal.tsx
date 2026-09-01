@@ -1,15 +1,63 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
-
-import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
-
-import BaseModal from "../ui/base-modal";
-import { useSearchPage } from "./authority-search-page-context";
+import type { AuthorityHistoryResponse } from "@/api/authority-history";
+import BaseModal from "@/components/ui/base-modal";
+import MarcFontSizeSelect, {
+  defaultFontSize,
+} from "@/components/ui/marc-font-size-select";
+import OverflowTooltip from "@/components/ui/overflow-tooltip";
+import MarcRecordPreview from "@/components/ui/record-preview";
 import { useAuthorityHistory } from "@/hooks/use-authority-history";
+import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
+import { authorityTypeLabels, isValidAcType } from "@/types/authority.types";
+import {
+  getAuthorityHeading,
+  getAuthorityHeadingTag,
+  getMarcAuthorityHeading,
+} from "@/utils/authority-record";
+
+import { useSearchPage } from "./authority-search-page-context";
+
+const HISTORY_DISPLAY = 10;
+
+const operationLabels: Record<string, string> = {
+  CREATE: "등록",
+  INSERT: "등록",
+  UPDATE: "수정",
+  DELETE: "삭제",
+  INTEGRATE: "통합",
+  MERGE: "통합",
+  SPLIT: "분리",
+  IMPORT: "수입",
+};
+
+type HistoryItem = AuthorityHistoryResponse["data"]["items"][number];
+
+function getOperationLabel(operation: string) {
+  return operationLabels[operation.toUpperCase()] ?? operation;
+}
+
+function getHistoryDate(item: HistoryItem) {
+  return (
+    item.record.controlFields.find((field) => field.tag === "005")?.value ?? "-"
+  );
+}
+
+function formatFirstInputDate(value?: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  const compactDate = value.replace(/[^0-9]/g, "");
+  if (compactDate.length < 8) {
+    return value;
+  }
+
+  return `${compactDate.slice(0, 4)}-${compactDate.slice(4, 6)}-${compactDate.slice(6, 8)}`;
+}
 
 export function AuthorityHistoryButton() {
   const { selectedRecordKeys } = useSearchPage();
-
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const handleClick = () => {
@@ -56,29 +104,68 @@ export default function AuthorityHistoryModal({
 }
 
 export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
-  const { data } = useAuthoritySearchByRecordKeys();
+  const [page, setPage] = useState(1);
+  const [selectedHistoryKey, setSelectedHistoryKey] = useState("");
+  const [fontSize, setFontSize] = useState(defaultFontSize);
 
   const {
-    recKey,
-    acType,
-    acRegionCode,
-    firstWorker,
-    firstInputDate,
-    headingName,
-    activityField,
-  } = data[0];
-
-  // 최초입력자, 전거표시기호, 전거지역구분, 최초입력일, 채택표목
+    data: selectedRecords = [],
+    isLoading: isRecordLoading,
+    isError: isRecordError,
+  } = useAuthoritySearchByRecordKeys();
+  const selectedRecord = selectedRecords[0];
+  const recKey = selectedRecord?.recKey ?? "";
 
   const {
-    data: historyData,
-    isError,
-    isLoading,
-  } = useAuthorityHistory({
-    recKey,
-  });
+    data: historyResponse,
+    isError: isHistoryError,
+    isLoading: isHistoryLoading,
+    isFetching: isHistoryFetching,
+  } = useAuthorityHistory(
+    {
+      recKey,
+      page: String(page),
+      display: String(HISTORY_DISPLAY),
+    },
+    { enabled: Boolean(recKey) },
+  );
 
-  console.log(history);
+  const history = historyResponse?.data;
+  const historyItems = history?.items ?? [];
+  const currentPage = history?.page ?? page;
+  const totalPages = Math.max(history?.totalPages ?? 1, 1);
+  const selectedHistory =
+    historyItems.find((item) => item.historyKey === selectedHistoryKey) ??
+    historyItems[0];
+  const headingTag = getAuthorityHeadingTag(selectedRecord?.acType);
+  const authorityTypeLabel =
+    selectedRecord && isValidAcType(selectedRecord.acType)
+      ? authorityTypeLabels[selectedRecord.acType]
+      : "";
+  const region = [selectedRecord?.acRegionCode, selectedRecord?.acRegionDesc]
+    .filter(Boolean)
+    .join(" : ");
+
+  const moveToPage = (nextPage: number) => {
+    setSelectedHistoryKey("");
+    setPage(nextPage);
+  };
+
+  const renderHistoryState = () => {
+    if (isRecordLoading) {
+      return "선택한 전거자료 정보를 불러오는 중입니다.";
+    }
+    if (!recKey) {
+      return "선택한 전거자료 정보가 없습니다.";
+    }
+    if (isHistoryLoading) {
+      return "변경이력을 불러오는 중입니다.";
+    }
+    if (isHistoryError) {
+      return "변경이력을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.";
+    }
+    return "조회된 변경이력이 없습니다.";
+  };
 
   return (
     <>
@@ -92,14 +179,20 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {isLoading && (
-          <p className="mb-0">선택한 전거자료를 불러오는 중입니다.</p>
+        {isRecordLoading && (
+          <div className="alert alert-info py-2" role="status">
+            선택한 전거자료 정보를 불러오는 중입니다.
+          </div>
         )}
-
-        {!isLoading && isError && (
-          <p className="mb-0">
-            선택한 전거자료를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
-          </p>
+        {isRecordError && (
+          <div className="alert alert-danger py-2" role="alert">
+            선택한 전거자료 정보를 불러오지 못했습니다.
+          </div>
+        )}
+        {!isRecordLoading && !isRecordError && !selectedRecord && (
+          <div className="alert alert-warning py-2" role="alert">
+            선택한 전거자료 정보를 찾을 수 없습니다.
+          </div>
         )}
 
         <div className="row g-2 mb-3">
@@ -118,7 +211,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                   type="text"
                   className="form-control"
                   id="histFirstUser"
-                  value="김영희"
+                  value={selectedRecord?.firstWorker ?? "-"}
                   readOnly
                 />
               </div>
@@ -137,7 +230,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                   type="text"
                   className="form-control"
                   id="histFirstDate"
-                  value="2026/06/25"
+                  value={formatFirstInputDate(selectedRecord?.firstInputDate)}
                   readOnly
                 />
               </div>
@@ -158,7 +251,11 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                   type="text"
                   className="form-control"
                   id="histTag"
-                  value="150 : 주제명"
+                  value={
+                    headingTag && authorityTypeLabel
+                      ? `${headingTag} : ${authorityTypeLabel}`
+                      : "-"
+                  }
                   readOnly
                 />
               </div>
@@ -175,7 +272,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                   type="text"
                   className="form-control"
                   id="histRegion"
-                  value="1 : 한국"
+                  value={region || "-"}
                   readOnly
                 />
               </div>
@@ -194,7 +291,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                   type="text"
                   className="form-control"
                   id="histHeading"
-                  value="부작위[不作爲]"
+                  value={getAuthorityHeading(selectedRecord) || "-"}
                   readOnly
                 />
               </div>
@@ -204,81 +301,96 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
 
         <div className="row g-3">
           <div className="col-lg-5">
-            <table
-              className="table table-bordered table-sm text-center align-middle"
-              id="historyEntryTable"
-            >
-              <caption className="visually-hidden">전거 변경 이력</caption>
-              <thead className="table-light">
-                <tr>
-                  <th scope="col">No</th>
-                  <th scope="col">선택</th>
-                  <th scope="col">수정자</th>
-                  <th scope="col">표목</th>
-                  <th scope="col">수정일</th>
-                </tr>
-              </thead>
-              <tbody id="historyEntryBody">
-                <tr className="table-primary">
-                  <td>1</td>
-                  <td>
-                    <label
-                      className="visually-hidden"
-                      htmlFor="hist-refSelect1"
-                    >
-                      홍길동 20260630101530 선택
-                    </label>
-                    <input
-                      type="radio"
-                      id="hist-refSelect1"
-                      name="historyRefSelect"
-                      checked
-                    />
-                  </td>
-                  <td>홍길동</td>
-                  <td className="text-start">부작위</td>
-                  <td>20260630101530</td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>
-                    <label
-                      className="visually-hidden"
-                      htmlFor="hist-refSelect2"
-                    >
-                      김철수 20260628091205 선택
-                    </label>
-                    <input
-                      type="radio"
-                      id="hist-refSelect2"
-                      name="historyRefSelect"
-                    />
-                  </td>
-                  <td>김철수</td>
-                  <td className="text-start">부작위</td>
-                  <td>20260628091205</td>
-                </tr>
-                <tr>
-                  <td>3</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td>4</td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
+            <div className="table-responsive">
+              <table
+                className="table table-bordered table-sm text-center align-middle mb-2"
+                id="historyEntryTable"
+                style={{ tableLayout: "fixed" }}
+              >
+                <caption className="visually-hidden">전거 변경 이력</caption>
+                <colgroup>
+                  <col style={{ width: "48px" }} />
+                  <col style={{ width: "52px" }} />
+                  <col style={{ width: "64px" }} />
+                  <col />
+                  <col style={{ width: "132px" }} />
+                </colgroup>
+                <thead className="table-light">
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">선택</th>
+                    <th scope="col">작업</th>
+                    <th scope="col">표목</th>
+                    <th scope="col">수정일시</th>
+                  </tr>
+                </thead>
+                <tbody id="historyEntryBody">
+                  {historyItems.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-4 text-secondary">
+                        {renderHistoryState()}
+                      </td>
+                    </tr>
+                  ) : (
+                    historyItems.map((item, index) => {
+                      const isSelected =
+                        selectedHistory?.historyKey === item.historyKey;
+                      const heading =
+                        getMarcAuthorityHeading(
+                          item.record,
+                          selectedRecord?.acType,
+                        ) || "-";
+                      const inputId = `history-${index}`;
+
+                      return (
+                        <tr
+                          key={item.historyKey}
+                          className={isSelected ? "table-primary" : undefined}
+                        >
+                          <td>
+                            {(currentPage - 1) *
+                              (history?.display ?? HISTORY_DISPLAY) +
+                              index +
+                              1}
+                          </td>
+                          <td>
+                            <label
+                              className="visually-hidden"
+                              htmlFor={inputId}
+                            >
+                              {heading} 이력 선택
+                            </label>
+                            <input
+                              type="radio"
+                              id={inputId}
+                              name="historyRefSelect"
+                              checked={isSelected}
+                              onChange={() =>
+                                setSelectedHistoryKey(item.historyKey)
+                              }
+                            />
+                          </td>
+                          <td>{getOperationLabel(item.operation)}</td>
+                          <td className="text-start">
+                            <OverflowTooltip text={heading}>
+                              {heading}
+                            </OverflowTooltip>
+                          </td>
+                          <td>{getHistoryDate(item)}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
             <div className="d-flex justify-content-center align-items-center gap-2">
               <button
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
                 aria-label="첫 페이지"
+                disabled={isHistoryFetching || currentPage <= 1}
+                onClick={() => moveToPage(1)}
               >
                 <i className="bi bi-chevron-double-left" aria-hidden="true"></i>
               </button>
@@ -286,14 +398,20 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
                 aria-label="이전 페이지"
+                disabled={isHistoryFetching || currentPage <= 1}
+                onClick={() => moveToPage(currentPage - 1)}
               >
                 <i className="bi bi-chevron-left" aria-hidden="true"></i>
               </button>
-              <span className="border rounded px-3 py-1">1/1</span>
+              <span className="border rounded px-3 py-1">
+                {currentPage}/{totalPages}
+              </span>
               <button
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
                 aria-label="다음 페이지"
+                disabled={isHistoryFetching || currentPage >= totalPages}
+                onClick={() => moveToPage(currentPage + 1)}
               >
                 <i className="bi bi-chevron-right" aria-hidden="true"></i>
               </button>
@@ -301,6 +419,8 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                 className="btn btn-sm btn-outline-secondary"
                 type="button"
                 aria-label="마지막 페이지"
+                disabled={isHistoryFetching || currentPage >= totalPages}
+                onClick={() => moveToPage(totalPages)}
               >
                 <i
                   className="bi bi-chevron-double-right"
@@ -311,141 +431,27 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
           </div>
           <div className="col-lg-7">
             <div className="d-flex justify-content-end align-items-center gap-2 mb-2">
-              <label className="visually-hidden" htmlFor="histFontSize">
-                글자크기
-              </label>
               <span className="fw-bold" aria-hidden="true">
                 글자크기
               </span>
-              <select
-                className="form-select form-select-sm w-auto"
-                id="histFontSize"
-              >
-                <option value="14">14 px</option>
-                <option value="16" selected>
-                  16 px
-                </option>
-                <option value="18">18 px</option>
-                <option value="20">20 px</option>
-                <option value="22">22 px</option>
-              </select>
-              <button type="button" className="btn btn-sm btn-outline-dark">
-                한자 -&gt; 한글
-              </button>
+              <MarcFontSizeSelect
+                aria-label="변경이력 MARC 글자크기"
+                className="form-select-sm w-auto"
+                value={fontSize}
+                onChange={setFontSize}
+              />
             </div>
-            <div
-              className="marc-record-view font-monospace bg-light border rounded p-2"
-              id="historyMarcPanel"
-              style={{
-                fontSize: "16px",
-                minHeight: "380px",
-              }}
-            >
-              <div className="marc-line marc-line-control">
-                <span className="marc-tag">005</span> 20260630101530
-              </div>
-              <div className="marc-line marc-line-control">
-                <span className="marc-tag">008</span> 120224 b aznnnaabn a
-                aaa{" "}
-              </div>
-              <div className="marc-line marc-line-data bg-danger-subtle">
-                <span className="marc-tag">150</span>{" "}
-                <span className="marc-sf">$a</span>부작위[不作爲]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data bg-success-subtle">
-                <span className="marc-tag">150</span>{" "}
-                <span className="marc-sf">$a</span>부작위[不作爲]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">450</span>{" "}
-                <span className="marc-sf">$w</span>r
-                <span className="marc-sf">$i</span>영어
-                <span className="marc-sf">$a</span>nonfeasance
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">450</span>{" "}
-                <span className="marc-sf">$w</span>r
-                <span className="marc-sf">$i</span>독일어
-                <span className="marc-sf">$a</span>Untatigkeit
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">450</span>{" "}
-                <span className="marc-sf">$w</span>r
-                <span className="marc-sf">$i</span>불어
-                <span className="marc-sf">$a</span>negligence
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">550</span>{" "}
-                <span className="marc-sf">$w</span>h
-                <span className="marc-sf">$a</span>단순부작위[單純不作爲]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">550</span>{" "}
-                <span className="marc-sf">$w</span>h
-                <span className="marc-sf">$a</span>인용(인정)[認容]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">550</span>{" "}
-                <span className="marc-sf">$w</span>h
-                <span className="marc-sf">$a</span>입법부작위[立法不作爲]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">550</span>{" "}
-                <span className="marc-sf">$a</span>부작위명령[不作爲命令]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">550</span>{" "}
-                <span className="marc-sf">$a</span>부작위부담[不作爲負擔]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">550</span>{" "}
-                <span className="marc-sf">$a</span>부작위소송[不作爲訴訟]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">550</span>{" "}
-                <span className="marc-sf">$a</span>부작위위법[不作爲違法]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">550</span>{" "}
-                <span className="marc-sf">$a</span>부작위의무[不作爲義務]
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">670</span>{" "}
-                <span className="marc-sf">$a</span>법률용어사전
-                <span className="marc-eof">%</span>
-              </div>
-              <div className="marc-line marc-line-data">
-                <span className="marc-tag">680</span>{" "}
-                <span className="marc-sf">$a</span>이 표목은 법률상 의무가 있는
-                자가 행위를 하지 않음으로써 성립하는 법적 책임.
-                <span className="marc-eof">%</span>
-              </div>
-            </div>
+            <MarcRecordPreview
+              record={selectedHistory?.record}
+              fontSize={`${fontSize}px`}
+              className="bg-light overflow-auto"
+              message={renderHistoryState()}
+              style={{ minHeight: "380px", maxHeight: "520px" }}
+            />
           </div>
         </div>
       </Modal.Body>
-      <Modal.Footer className="justify-content-between">
-        <div>
-          <Button type="button" variant="outline-secondary">
-            이전
-          </Button>{" "}
-          <Button type="button" variant="outline-secondary">
-            다음
-          </Button>
-        </div>
+      <Modal.Footer className="justify-content-end">
         <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
           닫기
         </Button>
