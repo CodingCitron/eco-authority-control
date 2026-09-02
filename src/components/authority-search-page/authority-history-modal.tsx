@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
-import type { AuthorityHistoryResponse } from "@/api/authority-history";
 import BaseModal from "@/components/ui/base-modal";
 import MarcFontSizeSelect, {
   defaultFontSize,
@@ -35,6 +34,15 @@ function formatFirstInputDate(value?: string | null) {
   }
 
   return `${compactDate.slice(0, 4)}-${compactDate.slice(4, 6)}-${compactDate.slice(6, 8)}`;
+}
+
+function formatHistoryUpdateDate(value?: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  const parsedDate = parseISO(value);
+  return isValid(parsedDate) ? format(parsedDate, "yyyyMMddHHmm") : value;
 }
 
 export function AuthorityHistoryButton() {
@@ -118,6 +126,29 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
   const selectedHistory =
     historyItems.find((item) => item.historyKey === selectedHistoryKey) ??
     historyItems[0];
+  const selectedHistoryIndex = selectedHistory
+    ? historyItems.findIndex(
+        (item) => item.historyKey === selectedHistory.historyKey,
+      )
+    : -1;
+
+  const { data: nextHistoryPageResponse } = useAuthorityHistory(
+    {
+      recKey,
+      page: String(currentPage + 1),
+      display: String(HISTORY_DISPLAY),
+    },
+    {
+      enabled: Boolean(recKey) && currentPage < totalPages,
+    },
+  );
+  const previousHistory =
+    selectedHistoryIndex >= 0
+      ? (historyItems[selectedHistoryIndex + 1] ??
+        (selectedHistoryIndex === historyItems.length - 1
+          ? nextHistoryPageResponse?.data.items[0]
+          : undefined))
+      : undefined;
   const headingTag = getAuthorityHeadingTag(selectedRecord?.acType);
   const authorityTypeLabel =
     selectedRecord && isValidAcType(selectedRecord.acType)
@@ -324,9 +355,8 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                         ) || "-";
                       const inputId = `history-${index}`;
 
-                      const formattedDate = format(
+                      const formattedDate = formatHistoryUpdateDate(
                         item.updateDate,
-                        "yyyyMMddHHmm",
                       );
 
                       return (
@@ -425,20 +455,35 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
             </div>
           </div>
           <div className="col-lg-7">
-            <div className="d-flex justify-content-end align-items-center gap-2 mb-2">
-              <span className="fw-bold" aria-hidden="true">
-                글자크기
-              </span>
-              <MarcFontSizeSelect
-                aria-label="변경이력 MARC 글자크기"
-                className="form-select-sm w-auto"
-                value={fontSize}
-                onChange={setFontSize}
-              />
-              <HanjaToHangulModalButton />
+            <div className="d-flex justify-content-between align-items-center gap-2 mb-2">
+              <div className="d-flex align-items-center gap-2 small">
+                {previousHistory && (
+                  <>
+                    <span className="bg-danger-subtle border rounded px-2 py-1">
+                      삭제
+                    </span>
+                    <span className="bg-success-subtle border rounded px-2 py-1">
+                      추가
+                    </span>
+                  </>
+                )}
+              </div>
+              <div className="d-flex justify-content-end align-items-center gap-2">
+                <span className="fw-bold" aria-hidden="true">
+                  글자크기
+                </span>
+                <MarcFontSizeSelect
+                  aria-label="변경이력 MARC 글자크기"
+                  className="form-select-sm w-auto"
+                  value={fontSize}
+                  onChange={setFontSize}
+                />
+                <HanjaToHangulModalButton />
+              </div>
             </div>
             <MarcRecordPreview
               record={selectedHistory?.record}
+              previousRecord={previousHistory?.record}
               fontSize={`${fontSize}px`}
               className="bg-light overflow-auto"
               message={renderHistoryState()}

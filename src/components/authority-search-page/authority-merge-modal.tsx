@@ -305,7 +305,7 @@ export function AuthorityMergeModalBody({
     mutationFn: ({ params }: IntegrateMutationVariables) =>
       fetchAuthorityIntegrate(params),
     onSuccess: async (result, variables) => {
-      if (!result.integrated) {
+      if (!result.data.integrated) {
         return;
       }
 
@@ -418,11 +418,18 @@ export function AuthorityMergeModalBody({
         target,
         activeMasterEditorState.authorityCreateMetadata,
       );
-      integrateMutation.mutate({
-        params,
-        master: editedMaster,
-        target,
-      });
+      integrateMutation.mutate(
+        {
+          params,
+          master: editedMaster,
+          target,
+        },
+        {
+          onError(error) {
+            console.error(error);
+          },
+        },
+      );
     } catch {
       window.alert("통합할 전거자료의 레코드 키가 올바르지 않습니다.");
     }
@@ -642,40 +649,47 @@ export function AuthorityMergeModalBody({
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          className="px-4 fw-bold"
-          variant="outline-primary"
-          disabled={!canMerge || hasMarcMerged || integrateMutation.isPending}
-          onClick={mergeMarcDataFields}
-        >
-          {hasMarcMerged ? "MARC 통합 완료" : "MARC 통합"}
-        </Button>
-        <Button
-          className="px-4 fw-bold"
-          variant="primary"
-          disabled={!canMerge || !hasMarcMerged || integrateMutation.isPending}
-          onClick={integrateAuthority}
-        >
-          {integrateMutation.isPending ? "통합 중..." : "통합"}
-        </Button>
-        {integrateMutation.data?.integrated === false && (
-          <span className="small text-danger" role="alert">
-            전거자료를 통합하지 못했습니다. 다시 시도해주세요.
-          </span>
-        )}
-        {integrateMutation.isError && !integrateSaveError && (
-          <span className="small text-danger" role="alert">
-            전거자료 통합 중 오류가 발생했습니다.
-          </span>
-        )}
-        <Button
-          className="px-4 fw-bold"
-          variant="secondary"
-          disabled={integrateMutation.isPending}
-          onClick={onHide}
-        >
-          닫기
-        </Button>
+        <div className="col justify-content-start">
+          {integrateMutation.data?.data.integrated === false && (
+            <span className="small text-danger" role="alert">
+              전거자료를 통합하지 못했습니다. 다시 시도해주세요.
+            </span>
+          )}
+
+          {integrateMutation.isError && !integrateSaveError && (
+            <span className="small text-danger" role="alert">
+              전거자료 통합 중 오류가 발생했습니다.
+            </span>
+          )}
+        </div>
+        <div className="d-flex gap-2">
+          <Button
+            className="px-4 fw-bold"
+            variant="outline-primary"
+            disabled={!canMerge || hasMarcMerged || integrateMutation.isPending}
+            onClick={mergeMarcDataFields}
+          >
+            {hasMarcMerged ? "MARC 통합 완료" : "MARC 통합"}
+          </Button>
+          <Button
+            className="px-4 fw-bold"
+            variant="primary"
+            disabled={
+              !canMerge || !hasMarcMerged || integrateMutation.isPending
+            }
+            onClick={integrateAuthority}
+          >
+            {integrateMutation.isPending ? "통합 중..." : "통합"}
+          </Button>
+          <Button
+            className="px-4 fw-bold"
+            variant="secondary"
+            disabled={integrateMutation.isPending}
+            onClick={onHide}
+          >
+            닫기
+          </Button>
+        </div>
       </Modal.Footer>
     </>
   );

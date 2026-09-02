@@ -49,10 +49,11 @@ export const authorityDetailDataSchema = z.object({
 });
 
 /** 전거 통합 결과 */
-export const authorityIntegrateResultSchema = z.object({
-  sourceRecKey: z.string(),
-  integrated: z.boolean(),
-  target: z.object({
+const authorityTargetSchema = z
+  .looseObject({
+    acControlNo: z.string(),
+    acRegionCode: z.string(),
+    acRegionDesc: z.string(),
     birthDeathDatePrivateYn: z.enum(authorityYesNoValues).nullish(),
     biographyPrivateYn: z.enum(authorityYesNoValues).nullish(),
     copyrightBlanketAgreeYn: z.enum(authorityYesNoValues).nullish(),
@@ -62,7 +63,13 @@ export const authorityIntegrateResultSchema = z.object({
       controlFields: z.array(authorityControlFieldSchema),
       dataFields: z.array(authorityDataFieldSchema),
     }),
-  }),
+  })
+  .transform((value) => value);
+
+export const authorityIntegrateResultSchema = z.object({
+  sourceRecKey: z.string(),
+  integrated: z.boolean(),
+  target: z.any(),
 });
 
 export type AuthorityControlField = z.infer<typeof authorityControlFieldSchema>;

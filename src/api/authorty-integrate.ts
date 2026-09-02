@@ -1,3 +1,4 @@
+import z from "zod";
 import { apiClient } from "@/lib/axios";
 
 import { authorityIntegrateResultSchema } from "@/types/authority-detail.types";
@@ -17,10 +18,14 @@ export interface AuthorityIntegrateRequestQueryParams {
   };
 }
 
+export const authorityIntegrateResponseSchema = z.object({
+  data: authorityIntegrateResultSchema,
+});
+
 export async function fetchAuthorityIntegrate(
   params: AuthorityIntegrateRequestQueryParams,
 ) {
   const { data } = await apiClient.post<unknown>("/ac/integrate", params);
 
-  return authorityIntegrateResultSchema.parse(data);
+  return authorityIntegrateResponseSchema.parse(data);
 }
