@@ -77,7 +77,6 @@ export function BulkExportModalBody({
                   type="radio"
                   name="e_fmt"
                   id="fmt_marc"
-                  checked=""
                 />
                 <label className="form-check-label" htmlFor="fmt_marc">
                   MARC
