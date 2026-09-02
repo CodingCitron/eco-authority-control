@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
+
+import { format } from "date-fns";
+
 import type { AuthorityHistoryResponse } from "@/api/authority-history";
 import BaseModal from "@/components/ui/base-modal";
 import MarcFontSizeSelect, {
@@ -17,31 +20,9 @@ import {
 } from "@/utils/authority-record";
 
 import { useSearchPage } from "./authority-search-page-context";
+import { HanjaToHangulModalButton } from "../ui/hanja-to-hangul-modal";
 
 const HISTORY_DISPLAY = 10;
-
-const operationLabels: Record<string, string> = {
-  CREATE: "등록",
-  INSERT: "등록",
-  UPDATE: "수정",
-  DELETE: "삭제",
-  INTEGRATE: "통합",
-  MERGE: "통합",
-  SPLIT: "분리",
-  IMPORT: "수입",
-};
-
-type HistoryItem = AuthorityHistoryResponse["data"]["items"][number];
-
-function getOperationLabel(operation: string) {
-  return operationLabels[operation.toUpperCase()] ?? operation;
-}
-
-function getHistoryDate(item: HistoryItem) {
-  return (
-    item.record.controlFields.find((field) => field.tag === "005")?.value ?? "-"
-  );
-}
 
 function formatFirstInputDate(value?: string | null) {
   if (!value) {
@@ -175,7 +156,8 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
         className="bg-info text-white"
       >
         <Modal.Title as="h2" className="h5 fw-bold">
-          전거변경이력
+          <i className="bi bi-clock-history me-1" aria-hidden="true"></i>전거
+          변경이력
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -319,7 +301,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                   <tr>
                     <th scope="col">No</th>
                     <th scope="col">선택</th>
-                    <th scope="col">작업</th>
+                    <th scope="col">수정자</th>
                     <th scope="col">표목</th>
                     <th scope="col">수정일시</th>
                   </tr>
@@ -341,6 +323,11 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                           selectedRecord?.acType,
                         ) || "-";
                       const inputId = `history-${index}`;
+
+                      const formattedDate = format(
+                        item.updateDate,
+                        "yyyyMMddHHmm",
+                      );
 
                       return (
                         <tr
@@ -370,13 +357,21 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                               }
                             />
                           </td>
-                          <td>{getOperationLabel(item.operation)}</td>
+                          <td>
+                            <OverflowTooltip text={item.worker ?? "-"}>
+                              {item.worker ?? "-"}
+                            </OverflowTooltip>
+                          </td>
                           <td className="text-start">
                             <OverflowTooltip text={heading}>
                               {heading}
                             </OverflowTooltip>
                           </td>
-                          <td>{getHistoryDate(item)}</td>
+                          <td>
+                            <OverflowTooltip text={formattedDate}>
+                              {formattedDate}
+                            </OverflowTooltip>
+                          </td>
                         </tr>
                       );
                     })
@@ -440,6 +435,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                 value={fontSize}
                 onChange={setFontSize}
               />
+              <HanjaToHangulModalButton />
             </div>
             <MarcRecordPreview
               record={selectedHistory?.record}

@@ -23,6 +23,8 @@ export const authorityHistoryResponseSchema = z.object({
         recKey: z.string(),
         historyKey: z.string(),
         operation: z.string(),
+        updateDate: z.string().nullish(),
+        worker: z.string().nullish(),
         record: z.object({
           leader: z.string(),
           controlFields: z.array(authorityControlFieldSchema),
