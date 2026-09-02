@@ -22,6 +22,12 @@ export const authorityDataFieldSchema = z.object({
   subfields: z.array(authoritySubfieldSchema),
 });
 
+export const recordSchema = z.object({
+  leader: z.string(),
+  controlFields: z.array(authorityControlFieldSchema),
+  dataFields: z.array(authorityDataFieldSchema),
+});
+
 /** 전거 상세 데이터 */
 export const authorityDetailDataSchema = z.object({
   recKey: z.string(),
@@ -39,11 +45,7 @@ export const authorityDetailDataSchema = z.object({
   firstWorker: z.string().nullish(),
   lastUpdateDate: z.string().nullish(),
   lastWorker: z.string().nullish(),
-  record: z.object({
-    leader: z.string(),
-    controlFields: z.array(authorityControlFieldSchema),
-    dataFields: z.array(authorityDataFieldSchema),
-  }),
+  record: recordSchema,
   sourceControlNo: z.string().nullish(),
   sourceDataFound: z.string().nullish(),
 });
@@ -58,11 +60,7 @@ const authorityTargetSchema = z
     biographyPrivateYn: z.enum(authorityYesNoValues).nullish(),
     copyrightBlanketAgreeYn: z.enum(authorityYesNoValues).nullish(),
     copyrightBlanketAgreeDate: z.string(),
-    record: z.object({
-      leader: z.string(),
-      controlFields: z.array(authorityControlFieldSchema),
-      dataFields: z.array(authorityDataFieldSchema),
-    }),
+    record: recordSchema,
   })
   .transform((value) => value);
 

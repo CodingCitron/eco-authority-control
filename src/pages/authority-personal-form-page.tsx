@@ -32,6 +32,7 @@ import {
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search";
 import type { MarcEditorSaveError, MarcField } from "@/types/marc-editor.types";
 import type { AuthorityDetailResponse } from "@/api/authority-detail";
+import { HanjaToHangulModalButton } from "@/components/ui/hanja-to-hangul-modal";
 
 export type AuthorityPersonalFormMode = "create" | "edit";
 
@@ -125,6 +126,7 @@ export default function AuthorityPersonalFormPage({
       console.log(error);
     },
   });
+
   const resetSaveMutation = saveMutation.reset;
 
   useEffect(() => {
@@ -213,9 +215,7 @@ export default function AuthorityPersonalFormPage({
               onChange={setFontSize}
               className="form-select-sm w-auto"
             />
-            <button type="button" className="btn btn-sm btn-outline-dark">
-              한자 -{">"} 한글
-            </button>
+            <HanjaToHangulModalButton />
           </div>
         </div>
 

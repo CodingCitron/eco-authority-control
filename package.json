@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "exceljs": "^4.4.0",
+    "hanja": "^1.1.5",
     "marc-eco": "git+https://repo.eco.co.kr/libteam/marc-converter.git#main",
     "react": "^19.2.8",
     "react-bootstrap": "^2.10.10",

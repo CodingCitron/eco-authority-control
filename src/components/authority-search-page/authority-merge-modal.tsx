@@ -40,6 +40,7 @@ import BaseModal from "@/components/ui/base-modal";
 import OverflowTooltip from "@/components/ui/overflow-tooltip";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import MarcRecordPreview from "../ui/record-preview";
+import { HanjaToHangulModalButton } from "../ui/hanja-to-hangul-modal";
 
 interface AuthorityMergeModalProps {
   show: boolean;
@@ -565,12 +566,7 @@ export function AuthorityMergeModalBody({
                         onChange={setMasterFontSize}
                         className="form-select-sm w-auto"
                       />
-                      <button
-                        className="btn btn-sm btn-outline-dark"
-                        type="button"
-                      >
-                        한자 -&gt; 한글
-                      </button>
+                      <HanjaToHangulModalButton record={master?.record} />
                     </div>
                   </div>
                   {isMasterError ? (
@@ -622,12 +618,7 @@ export function AuthorityMergeModalBody({
                         onChange={setTargetFontSize}
                         className="form-select-sm w-auto"
                       />
-                      <button
-                        className="btn btn-sm btn-outline-dark"
-                        type="button"
-                      >
-                        한자 -&gt; 한글
-                      </button>
+                      <HanjaToHangulModalButton record={target?.record} />
                     </div>
                   </div>
                   {isTargetError ? (

@@ -20,6 +20,10 @@ import BaseModal from "./base-modal";
 import MarcFontSizeSelect, { defaultFontSize } from "./marc-font-size-select";
 import OverflowTooltip from "./overflow-tooltip";
 import MarcRecordPreview from "./record-preview";
+import {
+  HanjaToHangulModal,
+  HanjaToHangulModalButton,
+} from "./hanja-to-hangul-modal";
 
 const referenceSearchDefaultParams: AuthoritySearchQueryParams = {
   acType: "1",
@@ -457,9 +461,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
                 value={fontSize}
                 onChange={setFontSize}
               />
-              <button className="btn btn-sm btn-outline-dark">
-                한자 -&gt; 한글
-              </button>
+              <HanjaToHangulModalButton record={detailResponse?.data.record} />
             </div>
             <MarcRecordPreview
               detail={detailResponse?.data}
