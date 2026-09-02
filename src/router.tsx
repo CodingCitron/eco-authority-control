@@ -63,12 +63,12 @@ const router = createBrowserRouter([
           {
             // 주제명 등록
             path: "subject/new",
-            element: <AuthoritySubjectFormPage />,
+            element: <AuthoritySubjectFormPage mode="create" />,
           },
           {
             // 주제명 수정
             path: "subject/edit",
-            element: <AuthoritySubjectFormPage />,
+            element: <AuthoritySubjectFormPage mode="edit" />,
           },
           {
             // 전거 반입 관리
