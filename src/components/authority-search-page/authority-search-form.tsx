@@ -114,6 +114,8 @@ export default function AuthoritySearchForm() {
         queryKey: authoritySearchQueryKeys.all,
         type: "active",
       });
+
+      clearSelectedRecordKeys();
     }
 
     startTransition(() => {
