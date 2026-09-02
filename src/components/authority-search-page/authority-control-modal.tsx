@@ -2,11 +2,21 @@ import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 import BaseModal from "../ui/base-modal";
+import { useSearchPage } from "./authority-search-page-context";
 
 export function AuthorityControlButton() {
+  const { selectedRecordKeys } = useSearchPage();
+
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const handleClick = () => {
+    if (selectedRecordKeys.length !== 1) {
+      alert(
+        "전거통제는 1건씩 진행합니다. 통제할 전거자료를 정확히 1건 선택해주세요.",
+      );
+      return;
+    }
+
     setModalIsOpen(true);
   };
 

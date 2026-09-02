@@ -20,10 +20,7 @@ import BaseModal from "./base-modal";
 import MarcFontSizeSelect, { defaultFontSize } from "./marc-font-size-select";
 import OverflowTooltip from "./overflow-tooltip";
 import MarcRecordPreview from "./record-preview";
-import {
-  HanjaToHangulModal,
-  HanjaToHangulModalButton,
-} from "./hanja-to-hangul-modal";
+import { HanjaToHangulModalButton } from "./hanja-to-hangul-modal";
 
 const referenceSearchDefaultParams: AuthoritySearchQueryParams = {
   acType: "1",
