@@ -22,6 +22,8 @@ import { useMarcEditor, type LeaderData } from "./marc-editor-context";
 import MarcFieldContentGuide from "./marc-field-content-guide";
 import MarcTagCombobox from "./marc-tag-combobox";
 import { BibliographicRecordConsistencyButton } from "../authority-personal-form-page/bibliographic-record-consistency-modal";
+import { useMutation } from "@tanstack/react-query";
+import { fetchAuthorityDuplicateCheck } from "@/api/authority-duplicate-check";
 
 interface MarcEditorProps {
   showPrevAndNextButtons?: boolean;
@@ -80,6 +82,32 @@ export default function MarcEditor({
     });
   };
 
+  const duplicateCheck = useMutation({
+    mutationFn: () =>
+      fetchAuthorityDuplicateCheck({
+        leaderStatus: leaderData.status,
+        leaderType: leaderData.type,
+        leaderInputLevel: leaderData.encodingLevel,
+        acRegionCode: authorityCreateMetadata.acRegionCode ?? "",
+
+        // 개인명, 단체명, 지리명, 주제명 매개변수가 다른데, birthDeath 이런 데이터들도 보내야 하는가?
+        birthDeathDatePrivateYn: "N",
+        biographyPrivateYn: "N",
+        copyrightBlanketAgreeYn: "N",
+        record: buildMarcRecord(variableFields),
+      }),
+    onSuccess: (data) => {
+      const duplicate = data.data.duplicate;
+
+      if (duplicate) {
+        alert("이미 동일한 자료가 존재합니다.");
+        return;
+      }
+
+      alert("동일한 자료가 존재하지 않습니다.");
+    },
+  });
+
   return (
     <div className="card shadow-sm marc-editor-card">
       <MarcEditorWorkspace
@@ -114,7 +142,13 @@ export default function MarcEditor({
           )}
         </div>
         <div>
-          <button className="btn btn-light-warning">중복조사</button>{" "}
+          <button
+            className="btn btn-light-warning"
+            onClick={() => duplicateCheck.mutate()}
+            disabled={duplicateCheck.isPending}
+          >
+            중복조사
+          </button>{" "}
           <button
             type="button"
             className="btn btn-primary"
@@ -371,13 +405,7 @@ interface MarcRowProps {
   onRemove: () => void;
 }
 
-function MarcRow({
-  field,
-  mode,
-  usedTags,
-  onChange,
-  onRemove,
-}: MarcRowProps) {
+function MarcRow({ field, mode, usedTags, onChange, onRemove }: MarcRowProps) {
   const skipBlurCommitRef = useRef(false);
   const contentInputRef = useRef<HTMLInputElement>(null);
   const [formFocusTarget, setFormFocusTarget] = useState<"tag" | "content">(

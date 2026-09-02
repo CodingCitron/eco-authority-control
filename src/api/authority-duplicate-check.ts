@@ -5,17 +5,19 @@ import type { AuthorityCreateQueryParams } from "./authority-create";
 export interface AuthorityDuplicateCheckQueryParams extends AuthorityCreateQueryParams {}
 
 const authorityDuplicateCheckResponseSchema = z.object({
-  duplicate: z.boolean(),
-  acType: z.string(),
-  headingName: z.string(),
-  matches: z.array(
-    z.object({
-      recKey: z.string(),
-      acControlNo: z.string(),
-      acType: z.string(),
-      headingName: z.string(),
-    }),
-  ),
+  data: z.object({
+    duplicate: z.boolean(),
+    acType: z.string(),
+    headingName: z.string(),
+    matches: z.array(
+      z.object({
+        recKey: z.string(),
+        acControlNo: z.string(),
+        acType: z.string(),
+        headingName: z.string(),
+      }),
+    ),
+  }),
 });
 
 export async function fetchAuthorityDuplicateCheck(
