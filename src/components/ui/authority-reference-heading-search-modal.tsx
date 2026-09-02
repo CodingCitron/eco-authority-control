@@ -13,6 +13,7 @@ import type { MarcDataField } from "@/types/marc-editor.types";
 
 import {
   create5XXReferenceFields,
+  type AuthorityReferenceFieldTag,
   type AuthorityReferenceRelationCode,
 } from "./authority-reference-heading.mapper";
 import BaseModal from "./base-modal";
@@ -37,10 +38,14 @@ function getReferenceFieldDescription(field: Pick<MarcDataField, "subfields">) {
 
 interface AuthorityReferenceHeadingSearchProps {
   onConfirm: (fields: MarcDataField[]) => void;
+  defaultAuthorityType?: AuthoritySearchType;
+  referenceTag?: AuthorityReferenceFieldTag;
 }
 
 export function AuthorityReferenceHeadingSearchButton({
   onConfirm,
+  defaultAuthorityType,
+  referenceTag,
 }: AuthorityReferenceHeadingSearchProps) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -61,6 +66,8 @@ export function AuthorityReferenceHeadingSearchButton({
         show={modalIsOpen}
         onHide={() => setModalIsOpen(false)}
         onConfirm={onConfirm}
+        defaultAuthorityType={defaultAuthorityType}
+        referenceTag={referenceTag}
       />
     </>
   );
@@ -70,6 +77,8 @@ export function AuthorityReferenceHeadingSearchModal({
   show,
   onHide,
   onConfirm,
+  defaultAuthorityType,
+  referenceTag,
 }: AuthorityReferenceHeadingSearchProps & {
   show: boolean;
   onHide: () => void;
@@ -79,6 +88,8 @@ export function AuthorityReferenceHeadingSearchModal({
       <AuthorityReferenceHeadingSearchModalBody
         onHide={onHide}
         onConfirm={onConfirm}
+        defaultAuthorityType={defaultAuthorityType}
+        referenceTag={referenceTag}
       />
     </BaseModal>
   );
@@ -87,10 +98,13 @@ export function AuthorityReferenceHeadingSearchModal({
 export function AuthorityReferenceHeadingSearchModalBody({
   onHide,
   onConfirm,
+  defaultAuthorityType = "1",
+  referenceTag = "510",
 }: AuthorityReferenceHeadingSearchProps & {
   onHide: () => void;
 }) {
-  const [authorityType, setAuthorityType] = useState<AuthoritySearchType>("1");
+  const [authorityType, setAuthorityType] =
+    useState<AuthoritySearchType>(defaultAuthorityType);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchParams, setSearchParams] =
     useState<AuthoritySearchQueryParams>();
@@ -177,7 +191,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
       selectedAuthorityType,
       detailResponse?.data.record,
       relationCode,
-      "510",
+      referenceTag,
     );
 
     if (copiedFields.length === 0) {
@@ -215,7 +229,7 @@ export function AuthorityReferenceHeadingSearchModalBody({
   };
 
   const handleReset = () => {
-    setAuthorityType("1");
+    setAuthorityType(defaultAuthorityType);
     setSearchKeyword("");
     setSearchParams(undefined);
     setSelectedRecordKey("");

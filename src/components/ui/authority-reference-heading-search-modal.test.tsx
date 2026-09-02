@@ -118,4 +118,32 @@ describe("AuthorityReferenceHeadingSearchModalBody", () => {
 
     expect(screen.getByText("복사한 5XX 필드가 없습니다.")).toBeInTheDocument();
   });
+
+  it("호출한 전거 유형과 대상 5XX 태그를 적용한다", async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+
+    render(
+      <AuthorityReferenceHeadingSearchModalBody
+        defaultAuthorityType="5"
+        referenceTag="551"
+        onConfirm={onConfirm}
+        onHide={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText("전거유형")).toHaveValue("5");
+    await user.click(screen.getByRole("radio", { name: /한국\. 문화부 선택/ }));
+    await user.click(screen.getByRole("button", { name: "5XX로 복사" }));
+
+    const temporaryTable = screen.getByRole("table", {
+      name: "5XX 필드 목록",
+    });
+    expect(within(temporaryTable).getByText("551")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "확인" }));
+    expect(onConfirm.mock.calls[0][0]).toEqual([
+      expect.objectContaining({ tag: "551" }),
+    ]);
+  });
 });

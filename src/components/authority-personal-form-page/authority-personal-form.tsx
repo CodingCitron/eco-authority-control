@@ -222,9 +222,7 @@ export default function AuthorityPersonalForm({
                             onBlur={field.onBlur}
                             checked={field.value === "Y"}
                             onChange={(event) =>
-                              field.onChange(
-                                event.target.checked ? "Y" : "N",
-                              )
+                              field.onChange(event.target.checked ? "Y" : "N")
                             }
                           />
                         )}

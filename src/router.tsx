@@ -53,12 +53,12 @@ const router = createBrowserRouter([
           {
             // 지리명 등록
             path: "geography/new",
-            element: <AuthorityGeographyFormPage />,
+            element: <AuthorityGeographyFormPage mode="create" />,
           },
           {
             // 지리명 수정
             path: "geography/edit",
-            element: <AuthorityGeographyFormPage />,
+            element: <AuthorityGeographyFormPage mode="edit" />,
           },
           {
             // 주제명 등록

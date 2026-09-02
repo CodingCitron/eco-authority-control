@@ -515,7 +515,7 @@ function AuditFields({ register }: RegisteredFieldProps) {
         <div className="col-md-3">
           <input
             type="text"
-            className="form-control"
+            className="form-control bg-secondary-subtle"
             id="c-updated-by"
             readOnly
             {...register("updatedBy")}
@@ -529,7 +529,7 @@ function AuditFields({ register }: RegisteredFieldProps) {
         <div className="col-md-3">
           <input
             type="text"
-            className="form-control"
+            className="form-control bg-secondary-subtle"
             id="c-updated-at"
             readOnly
             {...register("updatedAt")}
