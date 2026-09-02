@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { Modal, type ModalProps } from "react-bootstrap";
 
-export interface BaseModalProps extends ModalProps {
+export interface BaseModalProps extends Omit<ModalProps, "size"> {
+  size?: ModalProps["size"] | "md";
   children: ReactNode;
 }
 
@@ -24,7 +25,7 @@ export default function BaseModal({
   return (
     <Modal
       {...props}
-      size={size}
+      size={size as ModalProps["size"]}
       backdrop={backdrop}
       centered={centered}
       show={show}
