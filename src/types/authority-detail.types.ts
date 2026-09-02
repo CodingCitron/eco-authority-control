@@ -41,6 +41,8 @@ export const authorityDetailDataSchema = z.object({
   headingName: z.string().nullish(),
   birthDeathDate: z.string().nullish(),
   birthDeathDatePrivateYn: z.enum(authorityYesNoValues).nullish(),
+  copyrightBlanketAgreeYn: z.enum(authorityYesNoValues).nullish(),
+  copyrightBlanketAgreeDate: z.string().nullish(),
   firstInputDate: z.string().nullish(),
   firstWorker: z.string().nullish(),
   lastUpdateDate: z.string().nullish(),

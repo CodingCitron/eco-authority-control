@@ -10,6 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { fetchGenerateAuthorityControlNumber } from "@/api/authortiy-control-number";
+import { fetchAuthoritySeparation } from "@/api/authority-separation";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
 
@@ -19,11 +20,19 @@ vi.mock("@/api/authortiy-control-number", () => ({
   fetchGenerateAuthorityControlNumber: vi.fn(),
 }));
 
+vi.mock("@/api/authority-separation", () => ({
+  fetchAuthoritySeparation: vi.fn(),
+}));
+
 vi.mock("@/hooks/use-authority-search", () => ({
+  authoritySearchQueryKeys: { all: ["authority-search"] },
   useAuthoritySearchByRecordKeys: vi.fn(),
 }));
 
 vi.mock("@/hooks/use-authority-detail", () => ({
+  authorityDetailKeys: {
+    detail: (recKey: string) => ["authority-detail", "detail", recKey],
+  },
   useAuthorityDetail: vi.fn(),
 }));
 
@@ -32,6 +41,11 @@ const detailResponse = {
     recKey: "source-record",
     acType: "1",
     acControlNo: "KAC000000001",
+    acRegionCode: "10",
+    birthDeathDatePrivateYn: "Y",
+    biographyPrivateYn: "Y",
+    copyrightBlanketAgreeYn: "Y",
+    copyrightBlanketAgreeDate: "20260831",
     record: {
       leader: "00000nz  a2200000n  4500",
       controlFields: [{ tag: "001", value: "KAC000000001" }],
@@ -47,14 +61,20 @@ const detailResponse = {
   },
 };
 
-function renderSplitModalBody() {
+function renderSplitModalBody({
+  onHide = vi.fn(),
+  onSplit,
+}: {
+  onHide?: () => void;
+  onSplit?: () => void;
+} = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false } },
   });
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <AuthoritySplitModalBody show onHide={vi.fn()} />
+      <AuthoritySplitModalBody show onHide={onHide} onSplit={onSplit} />
     </QueryClientProvider>,
   );
 }
@@ -115,6 +135,61 @@ describe("AuthoritySplitModalBody", () => {
       expect(screen.getByText("분리대상자료 (KAC000000002)")).toBeVisible();
     });
     expect(screen.getByRole("button", { name: "저장" })).toBeEnabled();
+  });
+
+  it("원본 메타데이터와 편집 중인 MARC로 전거자료를 분리 저장한다", async () => {
+    const user = userEvent.setup();
+    const onHide = vi.fn();
+    const onSplit = vi.fn();
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    vi.mocked(useAuthoritySearchByRecordKeys).mockReturnValue({
+      data: [{ recKey: "source-record" }],
+      isLoading: false,
+      isError: false,
+    } as never);
+    vi.mocked(useAuthorityDetail).mockReturnValue({
+      data: detailResponse,
+      isLoading: false,
+      isError: false,
+    } as never);
+    vi.mocked(fetchGenerateAuthorityControlNumber).mockResolvedValue({
+      data: "KAC000000002",
+    });
+    vi.mocked(fetchAuthoritySeparation).mockResolvedValue({
+      data: {
+        ...detailResponse.data,
+        recKey: "separated-record",
+        acControlNo: "KAC000000002",
+      },
+    } as never);
+
+    renderSplitModalBody({ onHide, onSplit });
+    await user.click(screen.getByRole("button", { name: "MARC 분리 실행" }));
+    await screen.findByText("분리대상자료 (KAC000000002)");
+    await user.click(screen.getByRole("button", { name: "저장" }));
+
+    await waitFor(() => {
+      expect(fetchAuthoritySeparation).toHaveBeenCalledTimes(1);
+    });
+    expect(fetchAuthoritySeparation).toHaveBeenCalledWith({
+      leaderStatus: "n",
+      leaderType: "z",
+      leaderInputLevel: "n",
+      acRegionCode: "10",
+      birthDeathDatePrivateYn: "Y",
+      biographyPrivateYn: "Y",
+      copyrightBlanketAgreeYn: "Y",
+      copyrightBlanketAgreeDate: "20260831",
+      record: {
+        controlFields: [{ tag: "001", value: "KAC000000002" }],
+        dataFields: detailResponse.data.record.dataFields,
+      },
+    });
+    await waitFor(() => {
+      expect(alertSpy).toHaveBeenCalledWith("전거자료가 분리되었습니다.");
+      expect(onSplit).toHaveBeenCalledOnce();
+      expect(onHide).toHaveBeenCalledOnce();
+    });
   });
 
   it("생성된 분리대상자료의 008과 MARC 행을 편집한다", async () => {

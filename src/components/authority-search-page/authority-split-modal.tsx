@@ -1,11 +1,23 @@
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { fetchGenerateAuthorityControlNumber } from "@/api/authortiy-control-number";
-import { useAuthoritySearchByRecordKeys } from "@/hooks/use-authority-search";
-import { useAuthorityDetail } from "@/hooks/use-authority-detail";
+import {
+  fetchAuthoritySeparation,
+  type AuthoritySeparationQueryParams,
+} from "@/api/authority-separation";
+import { getAuthoritySaveError } from "@/api/authority-save-error";
+import {
+  authoritySearchQueryKeys,
+  useAuthoritySearchByRecordKeys,
+} from "@/hooks/use-authority-search";
+import {
+  authorityDetailKeys,
+  useAuthorityDetail,
+} from "@/hooks/use-authority-detail";
 import { sortMarcFields } from "@/lib/marc/marc-field.utils";
+import { buildMarcRecord } from "@/lib/marc/marc-record.utils";
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 import { isValidAcType } from "@/types/authority.types";
 import type {
@@ -51,13 +63,45 @@ function createEditorFields(
       tag: field.tag,
       indicator1: field.ind1,
       indicator2: field.ind2,
-      subfields: field.subfields,
+      subfields: field.subfields.map((subfield) => ({ ...subfield })),
     })),
   ]);
 }
 
+function createAuthorityMetadata(
+  detail: AuthorityDetailData,
+): AuthorityCreateMetadata {
+  return {
+    acRegionCode: detail.acRegionCode ?? undefined,
+    birthDeathDatePrivateYn: detail.birthDeathDatePrivateYn ?? undefined,
+    biographyPrivateYn: detail.biographyPrivateYn ?? undefined,
+    copyrightBlanketAgreeYn: detail.copyrightBlanketAgreeYn ?? undefined,
+    copyrightBlanketAgreeDate: detail.copyrightBlanketAgreeDate ?? undefined,
+  };
+}
+
+function buildAuthoritySeparationParams(
+  leaderData: LeaderData,
+  variableFields: MarcField[],
+  metadata: AuthorityCreateMetadata,
+): AuthoritySeparationQueryParams {
+  const copyrightBlanketAgreeDate = metadata.copyrightBlanketAgreeDate?.trim();
+
+  return {
+    leaderStatus: leaderData.status,
+    leaderType: leaderData.type,
+    leaderInputLevel: leaderData.encodingLevel,
+    acRegionCode: metadata.acRegionCode ?? "",
+    birthDeathDatePrivateYn: metadata.birthDeathDatePrivateYn ?? "N",
+    biographyPrivateYn: metadata.biographyPrivateYn ?? "N",
+    copyrightBlanketAgreeYn: metadata.copyrightBlanketAgreeYn ?? "N",
+    ...(copyrightBlanketAgreeDate && { copyrightBlanketAgreeDate }),
+    record: buildMarcRecord(variableFields),
+  };
+}
+
 export function AuthoritySplitButton() {
-  const { selectedRecordKeys } = useSearchPage();
+  const { selectedRecordKeys, clearSelectedRecordKeys } = useSearchPage();
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -85,6 +129,7 @@ export function AuthoritySplitButton() {
       <AuthoritySplitModal
         show={modalIsOpen}
         onHide={() => setModalIsOpen(false)}
+        onSplit={clearSelectedRecordKeys}
       />
     </>
   );
@@ -93,13 +138,15 @@ export function AuthoritySplitButton() {
 export default function AuthoritySplitModal({
   show,
   onHide,
+  onSplit,
 }: {
   show: boolean;
   onHide: () => void;
+  onSplit?: () => void;
 }) {
   return (
     <BaseModal show={show} onHide={onHide}>
-      <AuthoritySplitModalBody show={show} onHide={onHide} />
+      <AuthoritySplitModalBody show={show} onHide={onHide} onSplit={onSplit} />
     </BaseModal>
   );
 }
@@ -107,10 +154,13 @@ export default function AuthoritySplitModal({
 export function AuthoritySplitModalBody({
   show,
   onHide,
+  onSplit,
 }: {
   show: boolean;
   onHide: () => void;
+  onSplit?: () => void;
 }) {
+  const queryClient = useQueryClient();
   const [masterFontSize, setMasterFontSize] = useState(defaultFontSize);
   const [targetFontSize, setTargetFontSize] = useState(defaultFontSize);
   const [targetLeaderData, setTargetLeaderData] =
@@ -166,7 +216,10 @@ export function AuthoritySplitModalBody({
         record: {
           ...sourceDetail.record,
           controlFields: targetControlFields,
-          dataFields: [...sourceDetail.record.dataFields],
+          dataFields: sourceDetail.record.dataFields.map((field) => ({
+            ...field,
+            subfields: field.subfields.map((subfield) => ({ ...subfield })),
+          })),
         },
       };
 
@@ -175,9 +228,30 @@ export function AuthoritySplitModalBody({
       });
       setTargetLeaderData(parseLeaderData(targetDetail.record.leader));
       setTargetVariableFields(createEditorFields(targetDetail.record));
-      setTargetAuthorityCreateMetadata({});
+      setTargetAuthorityCreateMetadata(createAuthorityMetadata(sourceDetail));
     },
   });
+
+  const separationMutation = useMutation({
+    mutationFn: (params: AuthoritySeparationQueryParams) =>
+      fetchAuthoritySeparation(params),
+    onSuccess: async (result) => {
+      queryClient.setQueryData(
+        authorityDetailKeys.detail(result.data.recKey),
+        result,
+      );
+
+      await queryClient.invalidateQueries({
+        queryKey: authoritySearchQueryKeys.all,
+      });
+
+      window.alert("전거자료가 분리되었습니다.");
+      onSplit?.();
+      onHide();
+    },
+  });
+
+  const separationSaveError = getAuthoritySaveError(separationMutation.error);
 
   const handleSplit = () => {
     const acType = detailData?.data.acType;
@@ -185,13 +259,22 @@ export function AuthoritySplitModalBody({
       return;
     }
 
+    separationMutation.reset();
     generateControlNumber(acType);
   };
 
   const handleSave = () => {
-    console.log(targetLeaderData);
-    console.log(targetVariableFields);
-    console.log(targetAuthorityCreateMetadata);
+    if (!targetRecord) {
+      return;
+    }
+
+    separationMutation.mutate(
+      buildAuthoritySeparationParams(
+        targetLeaderData,
+        targetVariableFields,
+        targetAuthorityCreateMetadata,
+      ),
+    );
   };
 
   const targetRecordMessage = isSplitPending
@@ -203,7 +286,7 @@ export function AuthoritySplitModalBody({
   return (
     <>
       <Modal.Header
-        closeButton
+        closeButton={!separationMutation.isPending}
         closeVariant="white"
         className="bg-primary text-white"
       >
@@ -238,7 +321,7 @@ export function AuthoritySplitModalBody({
               <div className="border p-3 bg-light rounded h-100">
                 <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                   <span className="badge bg-primary">
-                    통합원본자료({detailData.data.acControlNo})
+                    분리원본자료({detailData.data.acControlNo})
                   </span>
                   <div className="d-flex gap-2">
                     <MarcFontSizeSelect
@@ -306,6 +389,8 @@ export function AuthoritySplitModalBody({
                       <MarcEditorWorkspace
                         title="분리대상자료 MARC"
                         fontSize={`${targetFontSize}px`}
+                        saveError={separationSaveError}
+                        saveErrorKey={separationMutation.submittedAt}
                       />
                     </div>
                   </MarcEditorContext.Provider>
@@ -322,10 +407,17 @@ export function AuthoritySplitModalBody({
         )}
       </Modal.Body>
       <Modal.Footer className="justify-content-center">
+        {separationMutation.isError && !separationSaveError && (
+          <span className="small text-danger" role="alert">
+            전거자료 분리 중 오류가 발생했습니다.
+          </span>
+        )}
         <Button
           className="px-4 fw-bold"
           variant="primary"
-          disabled={!detailData || isSplitPending}
+          disabled={
+            !detailData || isSplitPending || separationMutation.isPending
+          }
           onClick={handleSplit}
         >
           {isSplitPending ? "MARC 분리 중" : "MARC 분리 실행"}
@@ -333,12 +425,19 @@ export function AuthoritySplitModalBody({
         <Button
           className="px-4 fw-bold"
           variant="secondary"
-          disabled={!targetRecord || isSplitPending}
+          disabled={
+            !targetRecord || isSplitPending || separationMutation.isPending
+          }
           onClick={handleSave}
         >
-          저장
+          {separationMutation.isPending ? "저장 중..." : "저장"}
         </Button>
-        <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
+        <Button
+          className="px-4 fw-bold"
+          variant="secondary"
+          disabled={separationMutation.isPending}
+          onClick={onHide}
+        >
           닫기
         </Button>
       </Modal.Footer>
