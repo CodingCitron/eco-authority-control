@@ -3,9 +3,7 @@ import { useForm } from "react-hook-form";
 import clsx from "clsx";
 import { css } from "styled-system/css";
 
-import logo from "@/assets/images/logo.png";
-
-const imgCss = css({ height: "40px" });
+import { useSignIn } from "@/hooks/use-auth";
 
 interface SignInFormValues {
   userId: string;
@@ -17,6 +15,7 @@ const signInFormClass = css({
 });
 
 export default function SignInPage() {
+  const signInMutation = useSignIn();
   const {
     register,
     handleSubmit,
@@ -40,7 +39,12 @@ export default function SignInPage() {
           </h1> */}
           <form
             noValidate
-            onSubmit={handleSubmit(() => undefined)}
+            onSubmit={handleSubmit(({ userId, password }) => {
+              signInMutation.mutate({
+                id: userId.trim(),
+                password,
+              });
+            })}
             aria-label="로그인"
             className={signInFormClass}
           >
@@ -105,11 +109,18 @@ export default function SignInPage() {
               )}
             </div>
 
+            {signInMutation.isError && (
+              <p className="text-danger small" role="alert">
+                아이디 또는 비밀번호를 확인해주세요.
+              </p>
+            )}
+
             <button
               className="btn btn-primary btn-lg w-100 fw-bold"
               type="submit"
+              disabled={signInMutation.isPending}
             >
-              로그인
+              {signInMutation.isPending ? "로그인 중..." : "로그인"}
             </button>
           </form>
         </div>

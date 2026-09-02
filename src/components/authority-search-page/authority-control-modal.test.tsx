@@ -237,7 +237,7 @@ describe("AuthorityControlModalBody", () => {
       "related-record",
       expect.objectContaining({ enabled: true }),
     );
-    await user.click(screen.getByLabelText("상위 (g)"));
+    await user.click(screen.getByLabelText(/상위\s*\(g\)/));
     await user.click(screen.getByRole("button", { name: "채택표목 복사" }));
 
     const copiedFieldCheckbox = within(referenceTable).getByLabelText(

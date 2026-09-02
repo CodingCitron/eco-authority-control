@@ -2,10 +2,14 @@ import { Link } from "react-router";
 import { css } from "styled-system/css";
 
 import logo from "@/assets/images/logo.png";
+import { useAuthProfile, useLogout } from "@/hooks/use-auth";
 
 const imgCss = css({ height: "40px" });
 
 export default function Header() {
+  const { data: profile, isPending: isProfilePending } = useAuthProfile();
+  const logoutMutation = useLogout();
+
   return (
     <>
       <Link to="/" className="visually-hidden-focusable skip-link">
@@ -22,13 +26,28 @@ export default function Header() {
           <div className="nav-item text-nowrap">
             <span className="nav-link text-white px-3">
               <i className="bi bi-person me-2" aria-hidden="true"></i>
-              관리자(홍길동)
+              {profile
+                ? `${profile.name}(${profile.userId})`
+                : isProfilePending
+                  ? "사용자 확인 중"
+                  : "비로그인"}
             </span>
           </div>
           <div className="nav-item text-nowrap">
-            <a className="btn btn-sm btn-outline-light" href="#">
-              로그아웃
-            </a>
+            {profile ? (
+              <button
+                className="btn btn-sm btn-outline-light"
+                type="button"
+                disabled={logoutMutation.isPending}
+                onClick={() => logoutMutation.mutate()}
+              >
+                {logoutMutation.isPending ? "로그아웃 중" : "로그아웃"}
+              </button>
+            ) : (
+              <Link className="btn btn-sm btn-outline-light" to="/sign-in">
+                로그인
+              </Link>
+            )}
           </div>
         </div>
       </header>
