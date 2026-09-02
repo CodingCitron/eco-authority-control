@@ -25,7 +25,10 @@ import MarcFontSizeSelect, {
   defaultFontSize,
 } from "@/components/ui/marc-font-size-select";
 import MarcRecordPreview from "@/components/ui/record-preview";
-import { HanjaToHangulModalButton } from "../ui/hanja-to-hangul-modal";
+import {
+  HanjaToHangulModalButton,
+  MarcEditorHanjaToHangulModalButton,
+} from "../ui/hanja-to-hangul-modal";
 
 const emptyLeaderData: LeaderData = {
   status: "",
@@ -264,9 +267,20 @@ export function AuthoritySplitModalBody({
                       className="form-select-sm w-auto"
                     />
                     {targetRecord && (
-                      <HanjaToHangulModalButton
-                        record={targetRecord.data.record}
-                      />
+                      <MarcEditorContext.Provider
+                        value={{
+                          leaderData: targetLeaderData,
+                          variableFields: targetVariableFields,
+                          authorityCreateMetadata:
+                            targetAuthorityCreateMetadata,
+                          setLeaderData: setTargetLeaderData,
+                          setVariableFields: setTargetVariableFields,
+                          setAuthorityCreateMetadata:
+                            setTargetAuthorityCreateMetadata,
+                        }}
+                      >
+                        <MarcEditorHanjaToHangulModalButton />
+                      </MarcEditorContext.Provider>
                     )}
                   </div>
                 </div>

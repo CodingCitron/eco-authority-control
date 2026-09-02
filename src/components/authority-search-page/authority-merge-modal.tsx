@@ -40,7 +40,10 @@ import BaseModal from "@/components/ui/base-modal";
 import OverflowTooltip from "@/components/ui/overflow-tooltip";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import MarcRecordPreview from "../ui/record-preview";
-import { HanjaToHangulModalButton } from "../ui/hanja-to-hangul-modal";
+import {
+  HanjaToHangulModalButton,
+  MarcEditorHanjaToHangulModalButton,
+} from "../ui/hanja-to-hangul-modal";
 
 interface AuthorityMergeModalProps {
   show: boolean;
@@ -144,8 +147,12 @@ function createAuthorityIntegrateParams(
   target: AuthorityDetailData,
   metadata: AuthorityCreateMetadata,
 ): AuthorityIntegrateRequestQueryParams {
-  const sourceRecKey = target.recKey;
-  const targetRecKey = master.recKey;
+  const sourceRecKey = parsePositiveRecordKey(target.recKey);
+  const targetRecKey = parsePositiveRecordKey(master.recKey);
+
+  if (sourceRecKey === targetRecKey) {
+    throw new Error("통합할 원본과 대상 전거 레코드 키가 같습니다.");
+  }
 
   const copyrightBlanketAgreeDate = metadata.copyrightBlanketAgreeDate?.trim();
 
@@ -566,7 +573,25 @@ export function AuthorityMergeModalBody({
                         onChange={setMasterFontSize}
                         className="form-select-sm w-auto"
                       />
-                      <HanjaToHangulModalButton record={master?.record} />
+                      {master && activeMasterEditorState ? (
+                        <MarcEditorContext.Provider
+                          value={{
+                            leaderData: activeMasterEditorState.leaderData,
+                            variableFields:
+                              activeMasterEditorState.variableFields,
+                            authorityCreateMetadata:
+                              activeMasterEditorState.authorityCreateMetadata,
+                            setLeaderData: setMasterLeaderData,
+                            setVariableFields: setMasterVariableFields,
+                            setAuthorityCreateMetadata:
+                              setMasterAuthorityCreateMetadata,
+                          }}
+                        >
+                          <MarcEditorHanjaToHangulModalButton />
+                        </MarcEditorContext.Provider>
+                      ) : (
+                        <HanjaToHangulModalButton record={master?.record} />
+                      )}
                     </div>
                   </div>
                   {isMasterError ? (

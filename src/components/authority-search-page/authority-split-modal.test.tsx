@@ -167,4 +167,45 @@ describe("AuthoritySplitModalBody", () => {
     await user.click(screen.getByRole("button", { name: "110 행 삭제" }));
     expect(screen.queryByLabelText("110 행")).not.toBeInTheDocument();
   });
+
+  it("한자 변환 모달에 편집 중인 분리대상자료를 전달한다", async () => {
+    const user = userEvent.setup();
+    vi.mocked(useAuthoritySearchByRecordKeys).mockReturnValue({
+      data: [{ recKey: "source-record" }],
+      isLoading: false,
+      isError: false,
+    } as never);
+    vi.mocked(useAuthorityDetail).mockReturnValue({
+      data: detailResponse,
+      isLoading: false,
+      isError: false,
+    } as never);
+    vi.mocked(fetchGenerateAuthorityControlNumber).mockResolvedValue({
+      data: "KAC000000002",
+    });
+
+    renderSplitModalBody();
+    await user.click(screen.getByRole("button", { name: "MARC 분리 실행" }));
+
+    const targetSection = (await screen.findByText(
+      "분리대상자료 (KAC000000002)",
+    )).closest("section") as HTMLElement;
+    const targetSectionScope = within(targetSection);
+    await user.click(targetSectionScope.getByLabelText("110 행"));
+    const contentInput = targetSectionScope.getByLabelText(
+      "MARC 지시기와 서브필드",
+    );
+    await user.clear(contentInput);
+    await user.type(contentInput, "\\\\$a漢字{Enter}");
+    await user.click(
+      targetSectionScope.getByRole("button", { name: /한자 -> 한글/ }),
+    );
+
+    const hanjaModal = screen
+      .getByRole("heading", { name: /한자 -> 한글 변환/ })
+      .closest(".modal-content") as HTMLElement;
+    const hanjaModalScope = within(hanjaModal);
+    expect(hanjaModalScope.getByText("漢字")).toBeInTheDocument();
+    expect(hanjaModalScope.getByText("한자")).toBeInTheDocument();
+  });
 });

@@ -17,6 +17,7 @@ import {
   type CorporationMarcAddTarget,
 } from "./corporation-form.mapper";
 import { AuthorityReferenceHeadingSearchButton } from "../ui/authority-reference-heading-search-modal";
+import clsx from "clsx";
 
 type TextFieldName = FieldPathByValue<CorporationAuthorityFormValues, string>;
 
@@ -515,7 +516,7 @@ function AuditFields({ register }: RegisteredFieldProps) {
         <div className="col-md-3">
           <input
             type="text"
-            className="form-control bg-secondary-subtle"
+            className={clsx("form-control bg-secondary-subtle")}
             id="c-updated-by"
             readOnly
             {...register("updatedBy")}

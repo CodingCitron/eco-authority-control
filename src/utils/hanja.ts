@@ -1,7 +1,10 @@
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 import hanjaModule from "hanja";
 
-const hanja = "default" in hanjaModule ? hanjaModule.default : hanjaModule;
+// CommonJS 번들에서는 default가 한 번 더 감싸져 들어오므로 두 형태를 모두 지원한다.
+const hanja = (
+  "default" in hanjaModule ? hanjaModule.default : hanjaModule
+) as typeof hanjaModule;
 
 /** 문자가 한자인지 확인 */
 export function isHanja(char: string) {
@@ -128,4 +131,3 @@ export function extractHanjaFromRecord(
 
   return rows;
 }
-

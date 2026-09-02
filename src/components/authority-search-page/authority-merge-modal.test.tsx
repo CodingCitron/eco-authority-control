@@ -76,7 +76,10 @@ const targetDetail = {
         tag: "670",
         ind1: " ",
         ind2: " ",
-        subfields: [{ code: "a", value: "대상 정보원" }],
+        subfields: [
+          { code: "a", value: "대상 정보원" },
+          { code: "b", value: "漢字" },
+        ],
       },
     ],
   },
@@ -138,14 +141,16 @@ describe("AuthorityMergeModalBody", () => {
     const onHide = vi.fn();
     vi.spyOn(window, "alert").mockImplementation(() => {});
     vi.mocked(fetchAuthorityIntegrate).mockResolvedValue({
-      sourceRecKey: targetDetail.recKey,
-      integrated: true,
-      target: {
-        birthDeathDatePrivateYn: "N",
-        biographyPrivateYn: "Y",
-        copyrightBlanketAgreeYn: "N",
-        copyrightBlanketAgreeDate: "",
-        record: masterDetail.record,
+      data: {
+        sourceRecKey: targetDetail.recKey,
+        integrated: true,
+        target: {
+          birthDeathDatePrivateYn: "N",
+          biographyPrivateYn: "Y",
+          copyrightBlanketAgreeYn: "N",
+          copyrightBlanketAgreeDate: "",
+          record: masterDetail.record,
+        },
       },
     });
     mockMergeRecords();
@@ -246,5 +251,28 @@ describe("AuthorityMergeModalBody", () => {
     expect(
       masterEditorScope.getByRole("button", { name: "110 행 삭제" }),
     ).toBeEnabled();
+  });
+
+  it("한자 변환 모달에 편집 중인 통합주자료를 전달한다", async () => {
+    const user = userEvent.setup();
+    mockMergeRecords();
+
+    renderMergeModalBody({ show: true, onHide: vi.fn() });
+
+    await user.click(screen.getByRole("button", { name: "MARC 통합" }));
+
+    const masterSection = screen
+      .getByText(`통합주자료(${masterDetail.acControlNo})`)
+      .closest("section") as HTMLElement;
+    await user.click(
+      within(masterSection).getByRole("button", { name: /한자 -> 한글/ }),
+    );
+
+    const hanjaModal = screen
+      .getByRole("heading", { name: /한자 -> 한글 변환/ })
+      .closest(".modal-content") as HTMLElement;
+    const hanjaModalScope = within(hanjaModal);
+    expect(hanjaModalScope.getByText("漢字")).toBeInTheDocument();
+    expect(hanjaModalScope.getByText("한자")).toBeInTheDocument();
   });
 });

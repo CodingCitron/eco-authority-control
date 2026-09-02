@@ -6,8 +6,8 @@ import type { AuthorityYesNo } from "@/types/authority.types";
 import type { MarcEditorRecord } from "@/types/marc-editor.types";
 
 export interface AuthorityIntegrateRequestQueryParams {
-  sourceRecKey: string;
-  targetRecKey: string;
+  sourceRecKey: number;
+  targetRecKey: number;
   acRegionCode?: string;
   birthDeathDatePrivateYn?: AuthorityYesNo;
   biographyPrivateYn?: AuthorityYesNo;
