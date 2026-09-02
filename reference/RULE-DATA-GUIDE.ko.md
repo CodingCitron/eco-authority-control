@@ -128,6 +128,12 @@ rules/kormarc-authority/
 
 허용할 코드와 화면 표시명을 정의합니다.
 
+코드셋은 스칼라 코드셋과 위치형 코드셋 중 하나로 작성합니다.
+
+### 스칼라 코드셋
+
+스칼라 코드셋은 전체 값을 `values`의 키와 비교합니다. 지시기호, 리더 위치, 제어필드 고정 위치 및 일반적인 코드형 식별기호에 사용합니다.
+
 ```json
 {
   "codesets": {
@@ -137,11 +143,11 @@ rules/kormarc-authority/
         " ": { "label": "미정의" }
       }
     },
-    "REF_400_W": {
-      "label": "400 참조관계",
+    "LEADER_STATUS": {
+      "label": "레코드 상태",
       "values": {
-        "a": { "label": "이전 형식" },
-        "b": { "label": "이후 형식" }
+        "n": { "label": "신규 레코드" },
+        "c": { "label": "수정 레코드" }
       }
     }
   }
@@ -156,6 +162,63 @@ rules/kormarc-authority/
 - 각 값의 `label`: 필수입니다.
 
 코드 값은 문자열 그대로 비교합니다. 대소문자, 공백 및 길이가 모두 일치해야 합니다. 여러 글자 코드도 사용할 수 있으므로 언어 코드처럼 `"kor"`와 같은 값을 정의할 수 있습니다.
+
+### 위치형 코드셋
+
+위치형 코드셋은 식별기호 값의 전체 길이와 각 문자 위치를 검사합니다. 400 필드의 `$w`와 같은 제어 식별기호에 사용합니다.
+
+```json
+"REF_400_W": {
+  "label": "400 제어 식별기호",
+  "minLength": 1,
+  "maxLength": 4,
+  "positions": {
+    "0": {
+      "label": "특수관계",
+      "values": {
+        "a": { "label": "이전표목" },
+        "b": { "label": "이후표목" },
+        "n": { "label": "적용불가" },
+        "|": { "label": "채움문자" }
+      }
+    },
+    "1": {
+      "label": "부출지시 사용 제한",
+      "values": {
+        "a": { "label": "이름 참조구조에만" },
+        "n": { "label": "적용불가" },
+        "|": { "label": "채움문자" }
+      }
+    },
+    "2": {
+      "label": "이전 표목형식",
+      "values": {
+        "a": { "label": "AACR2의 이전 표목형식" },
+        "n": { "label": "적용불가" },
+        "|": { "label": "채움문자" }
+      }
+    },
+    "3": {
+      "label": "참조 출력",
+      "values": {
+        "a": { "label": "참조를 출력하지 않음" },
+        "n": { "label": "적용불가" },
+        "|": { "label": "채움문자" }
+      }
+    }
+  }
+}
+```
+
+- `minLength`와 `maxLength`는 양의 정수이며 `minLength <= maxLength`여야 합니다.
+- 길이 제한은 최솟값과 최댓값을 모두 포함합니다.
+- 위치 키는 0부터 시작하는 정수 문자열입니다.
+- `"0"`부터 `String(maxLength - 1)`까지 모든 위치를 정의해야 합니다.
+- 각 위치에는 한 글자로 된 값이 하나 이상 있어야 하며 모든 값에 `label`이 필요합니다.
+- 위치형 코드셋에는 최상위 `values`를 함께 정의할 수 없습니다.
+- 위치형 코드셋은 식별기호의 `codeset`과 필드의 `relationCodeSet`에서만 참조할 수 있습니다.
+
+값이 `maxLength`보다 짧으면 실제로 존재하는 위치만 검사합니다. 예를 들어 `minLength: 1`, `maxLength: 4`이면 각 위치의 문자가 허용되는 한 1~4자 값을 사용할 수 있습니다.
 
 ## 4. `leader.json`
 
@@ -244,10 +307,40 @@ rules/kormarc-authority/
       "values": { " ": { "label": "미정의" } }
     },
     "REF_400_W": {
-      "label": "400 참조관계",
-      "values": {
-        "a": { "label": "이전 형식" },
-        "b": { "label": "이후 형식" }
+      "label": "400 제어 식별기호",
+      "minLength": 1,
+      "maxLength": 4,
+      "positions": {
+        "0": {
+          "label": "특수관계",
+          "values": {
+            "a": { "label": "이전표목" },
+            "b": { "label": "이후표목" },
+            "n": { "label": "적용불가" },
+            "|": { "label": "채움문자" }
+          }
+        },
+        "1": {
+          "label": "부출지시 사용 제한",
+          "values": {
+            "n": { "label": "적용불가" },
+            "|": { "label": "채움문자" }
+          }
+        },
+        "2": {
+          "label": "이전 표목형식",
+          "values": {
+            "n": { "label": "적용불가" },
+            "|": { "label": "채움문자" }
+          }
+        },
+        "3": {
+          "label": "참조 출력",
+          "values": {
+            "n": { "label": "적용불가" },
+            "|": { "label": "채움문자" }
+          }
+        }
       }
     }
   }
@@ -288,7 +381,7 @@ rules/kormarc-authority/
 }
 ```
 
-이 규칙에서는 400 필드를 여러 번 사용할 수 있고, 각 필드에 `$a`가 반드시 있어야 합니다. `$w`를 사용하면 값은 `a` 또는 `b`여야 하며 `$a`보다 앞에 위치해야 합니다.
+이 규칙에서는 400 필드를 여러 번 사용할 수 있고, 각 필드에 `$a`가 반드시 있어야 합니다. `$w`를 사용하면 값은 1~4자여야 하며 각 문자는 해당 위치의 허용 값과 일치해야 합니다. 또한 `$w`는 `$a`보다 앞에 위치해야 합니다.
 
 ## 7. 라이브러리가 시작할 때 검사하는 규칙 오류
 
@@ -321,19 +414,21 @@ if (!result.valid) {
 
 주요 오류 코드는 다음과 같습니다.
 
-| 오류 코드                    | 의미                                              |
-| ---------------------------- | ------------------------------------------------- |
-| `MISSING_REQUIRED_FIELD`     | 필수 필드가 없습니다.                             |
-| `NON_REPEATABLE_FIELD`       | 반복 불가 필드가 반복되었습니다.                  |
-| `INVALID_INDICATOR`          | 지시기호가 코드셋에 없습니다.                     |
-| `MISSING_REQUIRED_SUBFIELD`  | 필수 식별기호가 없습니다.                         |
-| `NON_REPEATABLE_SUBFIELD`    | 반복 불가 식별기호가 반복되었습니다.              |
-| `INVALID_SUBFIELD_ORDER`     | 식별기호 순서가 규칙과 다릅니다.                  |
-| `INVALID_SUBFIELD_CODE`      | 식별기호 값이 코드셋에 없습니다.                  |
-| `INVALID_LEADER_CODE`        | 리더 위치 값이 코드셋에 없습니다.                 |
-| `INVALID_FIXED_FIELD_LENGTH` | 제어 필드 길이가 규칙과 다릅니다.                 |
-| `INVALID_CONTROL_FIELD_CODE` | 제어 필드의 고정 위치 값이 코드셋에 없습니다.     |
-| `UNKNOWN_FIELD`              | 정의되지 않은 필드입니다. 오류가 아닌 경고입니다. |
+| 오류 코드                        | 의미                                              |
+| -------------------------------- | ------------------------------------------------- |
+| `MISSING_REQUIRED_FIELD`         | 필수 필드가 없습니다.                             |
+| `NON_REPEATABLE_FIELD`           | 반복 불가 필드가 반복되었습니다.                  |
+| `INVALID_INDICATOR`              | 지시기호가 코드셋에 없습니다.                     |
+| `MISSING_REQUIRED_SUBFIELD`      | 필수 식별기호가 없습니다.                         |
+| `NON_REPEATABLE_SUBFIELD`        | 반복 불가 식별기호가 반복되었습니다.              |
+| `INVALID_SUBFIELD_ORDER`         | 식별기호 순서가 규칙과 다릅니다.                  |
+| `INVALID_SUBFIELD_CODE`          | 식별기호 값이 코드셋에 없습니다.                  |
+| `INVALID_SUBFIELD_LENGTH`        | 위치형 식별기호 값이 허용 길이를 벗어났습니다.    |
+| `INVALID_SUBFIELD_POSITION_CODE` | 특정 위치의 문자가 코드셋에 없습니다.             |
+| `INVALID_LEADER_CODE`            | 리더 위치 값이 코드셋에 없습니다.                 |
+| `INVALID_FIXED_FIELD_LENGTH`     | 제어 필드 길이가 규칙과 다릅니다.                 |
+| `INVALID_CONTROL_FIELD_CODE`     | 제어 필드의 고정 위치 값이 코드셋에 없습니다.     |
+| `UNKNOWN_FIELD`                  | 정의되지 않은 필드입니다. 오류가 아닌 경고입니다. |
 
 ## 9. 규칙 추가 작업 순서
 
@@ -361,3 +456,54 @@ console.log(kormarcAuthorityRulePack.version);
 ```
 
 `getFieldRule()`은 데이터 필드와 제어 필드를 모두 조회합니다. 정의되지 않은 태그나 코드셋은 `undefined`를 반환합니다.
+
+위치형 코드셋을 안전하게 구분하려면 `isPositionalCodeSet()`을 사용합니다.
+
+```ts
+import { getCodeSet, isPositionalCodeSet } from "marc-eco";
+
+const codeSet = getCodeSet("REF_400_W");
+
+if (codeSet && isPositionalCodeSet(codeSet)) {
+  console.log(codeSet.minLength, codeSet.maxLength);
+  console.log(codeSet.positions["0"]?.values.a?.label);
+} else if (codeSet) {
+  console.log(codeSet.values);
+}
+```
+
+## 11. 레코드 비교
+
+규칙 검증과 구조 비교는 별도 작업입니다. `diff()`는 값을 정규화하거나 규칙 팩을 적용하지 않고 구조적으로 올바른 두 `MarcRecord` 객체를 그대로 비교합니다.
+
+```ts
+import { diff, fromJson } from "marc-eco";
+
+const before = fromJson(beforeJson);
+const after = fromJson(afterJson);
+const result = diff(before, after);
+
+for (const change of result.changes) {
+  if (change.kind === "subfield-value") {
+    console.log(change.tag, change.code, change.before, change.after);
+  }
+}
+```
+
+실제 상대 순서가 바뀐 항목은 이동으로 보고합니다. 단순한 추가 또는 삭제 때문에 인덱스만 밀린 항목은 이동으로 처리하지 않습니다.
+
+## 12. ISO 2709 리더 생성
+
+필드를 변경한 뒤 메모리의 레코드에도 최신 구조 리더 값이 필요하면 `buildLeader()`를 사용합니다.
+
+```ts
+import { buildLeader } from "marc-eco";
+
+const updated = buildLeader(record);
+```
+
+이 함수는 새로운 `MarcRecord`를 반환합니다. 기존 24자리 리더의 의미 위치는 유지하고, 레코드의 UTF-8 바이트를 기준으로 레코드 길이와 데이터 기본번지를 계산합니다. 문자부호화체계와 디렉터리 엔트리 맵 위치도 표준값으로 설정합니다. `toIso2709()`도 같은 계산을 사용합니다.
+
+## 13. 오류 및 진단 메시지
+
+모든 `MarcError`, 파서 경고 및 `validate()` 진단의 사람이 읽는 메시지는 한국어로 제공됩니다. 프로그램에서는 번역된 문장 대신 `INVALID_LEADER`, `INVALID_SUBFIELD`와 같은 안정적인 `code` 값을 기준으로 오류를 처리하십시오. `path`, `tag`, `subfieldCode`, `actual`, `offset` 등의 구조화된 정보도 기존 형식을 유지합니다.
