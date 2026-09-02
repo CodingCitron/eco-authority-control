@@ -2,10 +2,25 @@ import { useMemo, useState } from "react";
 import { Modal } from "react-bootstrap";
 
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
+import { buildMarcRecord } from "@/lib/marc/marc-record.utils";
 import { extractHanjaFromRecord, type HanjaRecordRow } from "@/utils/hanja";
 import BaseModal from "./base-modal";
+import { formatLeaderData, useMarcEditor } from "./marc-editor-context";
 
-// 등록, 수정 페이지에서는 context에서 가져오게 수정 필요
+/** 입력·수정 페이지의 현재 MARC 편집 상태를 한자 변환 모달에 연결한다. */
+export function MarcEditorHanjaToHangulModalButton() {
+  const { leaderData, variableFields } = useMarcEditor();
+  const record = useMemo<AuthorityDetailData["record"]>(
+    () => ({
+      leader: formatLeaderData(leaderData),
+      ...buildMarcRecord(variableFields),
+    }),
+    [leaderData, variableFields],
+  );
+
+  return <HanjaToHangulModalButton record={record} />;
+}
+
 export function HanjaToHangulModalButton({
   record,
 }: {
@@ -128,8 +143,6 @@ export function HanjaToHangulModalBody({
                 </thead>
                 <tbody>
                   {hanjaRows.map((row) => {
-                    console.log(hanjaRows);
-
                     return (
                       <tr key={row.key}>
                         <td className="text-center align-top pt-3">

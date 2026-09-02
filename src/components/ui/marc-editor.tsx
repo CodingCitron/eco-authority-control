@@ -9,6 +9,7 @@ import {
 import { kormarcAuthorityRulePack, MarcError, parseLine } from "marc-eco";
 
 import { sortMarcFields } from "@/lib/marc/marc-field.utils";
+import { buildMarcRecord } from "@/lib/marc/marc-record.utils";
 import type {
   AuthorityCreateMetadata,
   MarcEditorRecord,
@@ -656,24 +657,4 @@ function getMarcRowErrorMessage(error: unknown) {
     default:
       return "MARC 행 형식이 올바르지 않습니다.";
   }
-}
-
-function buildMarcRecord(fields: MarcField[]) {
-  return {
-    controlFields: fields.flatMap((field) =>
-      field.type === "control" ? [{ tag: field.tag, value: field.value }] : [],
-    ),
-    dataFields: fields.flatMap((field) =>
-      field.type === "data"
-        ? [
-            {
-              tag: field.tag,
-              ind1: field.indicator1,
-              ind2: field.indicator2,
-              subfields: field.subfields,
-            },
-          ]
-        : [],
-    ),
-  };
 }

@@ -32,7 +32,7 @@ import {
 import { authoritySearchQueryKeys } from "@/hooks/use-authority-search";
 import type { MarcEditorSaveError, MarcField } from "@/types/marc-editor.types";
 import type { AuthorityDetailResponse } from "@/api/authority-detail";
-import { HanjaToHangulModalButton } from "@/components/ui/hanja-to-hangul-modal";
+import { MarcEditorHanjaToHangulModalButton } from "@/components/ui/hanja-to-hangul-modal";
 
 export type AuthorityPersonalFormMode = "create" | "edit";
 
@@ -215,7 +215,7 @@ export default function AuthorityPersonalFormPage({
               onChange={setFontSize}
               className="form-select-sm w-auto"
             />
-            <HanjaToHangulModalButton />
+            <MarcEditorHanjaToHangulModalButton />
           </div>
         </div>
 

@@ -129,4 +129,3 @@ export function extractHanjaFromRecord(
   return rows;
 }
 
-console.log(hanja.translate("大韓民國", "SUBSTITUTION"));

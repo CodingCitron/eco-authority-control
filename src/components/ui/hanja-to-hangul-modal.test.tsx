@@ -5,7 +5,36 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   HanjaToHangulModalBody,
   HanjaToHangulModalButton,
+  MarcEditorHanjaToHangulModalButton,
 } from "./hanja-to-hangul-modal";
+import { useMarcEditor } from "./marc-editor-context";
+import MarcEditorProvider from "./marc-editor-provider";
+
+function CurrentRecordHarness() {
+  const { setVariableFields } = useMarcEditor();
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          setVariableFields([
+            {
+              type: "data",
+              tag: "100",
+              indicator1: "1",
+              indicator2: " ",
+              subfields: [{ code: "g", value: "尹東柱" }],
+            },
+          ])
+        }
+      >
+        편집값 변경
+      </button>
+      <MarcEditorHanjaToHangulModalButton />
+    </>
+  );
+}
 
 describe("HanjaToHangulModal", () => {
   afterEach(() => {
@@ -99,5 +128,23 @@ describe("HanjaToHangulModal", () => {
     expect(screen.getByRole("heading", { name: /한자 -> 한글 변환/ })).toBeInTheDocument();
     expect(screen.getByText("尹東柱")).toBeInTheDocument();
   });
-});
 
+  it("MARC 에디터에서 현재 작성 중인 레코드를 사용한다", async () => {
+    const user = userEvent.setup();
+    render(
+      <MarcEditorProvider>
+        <CurrentRecordHarness />
+      </MarcEditorProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "편집값 변경" }));
+    await user.click(screen.getByRole("button", { name: /한자 -> 한글/ }));
+
+    expect(
+      screen.getByRole("heading", { name: /한자 -> 한글 변환/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("100")).toBeInTheDocument();
+    expect(screen.getByText("尹東柱")).toBeInTheDocument();
+    expect(screen.getByText("윤동주")).toBeInTheDocument();
+  });
+});
