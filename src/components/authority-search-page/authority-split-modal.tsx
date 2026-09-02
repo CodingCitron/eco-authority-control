@@ -188,6 +188,12 @@ export function AuthoritySplitModalBody({
     generateControlNumber(acType);
   };
 
+  const handleSave = () => {
+    console.log(targetLeaderData);
+    console.log(targetVariableFields);
+    console.log(targetAuthorityCreateMetadata);
+  };
+
   const targetRecordMessage = isSplitPending
     ? "분리대상자료를 생성하는 중입니다."
     : isSplitError
@@ -328,6 +334,7 @@ export function AuthoritySplitModalBody({
           className="px-4 fw-bold"
           variant="secondary"
           disabled={!targetRecord || isSplitPending}
+          onClick={handleSave}
         >
           저장
         </Button>

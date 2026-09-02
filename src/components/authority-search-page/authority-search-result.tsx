@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
 
 import { useCurrentAuthoritySearch } from "@/hooks/use-authority-search";
@@ -431,10 +432,18 @@ function AuthorityTable({
 
 export default function AuthoritySearchResult() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { clearSelectedRecordKeys } = useSearchPage();
+  const { clearSelectedRecordKeys, pruneSelectedRecordKeys } = useSearchPage();
 
-  const { acType, data, isLoading, isError, isSearched } =
+  const { acType, data, isLoading, isError, isSuccess, isSearched } =
     useCurrentAuthoritySearch();
+
+  useEffect(() => {
+    if (!isSearched || !isSuccess || !data) {
+      return;
+    }
+
+    pruneSelectedRecordKeys(data.data.items.map((record) => record.recKey));
+  }, [data, isSearched, isSuccess, pruneSelectedRecordKeys]);
 
   if (!isSearched) {
     return (

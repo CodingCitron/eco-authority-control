@@ -91,6 +91,7 @@ function renderControlModal() {
         selectedRecordKeys: ["controlled-record"],
         toggleSelectedRecordKey: vi.fn(),
         toggleAllRecordKeys: vi.fn(),
+        pruneSelectedRecordKeys: vi.fn(),
         clearSelectedRecordKeys: vi.fn(),
       }}
     >

@@ -4,6 +4,7 @@ export interface SearchPageContextValue {
   selectedRecordKeys: readonly string[];
   toggleSelectedRecordKey: (recordKey: string) => void;
   toggleAllRecordKeys: (recordKeys: readonly string[]) => void;
+  pruneSelectedRecordKeys: (validRecordKeys: readonly string[]) => void;
   clearSelectedRecordKeys: () => void;
 }
 
@@ -24,6 +25,10 @@ export function useSearchPage() {
     SearchPageContext,
     (context) => context?.toggleAllRecordKeys,
   );
+  const pruneSelectedRecordKeys = useContextSelector(
+    SearchPageContext,
+    (context) => context?.pruneSelectedRecordKeys,
+  );
   const clearSelectedRecordKeys = useContextSelector(
     SearchPageContext,
     (context) => context?.clearSelectedRecordKeys,
@@ -33,6 +38,7 @@ export function useSearchPage() {
     !selectedRecordKeys ||
     !toggleSelectedRecordKey ||
     !toggleAllRecordKeys ||
+    !pruneSelectedRecordKeys ||
     !clearSelectedRecordKeys
   ) {
     throw new Error(
@@ -44,6 +50,7 @@ export function useSearchPage() {
     selectedRecordKeys,
     toggleSelectedRecordKey,
     toggleAllRecordKeys,
+    pruneSelectedRecordKeys,
     clearSelectedRecordKeys,
   };
 }

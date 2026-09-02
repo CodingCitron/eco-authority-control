@@ -32,6 +32,21 @@ export function SearchPageProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const pruneSelectedRecordKeys = useCallback(
+    (validRecordKeys: readonly string[]) => {
+      const validRecordKeySet = new Set(validRecordKeys);
+
+      setSelectedRecordKeys((current) => {
+        const next = current.filter((recordKey) =>
+          validRecordKeySet.has(recordKey),
+        );
+
+        return next.length === current.length ? current : next;
+      });
+    },
+    [],
+  );
+
   const clearSelectedRecordKeys = useCallback(() => {
     setSelectedRecordKeys([]);
   }, []);
@@ -42,6 +57,7 @@ export function SearchPageProvider({ children }: { children: ReactNode }) {
         selectedRecordKeys,
         toggleSelectedRecordKey,
         toggleAllRecordKeys,
+        pruneSelectedRecordKeys,
         clearSelectedRecordKeys,
       }}
     >
