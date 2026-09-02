@@ -478,7 +478,7 @@ export function AuthorityHistoryModalBody({ onHide }: { onHide: () => void }) {
                   value={fontSize}
                   onChange={setFontSize}
                 />
-                <HanjaToHangulModalButton />
+                <HanjaToHangulModalButton record={selectedHistory?.record} />
               </div>
             </div>
             <MarcRecordPreview
