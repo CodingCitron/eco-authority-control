@@ -251,5 +251,41 @@ describe("AuthorityControlModalBody", () => {
     expect(copiedFieldRow).toHaveTextContent("KAS000000002");
     expect(screen.getByRole("button", { name: "확인" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "삭제" })).toBeDisabled();
+
+    await user.click(copiedFieldCheckbox);
+    await user.click(screen.getByRole("button", { name: "삭제" }));
+
+    expect(
+      within(referenceTable).queryByText("작위[作爲]"),
+    ).not.toBeInTheDocument();
+    expect(
+      within(referenceTable).getByText("기존 관련 주제"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "삭제" })).toBeDisabled();
+  });
+
+  it("선택한 기존 5XX 필드를 모달의 목록에서 제거한다", async () => {
+    const user = userEvent.setup();
+    mockSubjectQueries();
+    renderControlModal();
+
+    const referenceTable = screen.getByRole("table", {
+      name: "5XX 필드 목록",
+    });
+    await user.click(
+      within(referenceTable).getByLabelText("550 기존 관련 주제 선택"),
+    );
+    const deleteButton = screen.getByRole("button", { name: "삭제" });
+    expect(deleteButton).toBeEnabled();
+
+    await user.click(deleteButton);
+
+    expect(
+      within(referenceTable).queryByText("기존 관련 주제"),
+    ).not.toBeInTheDocument();
+    expect(
+      within(referenceTable).getByText("현재 적용된 550 필드가 없습니다."),
+    ).toBeInTheDocument();
+    expect(deleteButton).toBeDisabled();
   });
 });

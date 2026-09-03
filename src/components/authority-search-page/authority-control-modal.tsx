@@ -1,4 +1,4 @@
-import { useState, type SubmitEvent } from "react";
+import { useRef, useState, type SubmitEvent } from "react";
 import { Button, Modal } from "react-bootstrap";
 
 import type { AuthoritySearchQueryParams } from "@/api/authority-search";
@@ -45,6 +45,19 @@ const referenceTagByAuthorityType: Record<
 
 type AuthorityReferenceField =
   AuthorityDetailData["record"]["dataFields"][number];
+
+interface TemporaryReferenceFieldEntry {
+  id: number;
+  field: AuthorityReferenceField;
+}
+
+interface ReferenceFieldRow {
+  id: string;
+  field: AuthorityReferenceField;
+  isTemporary: boolean;
+  existingIndex?: number;
+  temporaryId?: number;
+}
 
 function getReferenceFieldDescription(
   field: Pick<AuthorityReferenceField, "subfields">,
@@ -124,9 +137,15 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
   const [fontSize, setFontSize] = useState(defaultFontSize);
   const [relationCode, setRelationCode] =
     useState<AuthorityReferenceRelationCode>("");
-  const [temporaryReferenceFields, setTemporaryReferenceFields] = useState<
-    AuthorityReferenceField[]
-  >([]);
+  const temporaryReferenceFieldIdRef = useRef(0);
+  const [temporaryReferenceFieldEntries, setTemporaryReferenceFieldEntries] =
+    useState<TemporaryReferenceFieldEntry[]>([]);
+  const [
+    removedExistingReferenceFieldIndexes,
+    setRemovedExistingReferenceFieldIndexes,
+  ] = useState<Set<number>>(() => new Set());
+  const [selectedReferenceFieldRowIds, setSelectedReferenceFieldRowIds] =
+    useState<Set<string>>(() => new Set());
 
   const {
     data: controlledDetailResponse,
@@ -168,10 +187,27 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
         (field) => field.tag === referenceTag,
       ) ?? [])
     : [];
-  const referenceFields: AuthorityReferenceField[] = [
-    ...existingReferenceFields,
-    ...temporaryReferenceFields,
+  const referenceFieldRows: ReferenceFieldRow[] = [
+    ...existingReferenceFields.flatMap((field, index) =>
+      removedExistingReferenceFieldIndexes.has(index)
+        ? []
+        : [
+            {
+              id: `existing:${index}`,
+              field,
+              isTemporary: false,
+              existingIndex: index,
+            },
+          ],
+    ),
+    ...temporaryReferenceFieldEntries.map(({ id, field }) => ({
+      id: `temporary:${id}`,
+      field,
+      isTemporary: true,
+      temporaryId: id,
+    })),
   ];
+  const referenceFields = referenceFieldRows.map(({ field }) => field);
 
   const selectedDetailMessage = !selectedRecordKey
     ? "검색 결과에서 전거를 선택해 주세요."
@@ -247,11 +283,60 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
     });
 
     if (uniqueCopiedFields.length > 0) {
-      setTemporaryReferenceFields((fields) => [
-        ...fields,
-        ...uniqueCopiedFields,
+      setTemporaryReferenceFieldEntries((entries) => [
+        ...entries,
+        ...uniqueCopiedFields.map((field) => ({
+          id: temporaryReferenceFieldIdRef.current++,
+          field,
+        })),
       ]);
     }
+  };
+
+  const handleToggleReferenceFieldRow = (rowId: string) => {
+    setSelectedReferenceFieldRowIds((rowIds) => {
+      const nextRowIds = new Set(rowIds);
+
+      if (nextRowIds.has(rowId)) {
+        nextRowIds.delete(rowId);
+      } else {
+        nextRowIds.add(rowId);
+      }
+
+      return nextRowIds;
+    });
+  };
+
+  const handleDeleteReferenceFields = () => {
+    const selectedRows = referenceFieldRows.filter(({ id }) =>
+      selectedReferenceFieldRowIds.has(id),
+    );
+    if (selectedRows.length === 0) {
+      return;
+    }
+
+    const selectedExistingIndexes = selectedRows.flatMap(({ existingIndex }) =>
+      existingIndex === undefined ? [] : [existingIndex],
+    );
+    const selectedTemporaryIds = new Set(
+      selectedRows.flatMap(({ temporaryId }) =>
+        temporaryId === undefined ? [] : [temporaryId],
+      ),
+    );
+
+    if (selectedExistingIndexes.length > 0) {
+      setRemovedExistingReferenceFieldIndexes((indexes) => {
+        const nextIndexes = new Set(indexes);
+        selectedExistingIndexes.forEach((index) => nextIndexes.add(index));
+        return nextIndexes;
+      });
+    }
+    if (selectedTemporaryIds.size > 0) {
+      setTemporaryReferenceFieldEntries((entries) =>
+        entries.filter(({ id }) => !selectedTemporaryIds.has(id)),
+      );
+    }
+    setSelectedReferenceFieldRowIds(new Set());
   };
 
   const handleReset = () => {
@@ -261,7 +346,10 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
     setSelectedRecordKey("");
     setFontSize(defaultFontSize);
     setRelationCode("");
-    setTemporaryReferenceFields([]);
+    temporaryReferenceFieldIdRef.current = 0;
+    setTemporaryReferenceFieldEntries([]);
+    setRemovedExistingReferenceFieldIndexes(new Set());
+    setSelectedReferenceFieldRowIds(new Set());
   };
 
   return (
@@ -580,14 +668,14 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
                       </td>
                     </tr>
                   )}
-                  {referenceFields.map((field, index) => {
-                    const inputId = `ctrl-5xxRow-${index}`;
+                  {referenceFieldRows.map((row, index) => {
+                    const { id, field, isTemporary } = row;
+                    const inputId = `ctrl-5xxRow-${id}`;
                     const description = getReferenceFieldDescription(field);
-                    const isTemporary = index >= existingReferenceFields.length;
 
                     return (
                       <tr
-                        key={`${getReferenceFieldKey(field)}-${index}`}
+                        key={id}
                         className={isTemporary ? "table-success" : undefined}
                       >
                         <td>{index + 1}</td>
@@ -598,8 +686,8 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
                           <input
                             type="checkbox"
                             id={inputId}
-                            disabled
-                            title="삭제 API 연동 예정"
+                            checked={selectedReferenceFieldRowIds.has(id)}
+                            onChange={() => handleToggleReferenceFieldRow(id)}
                           />
                         </td>
                         <td className="fw-bold text-primary">{field.tag}</td>
@@ -626,8 +714,8 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
                 <button
                   className="btn btn-sm btn-outline-danger"
                   type="button"
-                  disabled
-                  title="삭제 API 연동 예정"
+                  disabled={selectedReferenceFieldRowIds.size === 0}
+                  onClick={handleDeleteReferenceFields}
                 >
                   삭제
                 </button>
