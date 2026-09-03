@@ -34,7 +34,6 @@ export default function GlobalToastContainer() {
 
   return (
     <ToastContainer
-      aria-label="알림"
       className="position-fixed top-0 end-0 p-3"
       style={{ zIndex: 1090 }}
     >

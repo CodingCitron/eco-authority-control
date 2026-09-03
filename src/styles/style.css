@@ -59,6 +59,16 @@
   --bs-btn-active-color: var(--krds-light-color-text-secondary);
 }
 
+/* 보조 외곽선 버튼은 연한 배경에서도 WCAG AA 텍스트 대비를 충족한다. */
+.btn-outline-secondary {
+  --bs-btn-color: #545b62;
+  --bs-btn-border-color: #545b62;
+  --bs-btn-hover-bg: #545b62;
+  --bs-btn-hover-border-color: #545b62;
+  --bs-btn-active-bg: #454b50;
+  --bs-btn-active-border-color: #454b50;
+}
+
 /* 텍스트 primary */
 .text-primary {
   color: var(--krds-light-color-text-primary) !important;
