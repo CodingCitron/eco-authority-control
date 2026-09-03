@@ -86,7 +86,8 @@ export default function AuthorityHistoryModal({
   onHide: () => void;
 }) {
   return (
-    <BaseModal show={show} onHide={onHide}>
+    // sm, lg, xl, xxl, fullscreen
+    <BaseModal show={show} onHide={onHide} dialogClassName="modal-xxl">
       <AuthorityHistoryModalBody onHide={onHide} />
     </BaseModal>
   );
