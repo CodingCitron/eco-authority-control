@@ -1,5 +1,5 @@
 import { useState, type ButtonHTMLAttributes, type MouseEvent } from "react";
-import { Alert, Button, Modal } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -147,15 +147,15 @@ export function AuthorityDeleteModalBody({ onHide }: { onHide: () => void }) {
       </Modal.Header>
       <Modal.Body>
         {isError && (
-          <Alert variant="danger" role="alert">
+          <p role="alert">
             선택한 전거자료를 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.
-          </Alert>
+          </p>
         )}
         {incompleteDeleteCount > 0 && (
-          <Alert variant="warning" role="alert">
+          <p role="alert">
             선택한 전거자료 중 {incompleteDeleteCount}건이 삭제되지 않았습니다.
             검색 결과를 확인해 주세요.
-          </Alert>
+          </p>
         )}
 
         <p className="mb-2">
@@ -226,9 +226,9 @@ export function AuthorityDeleteOneModalBody({
 
       <Modal.Body>
         {isError && (
-          <Alert variant="danger" role="alert">
+          <p role="alert">
             전거자료를 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.
-          </Alert>
+          </p>
         )}
 
         <p className="mb-2">전거자료({controlNumber})를 삭제하시겠습니까?</p>

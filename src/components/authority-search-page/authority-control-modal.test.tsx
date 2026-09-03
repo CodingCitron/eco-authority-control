@@ -1,17 +1,44 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { fetchAuthoritySeeAlso } from "@/api/authortiy-see-also";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
 import { useAuthoritySearch } from "@/hooks/use-authority-search";
 import { SearchPageContext } from "./authority-search-page-context";
 import { AuthorityControlModalBody } from "./authority-control-modal";
+
+vi.mock("@/api/authortiy-see-also", () => ({
+  fetchAuthoritySeeAlso: vi.fn(),
+}));
 
 vi.mock("@/hooks/use-authority-detail", () => ({
   useAuthorityDetail: vi.fn(),
 }));
 
 vi.mock("@/hooks/use-authority-search", () => ({
+  authoritySearchQueryKeys: {
+    all: ["authority-search"],
+    list: (params: unknown) => ["authority-search", "list", params],
+  },
+  useCurrentAuthoritySearchParams: () => ({
+    params: {
+      acType: "4",
+      acRegionCode: "0",
+      searchKeyword: "부작위",
+      searchType: "CONTAINS",
+      page: "1",
+      display: "20",
+    },
+    isSearched: true,
+  }),
   useAuthoritySearch: vi.fn(),
 }));
 
@@ -84,19 +111,32 @@ const searchResponse = {
   },
 };
 
-function renderControlModal() {
+function renderControlModal({
+  onHide = vi.fn(),
+  queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  }),
+}: {
+  onHide?: () => void;
+  queryClient?: QueryClient;
+} = {}) {
   return render(
-    <SearchPageContext.Provider
-      value={{
-        selectedRecordKeys: ["controlled-record"],
-        toggleSelectedRecordKey: vi.fn(),
-        toggleAllRecordKeys: vi.fn(),
-        pruneSelectedRecordKeys: vi.fn(),
-        clearSelectedRecordKeys: vi.fn(),
-      }}
-    >
-      <AuthorityControlModalBody onHide={vi.fn()} />
-    </SearchPageContext.Provider>,
+    <QueryClientProvider client={queryClient}>
+      <SearchPageContext.Provider
+        value={{
+          selectedRecordKeys: ["controlled-record"],
+          toggleSelectedRecordKey: vi.fn(),
+          toggleAllRecordKeys: vi.fn(),
+          pruneSelectedRecordKeys: vi.fn(),
+          clearSelectedRecordKeys: vi.fn(),
+        }}
+      >
+        <AuthorityControlModalBody onHide={onHide} />
+      </SearchPageContext.Provider>
+    </QueryClientProvider>,
   );
 }
 
@@ -249,7 +289,7 @@ describe("AuthorityControlModalBody", () => {
     expect(copiedFieldRow).toHaveTextContent("$wg");
     expect(copiedFieldRow).toHaveTextContent("작위[作爲]");
     expect(copiedFieldRow).toHaveTextContent("KAS000000002");
-    expect(screen.getByRole("button", { name: "확인" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "확인" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "삭제" })).toBeDisabled();
 
     await user.click(copiedFieldCheckbox);
@@ -287,5 +327,66 @@ describe("AuthorityControlModalBody", () => {
       within(referenceTable).getByText("현재 적용된 550 필드가 없습니다."),
     ).toBeInTheDocument();
     expect(deleteButton).toBeDisabled();
+  });
+
+  it("확인하면 새로 복사한 5XX 필드를 전거통제 API로 저장한다", async () => {
+    const user = userEvent.setup();
+    const onHide = vi.fn();
+    const queryClient = new QueryClient();
+    const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
+    const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    vi.mocked(fetchAuthoritySeeAlso).mockResolvedValue({
+      data: {
+        authority: {},
+        addedCount: 1,
+        skippedControlNos: [],
+      },
+    });
+    mockSubjectQueries();
+    renderControlModal({ onHide, queryClient });
+
+    await user.type(screen.getByLabelText("검색어"), "작위");
+    await user.click(screen.getByRole("button", { name: "찾기" }));
+    await user.click(screen.getByLabelText("작위[作爲] 선택"));
+    await user.click(screen.getByLabelText(/상위\s*\(g\)/));
+    await user.click(screen.getByRole("button", { name: "채택표목 복사" }));
+    await user.click(screen.getByRole("button", { name: "확인" }));
+
+    await waitFor(() =>
+      expect(fetchAuthoritySeeAlso).toHaveBeenCalledWith("controlled-record", {
+        seeAlsoFields: [
+          {
+            tag: "550",
+            ind1: " ",
+            ind2: " ",
+            subfields: [
+              { code: "w", value: "g" },
+              { code: "a", value: "작위[作爲]" },
+              { code: "0", value: "KAS000000002" },
+            ],
+          },
+        ],
+      }),
+    );
+    await waitFor(() => expect(onHide).toHaveBeenCalledTimes(1));
+    expect(invalidateQueriesSpy).toHaveBeenCalledTimes(1);
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [
+        "authority-search",
+        "list",
+        {
+          acType: "4",
+          acRegionCode: "0",
+          searchKeyword: "부작위",
+          searchType: "CONTAINS",
+          page: "1",
+          display: "20",
+        },
+      ],
+      exact: true,
+    });
+    expect(alertSpy).toHaveBeenCalledWith("참조표목 1건을 추가했습니다.");
+
+    alertSpy.mockRestore();
   });
 });

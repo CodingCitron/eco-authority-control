@@ -1,9 +1,16 @@
 import { useRef, useState, type SubmitEvent } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Modal } from "react-bootstrap";
 
+import { getAuthoritySaveError } from "@/api/authority-save-error";
 import type { AuthoritySearchQueryParams } from "@/api/authority-search";
+import { fetchAuthoritySeeAlso } from "@/api/authortiy-see-also";
 import { useAuthorityDetail } from "@/hooks/use-authority-detail";
-import { useAuthoritySearch } from "@/hooks/use-authority-search";
+import {
+  authoritySearchQueryKeys,
+  useCurrentAuthoritySearchParams,
+  useAuthoritySearch,
+} from "@/hooks/use-authority-search";
 import type { AuthorityDetailData } from "@/types/authority-detail.types";
 import {
   authorityTypeLabels,
@@ -125,6 +132,8 @@ export default function AuthorityControlModal({
 }
 
 export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
+  const queryClient = useQueryClient();
+  const { params: currentSearchParams } = useCurrentAuthoritySearchParams();
   const { selectedRecordKeys } = useSearchPage();
   const controlledRecordKey = selectedRecordKeys[0] ?? "";
 
@@ -216,6 +225,28 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
       : isSelectedDetailFetching
         ? "선택한 전거의 상세 정보를 불러오는 중입니다."
         : "선택한 전거의 상세 정보가 없습니다.";
+
+  const seeAlsoMutation = useMutation({
+    mutationFn: (seeAlsoFields: AuthorityReferenceField[]) =>
+      fetchAuthoritySeeAlso(controlledRecordKey, { seeAlsoFields }),
+    onSuccess: async ({ data }) => {
+      await queryClient.invalidateQueries({
+        queryKey: authoritySearchQueryKeys.list(currentSearchParams),
+        exact: true,
+      });
+
+      const skippedMessage =
+        data.skippedControlNos.length > 0
+          ? `\n이미 등록된 전거제어번호 ${data.skippedControlNos.join(
+              ", ",
+            )}는 제외되었습니다.`
+          : "";
+      window.alert(
+        `참조표목 ${data.addedCount}건을 추가했습니다.${skippedMessage}`,
+      );
+      onHide();
+    },
+  });
 
   const handleSearch = (event: SubmitEvent) => {
     event.preventDefault();
@@ -339,6 +370,17 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
     setSelectedReferenceFieldRowIds(new Set());
   };
 
+  const handleSave = () => {
+    const newReferenceFields = temporaryReferenceFieldEntries.map(
+      ({ field }) => field,
+    );
+    if (!controlledRecordKey || newReferenceFields.length === 0) {
+      return;
+    }
+
+    seeAlsoMutation.mutate(newReferenceFields);
+  };
+
   const handleReset = () => {
     setSearchKeyword("");
     setSearchParams(undefined);
@@ -351,6 +393,10 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
     setRemovedExistingReferenceFieldIndexes(new Set());
     setSelectedReferenceFieldRowIds(new Set());
   };
+
+  const seeAlsoError = seeAlsoMutation.isError
+    ? getAuthoritySaveError(seeAlsoMutation.error)
+    : undefined;
 
   return (
     <>
@@ -723,6 +769,12 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
             </div>
           </div>
         )}
+        {seeAlsoMutation.isError && (
+          <p className="text-danger mt-2 mb-0">
+            {seeAlsoError?.message ??
+              "참조표목을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."}
+          </p>
+        )}
       </Modal.Body>
       <Modal.Footer className="justify-content-between">
         <Button variant="secondary" onClick={handleReset}>
@@ -732,12 +784,20 @@ export function AuthorityControlModalBody({ onHide }: { onHide: () => void }) {
           <Button
             className="px-4 fw-bold"
             variant="primary"
-            disabled
-            title="전거통제 저장 API 연동 예정"
+            disabled={
+              temporaryReferenceFieldEntries.length === 0 ||
+              seeAlsoMutation.isPending
+            }
+            onClick={handleSave}
           >
-            확인
+            {seeAlsoMutation.isPending ? "저장 중..." : "확인"}
           </Button>{" "}
-          <Button className="px-4 fw-bold" variant="secondary" onClick={onHide}>
+          <Button
+            className="px-4 fw-bold"
+            variant="secondary"
+            disabled={seeAlsoMutation.isPending}
+            onClick={onHide}
+          >
             닫기
           </Button>
         </div>
