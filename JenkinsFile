@@ -39,8 +39,8 @@ pipeline {
                     withCredentials([
                         usernamePassword(
                             credentialsId: 'jenkins-marc-eco-read',
-                            usernameVariable: 'xectler2@eco.co.kr',
-                            passwordVariable: '81060780faf79e57c7db5c1ce73e496cb5944468'
+                            usernameVariable: 'GITEA_USER',
+                            passwordVariable: 'GITEA_TOKEN'
                         )
                     ]) {
                         try {
