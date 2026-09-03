@@ -10,6 +10,8 @@ pipeline {
         DEPLOY_USER  = 'eco'
         DEPLOY_PATH  = 'C:/Users/ECO/Workspace/authortiy_control_frontend'
         SSH_KEY      = 'C:/Users/ECO/.ssh/id_ed25519'
+        // 배포 서버의 Git for Windows가 HTTPS Git 의존성 인증에 사용하는 임시 파일
+        GITEA_NETRC  = 'C:/Users/ECO/_netrc'
     }
 
     stages {
@@ -26,16 +28,41 @@ pipeline {
             }
             steps {
                 script {
-                    def ssh = "ssh -o StrictHostKeyChecking=no -i %SSH_KEY% %DEPLOY_USER%@%DEPLOY_HOST%"
-
                     // 1. git pull
-                    bat "${ssh} \"cd /d %DEPLOY_PATH% && git pull origin main\""
+                    bat '''
+                        @echo off
+                        ssh -o StrictHostKeyChecking=no -i %SSH_KEY% %DEPLOY_USER%@%DEPLOY_HOST% "cd /d %DEPLOY_PATH% && git pull origin main"
+                    '''
 
-                    // 2. 의존성 설치
-                    bat "${ssh} \"cd /d %DEPLOY_PATH% && pnpm install\""
+                    // Jenkins Credentials에 등록한 Gitea 계정/토큰을 배포 서버에
+                    // pnpm 설치 중에만 제공한다. 토큰은 저장소에 기록하지 않는다.
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'jenkins-marc-eco-read',
+                            usernameVariable: 'xectler2@eco.co.kr',
+                            passwordVariable: '81060780faf79e57c7db5c1ce73e496cb5944468'
+                        )
+                    ]) {
+                        try {
+                            bat '''
+                                @echo off
+                                ssh -o StrictHostKeyChecking=no -i %SSH_KEY% %DEPLOY_USER%@%DEPLOY_HOST% "(echo machine repo.eco.co.kr&&echo login %GITEA_USER%&&echo password %GITEA_TOKEN%) > %GITEA_NETRC%"
+                                ssh -o StrictHostKeyChecking=no -i %SSH_KEY% %DEPLOY_USER%@%DEPLOY_HOST% "cd /d %DEPLOY_PATH% && pnpm install --frozen-lockfile"
+                            '''
+                        } finally {
+                            // 설치 또는 빌드가 실패해도 배포 서버에 토큰을 남기지 않는다.
+                            bat '''
+                                @echo off
+                                ssh -o StrictHostKeyChecking=no -i %SSH_KEY% %DEPLOY_USER%@%DEPLOY_HOST% "if exist %GITEA_NETRC% del /q %GITEA_NETRC%"
+                            '''
+                        }
+                    }
 
                     // 3. 빌드
-                    bat "${ssh} \"cd /d %DEPLOY_PATH% && pnpm build\""
+                    bat '''
+                        @echo off
+                        ssh -o StrictHostKeyChecking=no -i %SSH_KEY% %DEPLOY_USER%@%DEPLOY_HOST% "cd /d %DEPLOY_PATH% && pnpm build"
+                    '''
                 }
             }
         }
