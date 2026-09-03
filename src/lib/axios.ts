@@ -45,6 +45,7 @@ function parseAccessTokenRefreshResponse(
   }
 
   const data = value.data;
+
   if (
     !data ||
     typeof data !== "object" ||

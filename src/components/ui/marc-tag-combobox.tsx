@@ -40,6 +40,7 @@ interface MarcTagComboboxProps {
   autoFocus?: boolean;
   usedTags: readonly string[];
   onChange: (value: string) => void;
+  onFocus?: () => void;
   onSelect: (tag: string) => void;
   onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
 }
@@ -50,6 +51,7 @@ export default function MarcTagCombobox({
   autoFocus,
   usedTags,
   onChange,
+  onFocus,
   onSelect,
   onKeyDown,
 }: MarcTagComboboxProps) {
@@ -187,7 +189,10 @@ export default function MarcTagCombobox({
           openSuggestions();
           setActiveIndex(-1);
         }}
-        onFocus={openSuggestions}
+        onFocus={() => {
+          onFocus?.();
+          openSuggestions();
+        }}
         onKeyDown={handleKeyDown}
       />
 
@@ -246,14 +251,19 @@ export default function MarcTagCombobox({
                       </span>
                     )}
                     {isAlreadyUsed && (
-                      <span className="badge text-bg-warning">이미 사용 중</span>
+                      <span className="badge text-bg-warning">
+                        이미 사용 중
+                      </span>
                     )}
                   </span>
                 </button>
               );
             })
           ) : (
-            <p className="small text-muted p-3 mb-0" role="status">
+            <p
+              className="list-group-item small text-muted p-3 mb-0"
+              role="status"
+            >
               marc-eco에 정의되지 않은 태그입니다. 숫자 세 자리 태그를 직접
               입력할 수 있습니다.
             </p>

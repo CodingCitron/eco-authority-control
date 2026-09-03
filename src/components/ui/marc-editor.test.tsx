@@ -85,6 +85,23 @@ describe("MarcEditorWorkspace 태그 가이드", () => {
     );
   });
 
+  it("우측 입력을 사용한 뒤 태그를 다시 입력해도 왼쪽 포커스를 유지한다", async () => {
+    renderMarcEditor();
+    const { user, tagInput } = await addMarcRow();
+
+    await user.type(tagInput, "100");
+    await user.click(screen.getByRole("option", { name: /100.*개인명/ }));
+    expect(screen.getByLabelText("MARC 지시기와 서브필드")).toHaveFocus();
+
+    await user.click(tagInput);
+    await user.clear(tagInput);
+    await user.type(tagInput, "374");
+
+    expect(tagInput).toHaveValue("374");
+    expect(tagInput).toHaveFocus();
+    expect(screen.getByRole("option", { name: /374.*직업/ })).toBeVisible();
+  });
+
   it("방향키와 Enter로 태그를 선택한다", async () => {
     renderMarcEditor();
     const { user, tagInput } = await addMarcRow();

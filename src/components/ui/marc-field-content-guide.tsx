@@ -345,7 +345,9 @@ export default function MarcFieldContentGuide({
         value={value}
         onChange={(event) => {
           onChange(event.target.value);
-          setCaretPosition(event.target.selectionStart ?? event.target.value.length);
+          setCaretPosition(
+            event.target.selectionStart ?? event.target.value.length,
+          );
           setIsOpen(true);
           setActiveIndex(-1);
         }}
@@ -357,6 +359,7 @@ export default function MarcFieldContentGuide({
         }
         onFocus={(event) => {
           setCaretPosition(event.currentTarget.selectionStart ?? value.length);
+          setActiveIndex(-1);
           setIsOpen(hasGuide);
         }}
         onKeyDown={handleInputKeyDown}
@@ -413,7 +416,8 @@ export default function MarcFieldContentGuide({
                             const displayedCode =
                               option.code === " " ? "\\" : option.code;
                             const isSelected = value[position === "1" ? 0 : 1]
-                              ? value[position === "1" ? 0 : 1] === displayedCode
+                              ? value[position === "1" ? 0 : 1] ===
+                                displayedCode
                               : displayedCode === "\\";
 
                             return (
@@ -429,7 +433,10 @@ export default function MarcFieldContentGuide({
                                 title={option.label}
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() =>
-                                  selectIndicator(Number(position) as 1 | 2, option.code)
+                                  selectIndicator(
+                                    Number(position) as 1 | 2,
+                                    option.code,
+                                  )
                                 }
                               >
                                 <span className="font-monospace">

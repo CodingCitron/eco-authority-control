@@ -419,6 +419,12 @@ function MarcRow({ field, mode, usedTags, onChange, onRemove }: MarcRowProps) {
   const [textDraft, setTextDraft] = useState(() => formatMarcLine(field));
   const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    if (isEditing && mode === "form" && formFocusTarget === "content") {
+      contentInputRef.current?.focus();
+    }
+  }, [formFocusTarget, isEditing, mode, tagDraft]);
+
   const beginEditing = () => {
     if (isEditing) {
       return;
@@ -541,6 +547,7 @@ function MarcRow({ field, mode, usedTags, onChange, onRemove }: MarcRowProps) {
                 value={tagDraft}
                 usedTags={usedTags}
                 onChange={setTagDraft}
+                onFocus={() => setFormFocusTarget("tag")}
                 onSelect={(selectedTag) => {
                   setFormFocusTarget("content");
                   if (
@@ -549,12 +556,10 @@ function MarcRow({ field, mode, usedTags, onChange, onRemove }: MarcRowProps) {
                   ) {
                     setContentDraft("");
                   }
-                  contentInputRef.current?.focus();
                 }}
                 onKeyDown={handleInputKeyDown}
               />
               <MarcFieldContentGuide
-                key={tagDraft.trim()}
                 inputRef={contentInputRef}
                 tag={tagDraft.trim()}
                 value={contentDraft}
@@ -669,20 +674,24 @@ function getMarcRowErrorMessage(error: unknown) {
     return "MARC 행 형식이 올바르지 않습니다.";
   }
 
-  switch (error.code) {
-    case "INVALID_MNEMONIC_LINE":
-      return "MARC 행은 '=태그  데이터' 형식으로 입력해야 합니다.";
-    case "MISSING_INDICATORS":
-      return "데이터 필드에는 지시기 두 자리가 필요합니다.";
-    case "INVALID_SUBFIELD":
-      return "지시기 뒤에는 '$a값'과 같은 서브필드 형식으로 입력해야 합니다.";
-    case "LEADER_IS_NOT_FIELD":
-      return "리더(LDR)는 고정길이편집에서 수정해야 합니다.";
-    case "INVALID_TAG":
-      return "태그는 숫자 세 자리로 입력해야 합니다.";
-    case "UNREPRESENTABLE_TEXT":
-      return "MARC 행에는 줄바꿈을 입력할 수 없습니다.";
-    default:
-      return "MARC 행 형식이 올바르지 않습니다.";
-  }
+  // console.log(error.message);
+
+  // switch (error.code) {
+  //   case "INVALID_MNEMONIC_LINE":
+  //     return "MARC 행은 '=태그  데이터' 형식으로 입력해야 합니다.";
+  //   case "MISSING_INDICATORS":
+  //     return "데이터 필드에는 지시기 두 자리가 필요합니다.";
+  //   case "INVALID_SUBFIELD":
+  //     return "지시기 뒤에는 '$a값'과 같은 서브필드 형식으로 입력해야 합니다.";
+  //   case "LEADER_IS_NOT_FIELD":
+  //     return "리더(LDR)는 고정길이편집에서 수정해야 합니다.";
+  //   case "INVALID_TAG":
+  //     return "태그는 숫자 세 자리로 입력해야 합니다.";
+  //   case "UNREPRESENTABLE_TEXT":
+  //     return "MARC 행에는 줄바꿈을 입력할 수 없습니다.";
+  //   default:
+  //     return "MARC 행 형식이 올바르지 않습니다.";
+  // }
+
+  return error.message;
 }
