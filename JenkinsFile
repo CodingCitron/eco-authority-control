@@ -11,7 +11,7 @@ pipeline {
         DEPLOY_PATH  = 'C:/Users/ECO/Workspace/authortiy_control_frontend'
         SSH_KEY      = 'C:/Users/ECO/.ssh/id_ed25519'
         // 배포 서버의 Git for Windows가 HTTPS Git 의존성 인증에 사용하는 임시 파일
-        GITEA_NETRC  = 'C:/Users/ECO/_netrc'
+        GITEA_NETRC  = 'C:\\Users\\ECO\\_netrc'
     }
 
     stages {
