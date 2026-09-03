@@ -499,6 +499,16 @@ function MarcRow({ field, mode, usedTags, onChange, onRemove }: MarcRowProps) {
     }
   };
 
+  const handleTagInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      setFormFocusTarget("content");
+      return;
+    }
+
+    handleInputKeyDown(event);
+  };
+
   const handleRowMouseDown = (event: MouseEvent<HTMLDivElement>) => {
     if (isEditing || mode === "text") {
       return;
@@ -557,7 +567,7 @@ function MarcRow({ field, mode, usedTags, onChange, onRemove }: MarcRowProps) {
                     setContentDraft("");
                   }
                 }}
-                onKeyDown={handleInputKeyDown}
+                onKeyDown={handleTagInputKeyDown}
               />
               <MarcFieldContentGuide
                 inputRef={contentInputRef}

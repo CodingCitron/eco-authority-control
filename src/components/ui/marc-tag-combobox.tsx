@@ -141,13 +141,18 @@ export default function MarcTagCombobox({
       return;
     }
 
-    if (event.key === "Enter" && isOpen && activeIndex >= 0) {
-      const option = filteredOptions[activeIndex];
-      if (option) {
-        event.preventDefault();
-        selectOption(option);
-        return;
+    if (event.key === "Enter" && isOpen) {
+      if (activeIndex >= 0) {
+        const option = filteredOptions[activeIndex];
+        if (option) {
+          event.preventDefault();
+          selectOption(option);
+          return;
+        }
       }
+
+      setIsOpen(false);
+      setActiveIndex(-1);
     }
 
     if (event.key === "Escape" && isOpen) {

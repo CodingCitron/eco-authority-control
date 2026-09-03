@@ -85,6 +85,21 @@ describe("MarcEditorWorkspace 태그 가이드", () => {
     );
   });
 
+  it("직접 입력한 태그에서 Enter를 누르면 우측 내용 입력으로 이동한다", async () => {
+    renderMarcEditor();
+    const { user, tagInput } = await addMarcRow();
+
+    await user.type(tagInput, "100{Enter}");
+
+    expect(screen.getByLabelText("MARC 지시기와 서브필드")).toHaveFocus();
+    expect(
+      screen.queryByRole("listbox", { name: "사용 가능한 MARC 태그" }),
+    ).toBeNull();
+    expect(screen.getByLabelText("새 MARC 행")).toHaveClass(
+      "marc-line-editing",
+    );
+  });
+
   it("우측 입력을 사용한 뒤 태그를 다시 입력해도 왼쪽 포커스를 유지한다", async () => {
     renderMarcEditor();
     const { user, tagInput } = await addMarcRow();
